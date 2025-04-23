@@ -1,0 +1,111 @@
+package com.warehouse.service;
+
+import com.warehouse.model.Item;
+import com.warehouse.model.Reservation;
+import com.warehouse.repository.ItemRepository;
+import com.warehouse.repository.ReservationRepository;
+import com.warehouse.utils.QRCodeGenerator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class ReservationService {
+
+    private final ReservationRepository reservationRepository;
+    private final ItemRepository itemRepository;
+
+    /**
+     * Создание резервации
+     */
+    public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
+        // Поиск товара в базе данных
+        Item item = itemRepository.findByName(itemName).orElseThrow(() ->
+                new IllegalArgumentException("Item not found: " + itemName));
+
+        // Проверяем, есть ли достаточно товаров для резервации
+        if (item.getQuantity() < quantity) {
+            throw new IllegalArgumentException("Not enough items in inventory for reservation: " + itemName);
+        }
+
+        // Уменьшаем количество товара в Inventory
+        item.setQuantity(item.getQuantity() - quantity);
+        itemRepository.save(item);
+
+        // Создаем резервацию
+        Reservation reservation = new Reservation();
+        reservation.setOrderNumber(orderNumber);
+        reservation.setItemName(itemName);
+        reservation.setReservedQuantity(quantity);
+        reservation.setReservationWeek(reservationWeek);
+        reservation.setStatus("RESERVED");
+        reservationRepository.save(reservation);
+
+        // Генерируем QR-код
+        String qrCodePath = "резервации/" + orderNumber + ".png";
+        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
+
+        return reservation;
+    }
+
+    /**
+     * Завершение резервации
+     */
+    public boolean completeReservation(Long id) {
+        // Ищем резервацию по ID
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + id));
+
+        // Проверяем текущий статус. Только "RESERVED" можно завершить
+        if (!"RESERVED".equals(reservation.getStatus())) {
+            throw new IllegalStateException("Only RESERVED reservations can be completed.");
+        }
+
+        // Обновляем статус на COMPLETED
+        reservation.setStatus("COMPLETED");
+        reservationRepository.save(reservation);
+
+        return true; // Операция завершена успешно
+    }
+
+    /**
+     * Обработка сканирования QR-кода
+     */
+    public void handleScannedQRCode(String orderNumber) {
+        // Ищем резервацию по номеру
+        Reservation reservation = reservationRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new RuntimeException("Reservation not found: " + orderNumber));
+
+        // Если статус не "RESERVED", кидаем ошибку
+        if (!"RESERVED".equals(reservation.getStatus())) {
+            throw new IllegalStateException("Reservation is not available for selling");
+        }
+
+        // Обновляем статус резервации
+        reservation.setStatus("SOLD");
+        reservationRepository.save(reservation);
+
+        // Обновляем статистику в Item
+        Item item = itemRepository.findByName(reservation.getItemName())
+                .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
+        item.setSold(item.getSold() + reservation.getReservedQuantity()); // Увеличиваем количество проданных
+        itemRepository.save(item);
+    }
+
+    /**
+     * Получение всех резерваций
+     */
+    public List<Reservation> getAllReservations() {
+        return reservationRepository.findAll();
+    }
+
+    /**
+     * Получение резерваций за конкретную неделю
+     */
+    public List<Reservation> getReservationsByWeek(String reservationWeek) {
+        return reservationRepository.findByReservationWeek(reservationWeek);
+    }
+}
