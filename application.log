@@ -309,3 +309,1115 @@ java.lang.IllegalStateException: Only RESERVED reservations can be completed.
 2025-04-23T16:33:54.016+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
 2025-04-23T16:33:54.016+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
 2025-04-23T16:33:54.016+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T17:08:03.224+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T17:08:03.224+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T17:08:03.225+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:08:03.225+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T17:08:03.225+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:08:03.225+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T17:08:03.242+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T17:08:03.242+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:08:03.242+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T17:08:03.243+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T17:08:03.243+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:08:03.243+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T17:08:24.573+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T17:08:24.574+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:08:24.574+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T17:08:26.477+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T17:08:26.478+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:08:26.478+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T17:09:08.148+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/4/complete
+2025-04-23T17:09:08.149+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:09:08.149+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/4/complete
+2025-04-23T17:09:13.574+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T17:09:13.575+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:09:13.575+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T17:10:44.907+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing PUT /api/items/ORDER123/remove?quantity=1
+2025-04-23T17:10:44.907+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:10:44.907+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured PUT /api/items/ORDER123/remove?quantity=1
+2025-04-23T17:20:57.690+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing PUT /api/items/ORDER123/remove?quantity=1
+2025-04-23T17:20:57.690+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T17:20:57.690+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured PUT /api/items/ORDER123/remove?quantity=1
+2025-04-23T18:08:28.280+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:08:28.280+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:08:28.280+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:08:28.280+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:08:28.280+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:08:28.280+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:08:28.299+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:08:28.299+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:08:28.299+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:08:28.299+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:08:28.299+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:08:28.299+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:08:49.894+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:08:49.894+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:08:49.895+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:08:49.901+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /error?orderNumber=ORDER123
+2025-04-23T18:08:49.902+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /error?orderNumber=ORDER123
+2025-04-23T18:08:49.904+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:09:14.946+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/4/complete
+2025-04-23T18:09:14.946+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:09:14.946+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/4/complete
+2025-04-23T18:09:14.954+02:00 ERROR 21424 --- [http-nio-8080-exec-9] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: Only RESERVED reservations can be completed.] with root cause
+
+java.lang.IllegalStateException: Only RESERVED reservations can be completed.
+	at com.warehouse.service.ReservationService.completeReservation(ReservationService.java:64) ~[classes/:na]
+	at com.warehouse.controller.ReservationController.completeReservation(ReservationController.java:52) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2025-04-23T18:09:14.956+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /error
+2025-04-23T18:09:14.956+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /error
+2025-04-23T18:09:14.957+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:11:58.695+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:11:58.695+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:11:58.695+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:11:58.696+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:11:58.696+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:11:58.696+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:11:58.709+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:11:58.709+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:11:58.709+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:11:58.709+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:11:58.710+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:11:58.710+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:12:07.620+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:12:07.621+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:12:07.621+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:15:21.770+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:15:21.770+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:21.770+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:15:21.770+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:15:21.770+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:21.771+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:15:21.784+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:15:21.784+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:15:21.785+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:21.785+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:21.785+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:15:21.785+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:15:24.957+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/scan?orderNumber=ORDER123
+2025-04-23T18:15:24.957+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:24.957+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/scan?orderNumber=ORDER123
+2025-04-23T18:15:24.960+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /error?orderNumber=ORDER123
+2025-04-23T18:15:24.961+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /error?orderNumber=ORDER123
+2025-04-23T18:15:24.963+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:38.143+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:15:38.143+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:38.144+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:15:38.146+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:15:38.146+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:38.146+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:15:38.157+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:15:38.157+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:38.157+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:15:38.159+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:15:38.159+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:38.159+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:15:40.260+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:15:40.260+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:15:40.260+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:16:38.168+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:16:38.168+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.168+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:16:38.168+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:16:38.168+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.168+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:16:38.178+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:16:38.179+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.179+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:16:38.179+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:16:38.179+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.179+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:16:38.330+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:16:38.331+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.331+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:16:38.332+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:16:38.332+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.332+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:16:38.340+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:16:38.341+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.341+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:16:38.343+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:16:38.343+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:38.344+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:16:48.092+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:16:48.092+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:16:48.092+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:19:13.097+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T18:19:13.097+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:13.097+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T18:19:15.297+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:19:15.297+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:15.297+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:19:22.811+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:19:22.811+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:22.812+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:19:29.190+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:19:29.191+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:29.191+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:19:40.872+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/5/complete
+2025-04-23T18:19:40.873+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:40.873+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/5/complete
+2025-04-23T18:19:40.880+02:00 ERROR 21424 --- [http-nio-8080-exec-10] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: Only RESERVED reservations can be completed.] with root cause
+
+java.lang.IllegalStateException: Only RESERVED reservations can be completed.
+	at com.warehouse.service.ReservationService.completeReservation(ReservationService.java:64) ~[classes/:na]
+	at com.warehouse.controller.ReservationController.completeReservation(ReservationController.java:52) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2025-04-23T18:19:40.882+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /error
+2025-04-23T18:19:40.883+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /error
+2025-04-23T18:19:40.885+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:44.821+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:19:44.821+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:44.821+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:19:50.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:19:50.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:50.118+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:19:52.669+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:19:52.670+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:19:52.670+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:20:20.327+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T18:20:20.327+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:20:20.327+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T18:20:22.474+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:20:22.474+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:20:22.474+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:20:50.960+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T18:20:50.961+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:20:50.961+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T18:20:52.353+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:20:52.354+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:20:52.354+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:21:26.342+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=
+2025-04-23T18:21:26.342+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:21:26.342+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=
+2025-04-23T18:21:26.349+02:00 ERROR 21424 --- [http-nio-8080-exec-8] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.RuntimeException: Reservation not found: ] with root cause
+
+java.lang.RuntimeException: Reservation not found: 
+	at com.warehouse.service.ReservationService.lambda$handleScannedQRCode$2(ReservationService.java:80) ~[classes/:na]
+	at java.base/java.util.Optional.orElseThrow(Optional.java:403) ~[na:na]
+	at com.warehouse.service.ReservationService.handleScannedQRCode(ReservationService.java:80) ~[classes/:na]
+	at com.warehouse.controller.ReservationController.processQRCode(ReservationController.java:65) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2025-04-23T18:21:26.352+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /error?orderNumber=
+2025-04-23T18:21:26.352+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /error?orderNumber=
+2025-04-23T18:21:26.354+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:21:34.658+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:21:34.658+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:21:34.658+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:21:43.764+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:21:43.764+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:21:43.764+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:22:47.876+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:22:47.876+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:22:47.876+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:22:47.876+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:22:47.876+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:22:47.876+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:22:47.888+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:22:47.888+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:22:47.888+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:22:47.888+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:22:47.888+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:22:47.888+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:22:50.788+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:22:50.789+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:22:50.789+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:22:53.461+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:22:53.461+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:22:53.461+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:22:55.565+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-2qrha1ot0
+2025-04-23T18:22:55.566+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:22:55.566+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-2qrha1ot0
+2025-04-23T18:23:05.750+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:23:05.750+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:05.750+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:23:10.878+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-byl1wn7e7
+2025-04-23T18:23:10.878+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:10.878+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-byl1wn7e7
+2025-04-23T18:23:13.915+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:23:13.916+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:13.916+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:23:22.724+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-2qrha1ot0
+2025-04-23T18:23:22.724+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:22.724+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-2qrha1ot0
+2025-04-23T18:23:25.191+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-byl1wn7e7
+2025-04-23T18:23:25.192+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:25.192+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-byl1wn7e7
+2025-04-23T18:23:27.313+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:23:27.314+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:27.314+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-sxhn5r1jv
+2025-04-23T18:23:29.443+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:23:29.443+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:29.443+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER123
+2025-04-23T18:23:33.785+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/4/complete
+2025-04-23T18:23:33.785+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:33.785+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/4/complete
+2025-04-23T18:23:33.793+02:00 ERROR 21424 --- [http-nio-8080-exec-3] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: Only RESERVED reservations can be completed.] with root cause
+
+java.lang.IllegalStateException: Only RESERVED reservations can be completed.
+	at com.warehouse.service.ReservationService.completeReservation(ReservationService.java:64) ~[classes/:na]
+	at com.warehouse.controller.ReservationController.completeReservation(ReservationController.java:52) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2025-04-23T18:23:33.795+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing POST /error
+2025-04-23T18:23:33.795+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured POST /error
+2025-04-23T18:23:33.798+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:35.864+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/5/complete
+2025-04-23T18:23:35.865+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:35.865+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/5/complete
+2025-04-23T18:23:35.872+02:00 ERROR 21424 --- [http-nio-8080-exec-4] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: Only RESERVED reservations can be completed.] with root cause
+
+java.lang.IllegalStateException: Only RESERVED reservations can be completed.
+	at com.warehouse.service.ReservationService.completeReservation(ReservationService.java:64) ~[classes/:na]
+	at com.warehouse.controller.ReservationController.completeReservation(ReservationController.java:52) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2025-04-23T18:23:35.874+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing POST /error
+2025-04-23T18:23:35.874+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured POST /error
+2025-04-23T18:23:35.876+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:37.795+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/7/complete
+2025-04-23T18:23:37.795+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:37.795+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/7/complete
+2025-04-23T18:23:37.803+02:00 ERROR 21424 --- [http-nio-8080-exec-6] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: java.lang.IllegalStateException: Only RESERVED reservations can be completed.] with root cause
+
+java.lang.IllegalStateException: Only RESERVED reservations can be completed.
+	at com.warehouse.service.ReservationService.completeReservation(ReservationService.java:64) ~[classes/:na]
+	at com.warehouse.controller.ReservationController.completeReservation(ReservationController.java:52) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:569) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:914) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:108) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy.lambda$doFilterInternal$3(FilterChainProxy.java:231) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:365) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.intercept.AuthorizationFilter.doFilter(AuthorizationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:126) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:120) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:131) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:85) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:100) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:179) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:374) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$3(HandlerMappingIntrospector.java:195) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:230) ~[spring-security-config-6.3.3.jar:6.3.3]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:352) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:268) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2025-04-23T18:23:37.804+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /error
+2025-04-23T18:23:37.805+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /error
+2025-04-23T18:23:37.806+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:40.994+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:23:40.994+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:40.994+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:23:40.995+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:23:40.995+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:40.995+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:23:41.007+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:23:41.007+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:41.008+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:23:41.008+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:23:41.008+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:41.008+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:23:44.935+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/items/sorted?sortBy=name
+2025-04-23T18:23:44.935+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:44.935+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/items/sorted?sortBy=name
+2025-04-23T18:23:44.935+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:23:44.935+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:23:44.935+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:27:53.999+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:27:53.999+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:27:54.000+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:27:54.000+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:27:54.000+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:27:54.000+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:27:54.012+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:27:54.012+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:27:54.012+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:27:54.012+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:27:54.012+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:27:54.013+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:40:06.525+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:40:06.525+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:40:06.525+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:06.525+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:06.525+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:40:06.525+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:40:06.537+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:40:06.537+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:40:06.538+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:06.538+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:06.538+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:40:06.538+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:40:07.027+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:40:07.027+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:07.027+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:40:07.027+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:40:07.027+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:07.027+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:40:07.043+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:40:07.043+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:40:07.043+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:07.043+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:07.043+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:40:07.043+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:40:46.230+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T18:40:46.232+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:40:46.232+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T18:41:10.196+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:41:10.196+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:41:10.197+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:41:16.700+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-hwm0hw0cx
+2025-04-23T18:41:16.700+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:41:16.700+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-hwm0hw0cx
+2025-04-23T18:41:25.262+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:41:25.263+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:41:25.263+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:52:04.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:52:04.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:52:04.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:52:04.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:52:04.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:52:04.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:52:04.948+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:52:04.948+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:52:04.948+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:52:04.949+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:52:04.949+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:52:04.949+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:52:38.864+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-hwm0hw0cx
+2025-04-23T18:52:38.864+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:52:38.865+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-hwm0hw0cx
+2025-04-23T18:53:56.123+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:53:56.123+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:53:56.123+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:53:56.123+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:53:56.123+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:53:56.123+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:53:56.133+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:53:56.134+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T18:53:56.134+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:53:56.134+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:53:56.134+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:53:56.134+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T18:54:19.512+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T18:54:19.513+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:54:19.513+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T18:54:21.596+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:54:21.597+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:54:21.597+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T18:55:16.392+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-zmbij2ibm
+2025-04-23T18:55:16.393+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:55:16.393+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-zmbij2ibm
+2025-04-23T18:55:22.194+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T18:55:22.194+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T18:55:22.194+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:08:38.977+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:08:38.978+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:38.978+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:08:38.978+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:08:38.978+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:38.978+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:08:38.992+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:08:38.992+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:38.992+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:08:38.992+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:08:38.992+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:38.992+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:08:44.686+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:08:44.686+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:44.686+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:08:44.686+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:08:44.686+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:44.686+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:08:44.697+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:08:44.697+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:08:44.698+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:44.698+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:08:44.698+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:08:44.698+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:09:04.028+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-zmbij2ibm
+2025-04-23T19:09:04.029+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:09:04.029+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-zmbij2ibm
+2025-04-23T19:09:47.921+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:09:47.921+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:09:47.921+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:09:47.922+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:09:47.922+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:09:47.922+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:09:47.933+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:09:47.933+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:09:47.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:09:47.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:09:47.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:09:47.934+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:09:57.599+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T19:09:57.599+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:09:57.599+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T19:09:59.054+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:09:59.054+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:09:59.054+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:29:21.139+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:29:21.139+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:29:21.139+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:29:21.139+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:29:21.139+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:29:21.139+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:32:11.912+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:32:11.912+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:11.912+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:32:11.912+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:32:11.912+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:11.912+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:32:11.923+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:32:11.923+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:11.923+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:32:11.923+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:32:11.924+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:11.924+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:32:33.036+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:32:33.036+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:33.036+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:32:33.036+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:32:33.036+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:33.036+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:32:59.832+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:32:59.832+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:32:59.832+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:59.832+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:59.832+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:32:59.832+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:32:59.844+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:32:59.844+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:32:59.845+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:59.845+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:32:59.845+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:32:59.845+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:33:41.454+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-wyzv3zb6g
+2025-04-23T19:33:41.455+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:33:41.455+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-wyzv3zb6g
+2025-04-23T19:34:37.849+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T19:34:37.849+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:34:37.851+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T19:34:39.637+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:34:39.637+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:34:39.637+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:34:59.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:34:59.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:34:59.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:34:59.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:34:59.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:34:59.117+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:34:59.126+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:34:59.126+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:34:59.126+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:34:59.126+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:34:59.126+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:34:59.126+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:35:59.247+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations/scan?orderNumber=ORDER-hivwf4k0j
+2025-04-23T19:35:59.247+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:35:59.248+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations/scan?orderNumber=ORDER-hivwf4k0j
+2025-04-23T19:36:11.969+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:36:11.969+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:11.969+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:36:11.970+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:36:11.970+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:11.970+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:36:11.981+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:36:11.981+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:36:11.981+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:11.981+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:11.981+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:36:11.981+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:36:33.070+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T19:36:33.070+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:33.070+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T19:36:34.427+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:36:34.427+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:34.428+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:36:49.259+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:36:49.259+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:49.259+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:36:49.262+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:36:49.262+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:49.262+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:36:49.270+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:36:49.270+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:49.270+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:36:49.270+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:36:49.270+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:36:49.270+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:37:23.994+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing POST /api/reservations
+2025-04-23T19:37:23.994+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:37:23.994+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured POST /api/reservations
+2025-04-23T19:37:33.592+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:37:33.592+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:37:33.592+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:37:42.457+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:37:42.457+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:37:42.457+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:37:42.457+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:37:42.457+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:37:42.457+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:37:42.467+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:37:42.467+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:37:42.467+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:37:42.467+02:00 DEBUG 21424 --- [http-nio-8080-exec-1] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:37:42.467+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:37:42.467+02:00 DEBUG 21424 --- [http-nio-8080-exec-3] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:39:31.476+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:39:31.476+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:39:31.477+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:39:31.477+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:39:31.477+02:00 DEBUG 21424 --- [http-nio-8080-exec-5] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:39:31.477+02:00 DEBUG 21424 --- [http-nio-8080-exec-2] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:39:31.488+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:39:31.488+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:39:31.489+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:39:31.489+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:39:31.489+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:39:31.489+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
