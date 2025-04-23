@@ -1421,3 +1421,15 @@ java.lang.IllegalStateException: Only RESERVED reservations can be completed.
 2025-04-23T19:39:31.489+02:00 DEBUG 21424 --- [http-nio-8080-exec-4] o.s.security.web.FilterChainProxy        : Secured GET /api/items
 2025-04-23T19:39:31.489+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
 2025-04-23T19:39:31.489+02:00 DEBUG 21424 --- [http-nio-8080-exec-6] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:43:49.272+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:43:49.272+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:43:49.272+02:00 DEBUG 21424 --- [http-nio-8080-exec-7] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:43:49.278+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:43:49.278+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:43:49.278+02:00 DEBUG 21424 --- [http-nio-8080-exec-10] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
+2025-04-23T19:43:49.282+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Securing GET /api/items
+2025-04-23T19:43:49.283+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:43:49.283+02:00 DEBUG 21424 --- [http-nio-8080-exec-9] o.s.security.web.FilterChainProxy        : Secured GET /api/items
+2025-04-23T19:43:49.288+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Securing GET /api/reservations
+2025-04-23T19:43:49.288+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.s.w.a.AnonymousAuthenticationFilter  : Set SecurityContextHolder to anonymous SecurityContext
+2025-04-23T19:43:49.288+02:00 DEBUG 21424 --- [http-nio-8080-exec-8] o.s.security.web.FilterChainProxy        : Secured GET /api/reservations
