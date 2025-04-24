@@ -8,6 +8,9 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
     List<Reservation> findByReservationWeek(String reservationWeek);
-    Optional<Reservation> findByOrderNumber(String orderNumber);
 
+    // Новый метод: Поиск по неделе с сортировкой по имени товара
+    List<Reservation> findByReservationWeekOrderByItemName(String reservationWeek);
+
+    Optional<Reservation> findByOrderNumber(String orderNumber);
 }

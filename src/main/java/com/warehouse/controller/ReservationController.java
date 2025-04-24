@@ -76,4 +76,14 @@ public class ReservationController {
                 : reservationService.getReservationsByWeek(reservationWeek);
         return ResponseEntity.ok(reservations);
     }
+
+    /**
+     * Получение зарезервированных товаров за указанную неделю с сортировкой по имени.
+     */
+    @GetMapping("/sorted")
+    public ResponseEntity<List<Reservation>> getSortedReservationsByWeek(@RequestParam String reservationWeek) {
+        List<Reservation> sortedReservations = reservationService.getSortedReservationsByWeek(reservationWeek);
+        return ResponseEntity.ok(sortedReservations);
+    }
+
 }

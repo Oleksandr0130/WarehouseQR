@@ -108,4 +108,12 @@ public class ReservationService {
     public List<Reservation> getReservationsByWeek(String reservationWeek) {
         return reservationRepository.findByReservationWeek(reservationWeek);
     }
+
+    /**
+     * Получение зарезервированных товаров за неделю с сортировкой по имени.
+     */
+    public List<Reservation> getSortedReservationsByWeek(String reservationWeek) {
+        return reservationRepository.findByReservationWeekOrderByItemName(reservationWeek);
+    }
+
 }
