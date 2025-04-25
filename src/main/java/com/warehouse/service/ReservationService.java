@@ -116,4 +116,26 @@ public class ReservationService {
         return reservationRepository.findByReservationWeekOrderByItemName(reservationWeek);
     }
 
+    /**
+     * Удаление резервации и возврат списанного количества на склад.
+     */
+    public Reservation deleteReservation(Long reservationId) {
+        // Найти резервацию по ID
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID: " + reservationId));
+
+        // Получаем связанную запись товара
+        Item item = itemRepository.findByName(reservation.getItemName())
+                .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
+
+        // Возвращаем зарезервированное количество товара обратно на склад
+        item.setQuantity(item.getQuantity() + reservation.getReservedQuantity());
+        itemRepository.save(item);
+
+        // Удаляем резервацию
+        reservationRepository.delete(reservation);
+
+        // Возвращаем удаленную резервацию как подтверждение
+        return reservation;
+    }
 }

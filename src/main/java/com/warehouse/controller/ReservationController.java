@@ -33,6 +33,7 @@ public class ReservationController {
     }
 
 
+
     @PostMapping("/reservations")
     public ResponseEntity<?> createReservations(@RequestBody List<Reservation> reservations) {
         // Логирование полученных данных
@@ -85,5 +86,28 @@ public class ReservationController {
         List<Reservation> sortedReservations = reservationService.getSortedReservationsByWeek(reservationWeek);
         return ResponseEntity.ok(sortedReservations);
     }
+
+    /**
+     * Удаление резервации.
+     * Возвращает информацию о удаленной резервации и списанном количестве на складе.
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
+        try {
+            Reservation removedReservation = reservationService.deleteReservation(id);
+
+            String responseMessage = String.format(
+                    "Reservation for order %s was removed. Returned quantity: %d to item '%s'.",
+                    removedReservation.getOrderNumber(),
+                    removedReservation.getReservedQuantity(),
+                    removedReservation.getItemName()
+            );
+
+            return ResponseEntity.ok(responseMessage);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
+    }
+
 
 }
