@@ -26,13 +26,8 @@ public class ReservationService {
         Item item = itemRepository.findByName(itemName).orElseThrow(() ->
                 new IllegalArgumentException("Item not found: " + itemName));
 
-        // Проверяем, есть ли достаточно товаров для резервации
-        if (item.getQuantity() < quantity) {
-            throw new IllegalArgumentException("Not enough items in inventory for reservation: " + itemName);
-        }
-
-        // Уменьшаем количество товара в Inventory
-        item.setQuantity(item.getQuantity() - quantity);
+        // Уменьшаем количество товара
+        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
         itemRepository.save(item);
 
         // Создаем резервацию
@@ -50,6 +45,7 @@ public class ReservationService {
 
         return reservation;
     }
+
 
     /**
      * Завершение резервации
@@ -117,7 +113,7 @@ public class ReservationService {
     }
 
     /**
-     * Удаление резервации и возврат списанного количества на склад.
+     * Удаление резервации и возврат списанного количества на склад
      */
     public Reservation deleteReservation(Long reservationId) {
         // Найти резервацию по ID
@@ -128,7 +124,7 @@ public class ReservationService {
         Item item = itemRepository.findByName(reservation.getItemName())
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
 
-        // Возвращаем зарезервированное количество товара обратно на склад
+        // Возвращаем зарезервированное количество обратно в склад
         item.setQuantity(item.getQuantity() + reservation.getReservedQuantity());
         itemRepository.save(item);
 
@@ -138,4 +134,5 @@ public class ReservationService {
         // Возвращаем удаленную резервацию как подтверждение
         return reservation;
     }
+
 }
