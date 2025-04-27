@@ -5,6 +5,7 @@ import com.warehouse.model.Reservation;
 import com.warehouse.repository.ItemRepository;
 import com.warehouse.repository.ReservationRepository;
 import com.warehouse.utils.QRCodeGenerator;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -133,6 +134,14 @@ public class ReservationService {
 
         // Возвращаем удаленную резервацию как подтверждение
         return reservation;
+    }
+
+    /**
+     * Сохранение массива резерваций.
+     */
+    @Transactional
+    public List<Reservation> saveAll(List<Reservation> reservations) {
+        return reservationRepository.saveAll(reservations);
     }
 
 }

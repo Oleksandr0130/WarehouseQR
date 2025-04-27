@@ -1,7 +1,10 @@
 package com.warehouse.controller;
 
 import com.warehouse.model.Reservation;
+import com.warehouse.model.dto.ReservationDTO;
+import com.warehouse.model.dto.ReservationRequestDTO;
 import com.warehouse.service.ReservationService;
+import com.warehouse.service.mapper.ReservationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,40 +19,52 @@ import java.util.List;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationMapper reservationMapper;
 
+    /**
+     * Создание новой резервации.
+     * Использует ReservationRequestDTO для получения данных из запроса.
+     */
     @PostMapping
-    public ResponseEntity<Reservation> reserveItem(@RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationDTO> reserveItem(@RequestBody ReservationRequestDTO requestDTO) {
         try {
-            Reservation reservation = reservationService.reserveItem(
-                    request.getOrderNumber(),
-                    request.getItemName(),
-                    request.getQuantity(),
-                    request.getReservationWeek()
+            var reservation = reservationService.reserveItem(
+                    requestDTO.getOrderNumber(),
+                    requestDTO.getItemName(),
+                    requestDTO.getQuantity(),
+                    requestDTO.getReservationWeek()
             );
-            return ResponseEntity.ok(reservation);
+            return ResponseEntity.ok(reservationMapper.toDTO(reservation));
         } catch (IllegalArgumentException | IOException e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
 
-
-
+    /**
+     * Создание нескольких резерваций.
+     * Использует список DTO для обработки данных.
+     */
     @PostMapping("/reservations")
-    public ResponseEntity<?> createReservations(@RequestBody List<Reservation> reservations) {
-        // Логирование полученных данных
-        System.out.println("Получен запрос: " + reservations);
-
-        if (reservations == null || reservations.isEmpty()) {
+    public ResponseEntity<String> createReservations(@RequestBody List<ReservationDTO> reservationsDTO) {
+        if (reservationsDTO == null || reservationsDTO.isEmpty()) {
             return ResponseEntity.badRequest().body("Список резервов пуст.");
         }
 
-        // Обработка непустого массива
-        return ResponseEntity.ok("Резервы успешно обработаны.");
+        // Логирование полученных данных
+        System.out.println("Получено количество резерваций: " + reservationsDTO.size());
+
+        // Вариант обработки: например, преобразовать и сохранить в базе данных
+        List<Reservation> reservations = reservationMapper.toEntityList(reservationsDTO);
+        reservationService.saveAll(reservations);
+
+        return ResponseEntity.ok("Список резервов успешно обработан.");
     }
 
+    /**
+     * Завершение резервации по ID.
+     */
     @PostMapping("/{id}/complete")
     public ResponseEntity<String> completeReservation(@PathVariable Long id) {
-        // Пример обработки. Логику можно изменить на свою
         boolean success = reservationService.completeReservation(id);
         if (success) {
             return ResponseEntity.ok("Reservation completed successfully");
@@ -58,8 +73,9 @@ public class ReservationController {
         }
     }
 
-
-
+    /**
+     * Обработка QR-кода, связанного с заказом.
+     */
     @PostMapping("/scan")
     public ResponseEntity<String> processQRCode(@RequestParam String orderNumber) {
         try {
@@ -70,26 +86,29 @@ public class ReservationController {
         }
     }
 
+    /**
+     * Получение всех резерваций (или за конкретную неделю, если передан параметр).
+     */
     @GetMapping
-    public ResponseEntity<List<Reservation>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
-        List<Reservation> reservations = reservationWeek == null
+    public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
+        List<Reservation> reservations = (reservationWeek == null)
                 ? reservationService.getAllReservations()
                 : reservationService.getReservationsByWeek(reservationWeek);
-        return ResponseEntity.ok(reservations);
+        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
     }
 
     /**
      * Получение зарезервированных товаров за указанную неделю с сортировкой по имени.
      */
     @GetMapping("/sorted")
-    public ResponseEntity<List<Reservation>> getSortedReservationsByWeek(@RequestParam String reservationWeek) {
+    public ResponseEntity<List<ReservationDTO>> getSortedReservationsByWeek(@RequestParam String reservationWeek) {
         List<Reservation> sortedReservations = reservationService.getSortedReservationsByWeek(reservationWeek);
-        return ResponseEntity.ok(sortedReservations);
+        return ResponseEntity.ok(reservationMapper.toDTOList(sortedReservations));
     }
 
     /**
      * Удаление резервации.
-     * Возвращает информацию о удаленной резервации и списанном количестве на складе.
+     * Возвращает данные о удаленном заказе.
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
@@ -108,6 +127,4 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
     }
-
-
 }

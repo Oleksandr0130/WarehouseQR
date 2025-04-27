@@ -1,8 +1,11 @@
 package com.warehouse.controller;
 
 import com.warehouse.model.Item;
+import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.service.ItemService;
+import com.warehouse.service.mapper.ItemMapper;
 import com.warehouse.utils.ItemComparator;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,49 +13,49 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/items")
+@RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class ItemController {
     private final ItemService itemService;
-
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
+    private final ItemMapper itemMapper;
 
     @PostMapping
-    public ResponseEntity<Item> addItem(@RequestBody Item item) {
-        return ResponseEntity.ok(itemService.addItem(item));
+    public ResponseEntity<ItemDTO> addItem(@RequestBody ItemDTO itemDTO) {
+        var savedItem = itemService.addItem(itemMapper.toEntity(itemDTO));
+        return ResponseEntity.ok(itemMapper.toDTO(savedItem));
     }
 
     @PutMapping("/{id}/add")
-    public ResponseEntity<Item> addQuantity(@PathVariable("id") String id, @RequestParam("quantity") int quantity) {
+    public ResponseEntity<ItemDTO> addQuantity(@PathVariable("id") String id, @RequestParam("quantity") int quantity) {
         return itemService.updateQuantity(id, quantity)
-                .map(ResponseEntity::ok)
+                .map(item -> ResponseEntity.ok(itemMapper.toDTO(item)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}/remove")
-    public ResponseEntity<Item> removeQuantity(@PathVariable("id") String id, @RequestParam("quantity") int quantity) {
+    public ResponseEntity<ItemDTO> removeQuantity(@PathVariable("id") String id, @RequestParam("quantity") int quantity) {
         return itemService.removeQuantity(id, quantity)
-                .map(ResponseEntity::ok)
+                .map(item -> ResponseEntity.ok(itemMapper.toDTO(item)))
                 .orElse(ResponseEntity.badRequest().build());
     }
 
     @GetMapping
-    public List<Item> getAllItems() {
-        return itemService.getAllItems();
+    public List<ItemDTO> getAllItems() {
+        return itemMapper.toDTOList(itemService.getAllItems());
     }
 
     @GetMapping("/sorted")
-    public List<Item> getSortedItems(@RequestParam("sortBy") String sortBy) {
+    public List<ItemDTO> getSortedItems(@RequestParam("sortBy") String sortBy) {
         switch (sortBy.toLowerCase()) {
             case "name":
-                return itemService.getAllItemsSorted(ItemComparator.BY_NAME);
+                return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_NAME));
             case "quantity":
-                return itemService.getAllItemsSorted(ItemComparator.BY_QUANTITY);
+                return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_QUANTITY));
             case "sold":
-                return itemService.getAllItemsSorted(ItemComparator.BY_SOLD);
+                return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_SOLD));
             default:
                 throw new IllegalArgumentException("Invalid sortBy parameter. Use 'name', 'quantity', or 'sold'.");
         }
     }
 }
+
