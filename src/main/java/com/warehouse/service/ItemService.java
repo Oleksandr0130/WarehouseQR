@@ -7,6 +7,7 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.warehouse.model.Item;
 import com.warehouse.repository.ItemRepository;
+import com.warehouse.service.mapper.interfaces.ItemMapper;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -23,8 +24,11 @@ public class ItemService {
     private static final String QR_PATH = "qrcodes/";
     private final ItemRepository itemRepository;
 
-    public ItemService(ItemRepository itemRepository) {
+    private final ItemMapper itemMapper;
+
+    public ItemService(ItemRepository itemRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
+        this.itemMapper = itemMapper;
         try {
             Files.createDirectories(Paths.get(QR_PATH));
         } catch (IOException e) {

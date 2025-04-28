@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
-@RequestMapping("/api/folders")
+@RequestMapping("/folders")
 public class FolderController {
 
     @GetMapping("/qrcodes")

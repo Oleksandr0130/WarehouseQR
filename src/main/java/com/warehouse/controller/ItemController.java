@@ -1,10 +1,9 @@
 package com.warehouse.controller;
 
-import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.service.ItemService;
-import com.warehouse.service.mapper.ItemMapper;
 import com.warehouse.utils.ItemComparator;
+import com.warehouse.service.mapper.interfaces.ItemMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/items")
+@RequestMapping("/items")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:5173")
 public class ItemController {
@@ -21,7 +20,8 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemDTO> addItem(@RequestBody ItemDTO itemDTO) {
-        var savedItem = itemService.addItem(itemMapper.toEntity(itemDTO));
+        var itemEntity = itemMapper.toEntity(itemDTO);
+        var savedItem = itemService.addItem(itemEntity);
         return ResponseEntity.ok(itemMapper.toDTO(savedItem));
     }
 
@@ -58,4 +58,3 @@ public class ItemController {
         }
     }
 }
-
