@@ -14,8 +14,8 @@ public class StaticResourceConfig implements WebMvcConfigurer {
                 .addResourceLocations("file:./qrcodes/"); // Указывает, что папка лежит в корне проекта
 
         // Доступ к папке "резервации" из корня
-        registry.addResourceHandler("/резервации/**")
-                .addResourceLocations("file:./резервации/");
+        registry.addResourceHandler("/reservation/**")
+                .addResourceLocations("file:./reservation/");
     }
 
 }

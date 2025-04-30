@@ -17,22 +17,28 @@ public class FolderController {
     public List<String> listQRCodes() {
         File folder = new File("./qrcodes");
         if (folder.exists() && folder.isDirectory()) {
-            return Stream.of(folder.listFiles())
-                    .filter(file -> !file.isDirectory())
-                    .map(file -> "/qrcodes/" + file.getName())
-                    .collect(Collectors.toList());
+            File[] files = folder.listFiles();
+            if (files != null) {
+                return Stream.of(files)
+                        .filter(file -> !file.isDirectory())
+                        .map(file -> "/qrcodes/" + file.getName())
+                        .collect(Collectors.toList());
+            }
         }
         return List.of();
     }
 
-    @GetMapping("/reservations")
+    @GetMapping("/reservation")
     public List<String> listReservations() {
-        File folder = new File("./резервации");
+        File folder = new File("./reservation");
         if (folder.exists() && folder.isDirectory()) {
-            return Stream.of(folder.listFiles())
-                    .filter(file -> !file.isDirectory())
-                    .map(file -> "/резервации/" + file.getName())
-                    .collect(Collectors.toList());
+            File[] files = folder.listFiles();
+            if (files != null) {
+                return Stream.of(files)
+                        .filter(file -> !file.isDirectory())
+                        .map(file -> "/reservation/" + file.getName())
+                        .collect(Collectors.toList());
+            }
         }
         return List.of();
     }

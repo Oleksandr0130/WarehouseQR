@@ -41,7 +41,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         // Генерируем QR-код
-        String qrCodePath = "резервации/" + orderNumber + ".png";
+        String qrCodePath = "reservations/" + orderNumber + ".png";
         QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
 
         return reservation;
