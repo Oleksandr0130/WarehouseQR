@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Service
@@ -41,7 +43,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         // Генерируем QR-код
-        String qrCodePath = "reservations/" + orderNumber + ".png";
+        String qrCodePath = "reservation/" + orderNumber + ".png";
         QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
 
         return reservation;
@@ -83,6 +85,7 @@ public class ReservationService {
 
         // Обновляем статус резервации
         reservation.setStatus("SOLD");
+        reservation.setSaleDate(LocalDateTime.now(ZoneId.systemDefault()));
         reservationRepository.save(reservation);
 
         // Обновляем статистику в Item
@@ -90,6 +93,15 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
         item.setSold(item.getSold() + reservation.getReservedQuantity()); // Увеличиваем количество проданных
         itemRepository.save(item);
+
+        // Удаляем QR-код
+        String qrCodePath = "reservation/" + orderNumber + ".png";
+        try {
+            java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(qrCodePath));
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to delete QR Code for order " + orderNumber, e);
+        }
+
     }
 
     /**
@@ -142,6 +154,15 @@ public class ReservationService {
     @Transactional
     public List<Reservation> saveAll(List<Reservation> reservations) {
         return reservationRepository.saveAll(reservations);
+    }
+
+    /**
+     * Получение всех проданных резерваций
+     */
+    public List<Reservation> getSoldReservations() {
+        return reservationRepository.findAll().stream()
+                .filter(reservation -> "SOLD".equals(reservation.getStatus()))
+                .toList();
     }
 
 }

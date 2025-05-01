@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -21,4 +22,5 @@ public class Reservation {
     private int reservedQuantity; // Количество зарезервированного товара
     private String reservationWeek; // Например, "KW22"
     private String status;     // Статус резервации ("RESERVED", "SOLD")
+    private LocalDateTime saleDate;
 }

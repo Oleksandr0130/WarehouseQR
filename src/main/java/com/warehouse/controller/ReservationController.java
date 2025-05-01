@@ -96,4 +96,11 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
     }
+
+    @GetMapping("/sold")
+    public ResponseEntity<List<ReservationDTO>> getSoldReservations() {
+        List<Reservation> soldReservations = reservationService.getSoldReservations();
+        return ResponseEntity.ok(reservationMapper.toDTOList(soldReservations));
+    }
+
 }

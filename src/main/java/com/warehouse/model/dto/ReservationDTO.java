@@ -2,6 +2,8 @@ package com.warehouse.model.dto;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 public class ReservationDTO {
     private Long id;
@@ -10,5 +12,6 @@ public class ReservationDTO {
     private int reservedQuantity;
     private String reservationWeek;
     private String status;
+    private LocalDateTime saleDate;
 }
 
