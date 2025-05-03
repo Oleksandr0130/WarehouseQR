@@ -5,10 +5,8 @@ target/
 !**/src/test/**/target/
 
 .gitignore
-.Dockerfile
 *.xml
 *.env
-*.yml
 .pdf
 ### STS ###
 .apt_generated
