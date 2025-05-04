@@ -37,7 +37,9 @@ public class UserService {
         String code = codeService.generateConfirmationCode(savedUser);
 
         // Создаем ссылку
-        String confirmationLink = "http://localhost:8080/api/confirmation?code=" + code;
+//        String confirmationLink = "http://localhost:8080/api/confirmation?code=" + code;
+
+        String confirmationLink = "https://warehouse-qr-app-8adwv.ondigitalocean.app/api/confirmation?code=" + code;
 
         // Отправляем письмо
         emailService.sendConfirmationEmail(savedUser.getEmail(), savedUser.getUsername(), confirmationLink);
