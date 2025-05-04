@@ -180,3 +180,29 @@ java.lang.IllegalArgumentException: Некорректный код подтве
 2025-05-04T20:08:34.003+02:00  INFO 16980 --- [WarehouseQrApplication] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
 2025-05-04T20:08:34.004+02:00  INFO 16980 --- [WarehouseQrApplication] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
 2025-05-04T20:08:34.006+02:00  INFO 16980 --- [WarehouseQrApplication] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-04T20:24:18.597+02:00  INFO 4408 --- [WarehouseQrApplication] [main] com.warehouse.WarehouseQrApplication     : Starting WarehouseQrApplication using Java 17.0.12 with PID 4408 (D:\WareHouse\WarehouseQR\target\classes started by olek1 in D:\WareHouse\WarehouseQR)
+2025-05-04T20:24:18.599+02:00  INFO 4408 --- [WarehouseQrApplication] [main] com.warehouse.WarehouseQrApplication     : The following 1 profile is active: "dev"
+2025-05-04T20:24:18.962+02:00  INFO 4408 --- [WarehouseQrApplication] [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-04T20:24:19.001+02:00  INFO 4408 --- [WarehouseQrApplication] [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 34 ms. Found 3 JPA repository interfaces.
+2025-05-04T20:24:19.287+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-04T20:24:19.295+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-04T20:24:19.296+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
+2025-05-04T20:24:19.335+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.a.c.c.C.[Tomcat].[localhost].[/api]    : Initializing Spring embedded WebApplicationContext
+2025-05-04T20:24:19.336+02:00  INFO 4408 --- [WarehouseQrApplication] [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 716 ms
+2025-05-04T20:24:19.423+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-04T20:24:19.456+02:00  INFO 4408 --- [WarehouseQrApplication] [main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.3.Final
+2025-05-04T20:24:19.476+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-05-04T20:24:19.664+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-04T20:24:19.679+02:00  INFO 4408 --- [WarehouseQrApplication] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-04T20:24:19.738+02:00  INFO 4408 --- [WarehouseQrApplication] [main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@32a033b6
+2025-05-04T20:24:19.740+02:00  INFO 4408 --- [WarehouseQrApplication] [main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-04T20:24:20.271+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-04T20:24:20.310+02:00  INFO 4408 --- [WarehouseQrApplication] [main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-04T20:24:20.581+02:00  WARN 4408 --- [WarehouseQrApplication] [main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-04T20:24:20.598+02:00  INFO 4408 --- [WarehouseQrApplication] [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name userDetailsService
+2025-05-04T20:24:20.635+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2025-05-04T20:24:20.881+02:00  INFO 4408 --- [WarehouseQrApplication] [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/api'
+2025-05-04T20:24:20.886+02:00  INFO 4408 --- [WarehouseQrApplication] [main] com.warehouse.WarehouseQrApplication     : Started WarehouseQrApplication in 2.532 seconds (process running for 15.917)
+2025-05-04T20:30:28.890+02:00  INFO 4408 --- [WarehouseQrApplication] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-04T20:30:28.891+02:00  INFO 4408 --- [WarehouseQrApplication] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-04T20:30:28.894+02:00  INFO 4408 --- [WarehouseQrApplication] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
