@@ -32,6 +32,9 @@ spring:
           debug: true
   main:
     allow-bean-definition-overriding: true
+file-storage:
+  qrcodes: ./qrcodes
+  reservation: ./reservation
 
 server:
   servlet:

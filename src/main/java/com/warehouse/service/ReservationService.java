@@ -24,16 +24,38 @@ public class ReservationService {
     /**
      * Создание резервации
      */
+//    public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
+//        // Поиск товара в базе данных
+//        Item item = itemRepository.findByName(itemName).orElseThrow(() ->
+//                new IllegalArgumentException("Item not found: " + itemName));
+//
+//        // Уменьшаем количество товара
+//        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
+//        itemRepository.save(item);
+//
+//        // Создаем резервацию
+//        Reservation reservation = new Reservation();
+//        reservation.setOrderNumber(orderNumber);
+//        reservation.setItemName(itemName);
+//        reservation.setReservedQuantity(quantity);
+//        reservation.setReservationWeek(reservationWeek);
+//        reservation.setStatus("RESERVED");
+//        reservationRepository.save(reservation);
+//
+//        // Генерируем QR-код
+//        String qrCodePath = "reservation/" + orderNumber + ".png";
+//        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
+//
+//        return reservation;
+//    }
+
     public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
-        // Поиск товара в базе данных
         Item item = itemRepository.findByName(itemName).orElseThrow(() ->
                 new IllegalArgumentException("Item not found: " + itemName));
 
-        // Уменьшаем количество товара
-        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
+        item.setQuantity(item.getQuantity() - quantity);
         itemRepository.save(item);
 
-        // Создаем резервацию
         Reservation reservation = new Reservation();
         reservation.setOrderNumber(orderNumber);
         reservation.setItemName(itemName);
@@ -42,127 +64,79 @@ public class ReservationService {
         reservation.setStatus("RESERVED");
         reservationRepository.save(reservation);
 
-        // Генерируем QR-код
-        String qrCodePath = "reservation/" + orderNumber + ".png";
-        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
-
+        QRCodeGenerator.generateQRCode(orderNumber, ""); // Генерация и загрузка QR-кода
         return reservation;
     }
 
-
-    /**
-     * Завершение резервации
-     */
     public boolean completeReservation(Long id) {
-        // Ищем резервацию по ID
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + id));
 
-        // Проверяем текущий статус. Только "RESERVED" можно завершить
         if (!"RESERVED".equals(reservation.getStatus())) {
             throw new IllegalStateException("Only RESERVED reservations can be completed.");
         }
 
-        // Обновляем статус на COMPLETED
         reservation.setStatus("COMPLETED");
         reservationRepository.save(reservation);
 
-        return true; // Операция завершена успешно
+        return true;
     }
 
-    /**
-     * Обработка сканирования QR-кода
-     */
     public void handleScannedQRCode(String orderNumber) {
-        // Ищем резервацию по номеру
         Reservation reservation = reservationRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new RuntimeException("Reservation not found: " + orderNumber));
 
-        // Если статус не "RESERVED", кидаем ошибку
         if (!"RESERVED".equals(reservation.getStatus())) {
             throw new IllegalStateException("Reservation is not available for selling");
         }
 
-        // Обновляем статус резервации
         reservation.setStatus("SOLD");
         reservation.setSaleDate(LocalDateTime.now(ZoneId.systemDefault()));
         reservationRepository.save(reservation);
 
-        // Обновляем статистику в Item
         Item item = itemRepository.findByName(reservation.getItemName())
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
-        item.setSold(item.getSold() + reservation.getReservedQuantity()); // Увеличиваем количество проданных
+        item.setSold(item.getSold() + reservation.getReservedQuantity());
         itemRepository.save(item);
-
-        // Удаляем QR-код
-        String qrCodePath = "reservation/" + orderNumber + ".png";
-        try {
-            java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(qrCodePath));
-        } catch (IOException e) {
-            throw new RuntimeException("Unable to delete QR Code for order " + orderNumber, e);
-        }
-
     }
 
-    /**
-     * Получение всех резерваций
-     */
     public List<Reservation> getAllReservations() {
         return reservationRepository.findAll();
     }
 
-    /**
-     * Получение резерваций за конкретную неделю
-     */
     public List<Reservation> getReservationsByWeek(String reservationWeek) {
         return reservationRepository.findByReservationWeek(reservationWeek);
     }
 
-    /**
-     * Получение зарезервированных товаров за неделю с сортировкой по имени.
-     */
     public List<Reservation> getSortedReservationsByWeek(String reservationWeek) {
         return reservationRepository.findByReservationWeekOrderByItemName(reservationWeek);
     }
 
-    /**
-     * Удаление резервации и возврат списанного количества на склад
-     */
     public Reservation deleteReservation(Long reservationId) {
-        // Найти резервацию по ID
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID: " + reservationId));
 
-        // Получаем связанную запись товара
         Item item = itemRepository.findByName(reservation.getItemName())
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
 
-        // Возвращаем зарезервированное количество обратно в склад
         item.setQuantity(item.getQuantity() + reservation.getReservedQuantity());
         itemRepository.save(item);
 
-        // Удаляем резервацию
         reservationRepository.delete(reservation);
 
-        // Возвращаем удаленную резервацию как подтверждение
         return reservation;
     }
 
-    /**
-     * Сохранение массива резерваций.
-     */
     @Transactional
     public List<Reservation> saveAll(List<Reservation> reservations) {
         return reservationRepository.saveAll(reservations);
     }
 
-    /**
-     * Получение всех проданных резерваций
-     */
     public List<Reservation> getSoldReservations() {
         return reservationRepository.findAll().stream()
                 .filter(reservation -> "SOLD".equals(reservation.getStatus()))
                 .toList();
     }
+
 
 }
