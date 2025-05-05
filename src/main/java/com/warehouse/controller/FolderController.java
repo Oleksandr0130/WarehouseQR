@@ -54,37 +54,32 @@ import java.util.stream.Stream;
 @RequestMapping("/folders")
 public class FolderController {
 
-    // Использование значений из application.properties/application.yml
     @Value("${file-storage.qrcodes:./qrcodes}")
     private String qrCodesPath;
 
     @Value("${file-storage.reservation:./reservation}")
     private String reservationPath;
 
-    // Логгер для отслеживания работы API
     private static final Logger logger = LoggerFactory.getLogger(FolderController.class);
 
-    // Оригинальный метод для получения QR-кодов
     @GetMapping("/qrcodes")
     public List<String> listQRCodes() {
         logger.info("Получение списка QR-кодов...");
         return listFiles(new File(qrCodesPath), "/qrcodes/");
     }
 
-    // Оригинальный метод для получения списка резервных файлов
     @GetMapping("/reservation")
     public List<String> listReservations() {
         logger.info("Получение списка резервных файлов...");
         return listFiles(new File(reservationPath), "/reservation/");
     }
 
-    // Новый метод для работы с папками
     private List<String> listFiles(File folder, String urlPrefix) {
         if (folder.exists() && folder.isDirectory()) {
             File[] files = folder.listFiles();
             if (files != null) {
                 return Stream.of(files)
-                        .filter(file -> !file.isDirectory())
+                        .filter(file -> !file.isDirectory() && file.getName().endsWith(".png")) // Фильтрация PNG-файлов
                         .map(file -> urlPrefix + file.getName())
                         .collect(Collectors.toList());
             }
@@ -93,7 +88,6 @@ public class FolderController {
         return List.of();
     }
 
-    // Пост-инициализация директорий, если они отсутствуют
     @PostConstruct
     public void initDirectories() {
         logger.info("Проверка инициализации директорий...");
@@ -116,7 +110,6 @@ public class FolderController {
     }
 }
 
-// Конфигурация для предоставления статических файлов через /qrcodes и /reservation
 @Configuration
 class WebConfig implements WebMvcConfigurer {
 
@@ -133,4 +126,5 @@ class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/reservation/**")
                 .addResourceLocations("file:" + reservationPath + "/");
     }
+
 }

@@ -39,7 +39,7 @@ public class QRCodeGenerator {
 //        }
 //    }
 
-    private static final String UPLOAD_API_URL = "https://warehouse-qr-app-8adwv.ondigitalocean.app/api/upload";
+    private static final String UPLOAD_API_URL = "https://warehouse-qr-app-8adwv.ondigitalocean.app/upload";
 
     /**
      * Генерация QR-кода и его загрузка на сервер через API
