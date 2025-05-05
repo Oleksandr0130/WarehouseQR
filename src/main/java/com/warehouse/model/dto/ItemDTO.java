@@ -10,5 +10,7 @@ public class ItemDTO {
     private String name;
     private int quantity;
     private int sold;
+    private String qrCode; // Новое поле для URL QR-кода
+
 }
 

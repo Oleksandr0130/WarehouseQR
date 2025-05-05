@@ -13,5 +13,7 @@ public class ReservationDTO {
     private String reservationWeek;
     private String status;
     private LocalDateTime saleDate;
+    private String qrCode; // Новое поле для URL QR-кода
+
 }
 

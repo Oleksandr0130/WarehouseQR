@@ -7,6 +7,7 @@ import com.warehouse.repository.ReservationRepository;
 import com.warehouse.utils.QRCodeGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -20,6 +21,9 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ItemRepository itemRepository;
+
+    @Value("${app.reservation-base-url}")
+    private String reservationBaseUrl; // Значение из application.yml
 
     /**
      * Создание резервации
@@ -48,6 +52,10 @@ public class ReservationService {
 
         return reservation;
     }
+    public String getReservationQrUrl(String orderNumber) {
+        return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL
+    }
+
 
 
     /**

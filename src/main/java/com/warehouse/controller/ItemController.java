@@ -23,8 +23,15 @@ public class ItemController {
     public ResponseEntity<ItemDTO> addItem(@RequestBody ItemDTO itemDTO) {
         var itemEntity = itemMapper.toEntity(itemDTO);
         var savedItem = itemService.addItem(itemEntity);
-        return ResponseEntity.ok(itemMapper.toDTO(savedItem));
+
+        String qrCodeUrl = itemService.getQrCodeUrl(savedItem.getId()); // Генерация полного URL
+
+        ItemDTO responseDTO = itemMapper.toDTO(savedItem);
+        responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ItemDTO
+
+        return ResponseEntity.ok(responseDTO);
     }
+
 
     @PutMapping("/{id}/add")
     public ResponseEntity<ItemDTO> addQuantity(@PathVariable("id") String id, @RequestParam("quantity") int quantity) {

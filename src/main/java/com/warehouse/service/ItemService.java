@@ -8,6 +8,7 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.warehouse.model.Item;
 import com.warehouse.repository.ItemRepository;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,6 +26,9 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
 
+    @Value("${app.qrcode-base-url}")
+    private String qrCodeBaseUrl; // Значение из application.yml
+
     public ItemService(ItemRepository itemRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
@@ -34,6 +38,12 @@ public class ItemService {
             throw new RuntimeException("Failed to create QR codes directory: " + QR_PATH, e);
         }
     }
+
+
+    public String getQrCodeUrl(String id) {
+        return qrCodeBaseUrl + id + ".png"; // Формирование полного URL
+    }
+
 
     public Item addItem(Item item) {
         if (item.getId() == null || item.getId().isEmpty()) {

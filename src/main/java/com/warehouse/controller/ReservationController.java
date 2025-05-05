@@ -30,11 +30,18 @@ public class ReservationController {
                     requestDTO.getQuantity(),
                     requestDTO.getReservationWeek()
             );
-            return ResponseEntity.ok(reservationMapper.toDTO(reservation));
+
+            String qrCodeUrl = reservationService.getReservationQrUrl(reservation.getOrderNumber()); // Генерация полного URL
+
+            ReservationDTO responseDTO = reservationMapper.toDTO(reservation);
+            responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ReservationDTO
+
+            return ResponseEntity.ok(responseDTO);
         } catch (IllegalArgumentException | IOException e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
 
     @PostMapping("/reservations")
     public ResponseEntity<String> createReservations(@RequestBody List<ReservationDTO> reservationsDTO) {

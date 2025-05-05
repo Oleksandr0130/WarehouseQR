@@ -32,7 +32,9 @@ spring:
           debug: true
   main:
     allow-bean-definition-overriding: true
-
+app:
+  qrcode-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/qrcodes/
+  reservation-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/reservation/
 server:
   servlet:
     context-path: /api
