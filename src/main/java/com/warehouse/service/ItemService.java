@@ -8,7 +8,6 @@ import com.google.zxing.qrcode.QRCodeWriter;
 import com.warehouse.model.Item;
 import com.warehouse.repository.ItemRepository;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
-import com.warehouse.utils.QRCodeGenerator;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,93 +21,18 @@ import java.util.UUID;
 
 @Service
 public class ItemService {
-//    private static final String QR_PATH = "qrcodes/";
-//    private final ItemRepository itemRepository;
-//    private final ItemMapper itemMapper;
-//
-//    public ItemService(ItemRepository itemRepository, ItemMapper itemMapper) {
-//        this.itemRepository = itemRepository;
-//        this.itemMapper = itemMapper;
-//        try {
-//            Files.createDirectories(Paths.get(QR_PATH));
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to create QR codes directory: " + QR_PATH, e);
-//        }
-//    }
-//
-//    public Item addItem(Item item) {
-//        if (item.getId() == null || item.getId().isEmpty()) {
-//            item.setId(UUID.randomUUID().toString());
-//        }
-//        Item savedItem = itemRepository.save(item);
-//        generateQRCode(item.getId());
-//        return savedItem;
-//    }
-//
-//    public Optional<Item> updateQuantity(String id, int quantity) {
-//        Optional<Item> itemOpt = itemRepository.findById(id);
-//        if (itemOpt.isPresent()) {
-//            Item item = itemOpt.get();
-//            item.setQuantity(item.getQuantity() + quantity);
-//            return Optional.of(itemRepository.save(item));
-//        }
-//        return Optional.empty();
-//    }
-//
-//    public Optional<Item> removeQuantity(String id, int quantity) {
-//        Optional<Item> itemOpt = itemRepository.findById(id);
-//        if (itemOpt.isPresent()) {
-//            Item item = itemOpt.get();
-//            if (item.getQuantity() >= quantity) {
-//                item.setQuantity(item.getQuantity() - quantity);
-//                item.setSold(item.getSold() + quantity);
-//                return Optional.of(itemRepository.save(item));
-//            }
-//        }
-//        return Optional.empty();
-//    }
-//
-//
-//
-//    public List<Item> getAllItems() {
-//        return itemRepository.findAll();
-//    }
-//
-//    public List<Item> getAllItemsSorted(Comparator<Item> comparator) {
-//        List<Item> items = getAllItems(); // Получаем все товары
-//        items.sort(comparator); // Сортируем с использованием переданного компаратора
-//        return items;
-//    }
-//
-//
-//    private void generateQRCode(String id) {
-//        try {
-//            // Создаем полный путь до папки, включая вложенные директории
-//            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
-//            if (qrFolderPath != null) {
-//                Files.createDirectories(qrFolderPath);
-//            }
-//
-//            // Формируем полный путь к файлу
-//            String filePath = QR_PATH + id + ".png";
-//
-//            // Генерация и сохранение QR-кода
-//            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-//            BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
-//            Path path = Paths.get(filePath);
-//            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-//
-//        } catch (WriterException | IOException e) {
-//            throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
-//        }
-//    }
-
+    private static final String QR_PATH = "qrcodes/";
     private final ItemRepository itemRepository;
     private final ItemMapper itemMapper;
 
     public ItemService(ItemRepository itemRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
+        try {
+            Files.createDirectories(Paths.get(QR_PATH));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create QR codes directory: " + QR_PATH, e);
+        }
     }
 
     public Item addItem(Item item) {
@@ -143,23 +67,38 @@ public class ItemService {
         return Optional.empty();
     }
 
+
+
     public List<Item> getAllItems() {
         return itemRepository.findAll();
     }
 
     public List<Item> getAllItemsSorted(Comparator<Item> comparator) {
-        List<Item> items = getAllItems();
-        items.sort(comparator);
+        List<Item> items = getAllItems(); // Получаем все товары
+        items.sort(comparator); // Сортируем с использованием переданного компаратора
         return items;
     }
 
+
     private void generateQRCode(String id) {
         try {
-            QRCodeGenerator.generateQRCode(id, ""); // Передаём идентификатор для генерации QR-кода
-        } catch (IOException e) {
+            // Создаем полный путь до папки, включая вложенные директории
+            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
+            if (qrFolderPath != null) {
+                Files.createDirectories(qrFolderPath);
+            }
+
+            // Формируем полный путь к файлу
+            String filePath = QR_PATH + id + ".png";
+
+            // Генерация и сохранение QR-кода
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
+            Path path = Paths.get(filePath);
+            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+
+        } catch (WriterException | IOException e) {
             throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
         }
     }
-
-
 }
