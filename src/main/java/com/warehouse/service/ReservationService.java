@@ -133,9 +133,9 @@ public class ReservationService {
         item.setSold(item.getSold() + reservation.getReservedQuantity()); // Увеличиваем количество проданных
         itemRepository.save(item);
 
-        // Удаляем саму резервацию
-        reservationRepository.delete(reservation);
-
+        // Увеличиваем количество проданных товаров
+        item.setSold(item.getSold() + reservation.getReservedQuantity());
+        itemRepository.save(item); // Сохраняем изменения в базе товара
 
         // Удаляем QR-код
         String qrCodePath = "reservation/" + orderNumber + ".png";
@@ -146,6 +146,11 @@ public class ReservationService {
         }
 
     }
+
+    public List<Reservation> getActiveReservations() {
+        return reservationRepository.findByStatus("RESERVED");
+    }
+
 
     /**
      * Получение всех резерваций
