@@ -104,7 +104,7 @@ public class ReservationController {
         }
     }
 
-    @GetMapping
+    @GetMapping("/active")
     public ResponseEntity<List<ReservationDTO>> getActiveReservations() {
         List<Reservation> activeReservations = reservationService.getActiveReservations();
         return ResponseEntity.ok(reservationMapper.toDTOList(activeReservations));
