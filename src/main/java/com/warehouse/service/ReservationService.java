@@ -147,7 +147,10 @@ public class ReservationService {
      * Получение всех резерваций
      */
     public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll();
+        return reservationRepository.findAll().stream()
+                .filter(reservation -> "RESERVED".equals(reservation.getStatus())) // Только активные резервы
+                .toList();
+
     }
 
     /**
