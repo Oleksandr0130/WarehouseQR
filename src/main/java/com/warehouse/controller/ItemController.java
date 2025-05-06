@@ -65,4 +65,23 @@ public class ItemController {
                 throw new IllegalArgumentException("Invalid sortBy parameter. Use 'name', 'quantity', or 'sold'.");
         }
     }
+
+    // API для получения всего списка товаров с данными о продажах
+    @GetMapping("/sold")
+    public ResponseEntity<List<ItemDTO>> getAllItemsWithSoldData() {
+        List<ItemDTO> items = itemService.getAllItemsWithSoldData();
+        return ResponseEntity.ok(items);
+    }
+
+    // API для получения количества проданных единиц для конкретного товара
+    @GetMapping("/{id}/sold")
+    public ResponseEntity<Integer> getSoldQuantityForItem(@PathVariable String id) {
+        try {
+            int soldQuantity = itemService.getSoldQuantityForItem(id);
+            return ResponseEntity.ok(soldQuantity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

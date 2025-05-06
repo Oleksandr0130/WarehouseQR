@@ -6,11 +6,12 @@ import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.warehouse.model.Item;
+import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.repository.ItemRepository;
+import com.warehouse.repository.ReservationRepository;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,13 +25,15 @@ import java.util.UUID;
 public class ItemService {
     private static final String QR_PATH = "qrcodes/";
     private final ItemRepository itemRepository;
+    private final ReservationRepository reservationRepository;
     private final ItemMapper itemMapper;
 
     @Value("${app.qrcode-base-url}")
     private String qrCodeBaseUrl; // Значение из application.yml
 
-    public ItemService(ItemRepository itemRepository, ItemMapper itemMapper) {
+    public ItemService(ItemRepository itemRepository, ReservationRepository reservationRepository, ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
+        this.reservationRepository = reservationRepository;
         this.itemMapper = itemMapper;
         try {
             Files.createDirectories(Paths.get(QR_PATH));
@@ -77,6 +80,28 @@ public class ItemService {
         return Optional.empty();
     }
 
+    // Метод для получения количества проданных товаров
+    public int getSoldQuantityForItem(String itemId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found for ID: " + itemId));
+
+        // Суммируем из Reservation по имени товара
+        return reservationRepository.getTotalSoldQuantityForItem(item.getName())
+                .orElse(0); // Если в таблице Reservation нет данных - возвращаем 0
+    }
+
+    // Новый метод: Вернуть список всех товаров с подсчётом проданных штук
+    public List<ItemDTO> getAllItemsWithSoldData() {
+        List<Item> items = itemRepository.findAll();
+
+        List<ItemDTO> itemDTOs = itemMapper.toDTOList(items);
+        itemDTOs.forEach(itemDTO -> {
+            int soldQuantity = reservationRepository.getTotalSoldQuantityForItem(itemDTO.getName()).orElse(0);
+            itemDTO.setSold(soldQuantity);
+        });
+
+        return itemDTOs;
+    }
 
 
     public List<Item> getAllItems() {
