@@ -61,6 +61,23 @@ public class ReservationService {
     /**
      * Завершение резервации
      */
+//    public boolean completeReservation(Long id) {
+//        // Ищем резервацию по ID
+//        Reservation reservation = reservationRepository.findById(id)
+//                .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + id));
+//
+//        // Проверяем текущий статус. Только "RESERVED" можно завершить
+//        if (!"RESERVED".equals(reservation.getStatus())) {
+//            throw new IllegalStateException("Only RESERVED reservations can be completed.");
+//        }
+//
+//        // Обновляем статус на COMPLETED
+//        reservation.setStatus("COMPLETED");
+//        reservationRepository.save(reservation);
+//
+//        return true; // Операция завершена успешно
+//    }
+
     public boolean completeReservation(Long id) {
         // Ищем резервацию по ID
         Reservation reservation = reservationRepository.findById(id)
@@ -71,7 +88,20 @@ public class ReservationService {
             throw new IllegalStateException("Only RESERVED reservations can be completed.");
         }
 
-        // Обновляем статус на COMPLETED
+        // Обработка товара
+        // Находим товар по имени, связанному с резервацией
+        Item item = itemRepository.findByName(reservation.getItemName())
+                .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
+
+        // Списываем окончательно зарезервированную продукцию
+        if (item.getQuantity() >= reservation.getReservedQuantity()) {
+            item.setQuantity(item.getQuantity() - reservation.getReservedQuantity());
+        } else {
+            throw new IllegalStateException("Insufficient stock to complete the reservation.");
+        }
+        itemRepository.save(item);
+
+        // Обновляем статус резервации на COMPLETED
         reservation.setStatus("COMPLETED");
         reservationRepository.save(reservation);
 
