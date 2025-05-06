@@ -111,6 +111,7 @@ public class ReservationService {
     /**
      * Обработка сканирования QR-кода
      */
+    @Transactional
     public void handleScannedQRCode(String orderNumber) {
         // Ищем резервацию по номеру
         Reservation reservation = reservationRepository.findByOrderNumber(orderNumber)
