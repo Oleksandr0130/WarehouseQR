@@ -13,7 +13,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByReservationWeekOrderByItemName(String reservationWeek);
 
     Optional<Reservation> findByOrderNumber(String orderNumber);
-
-    List<Reservation> findByStatus(String status);
-
 }

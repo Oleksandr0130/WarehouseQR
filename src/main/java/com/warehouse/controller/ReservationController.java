@@ -104,13 +104,6 @@ public class ReservationController {
         }
     }
 
-    @GetMapping("/active")
-    public ResponseEntity<List<ReservationDTO>> getActiveReservations() {
-        List<Reservation> activeReservations = reservationService.getActiveReservations();
-        return ResponseEntity.ok(reservationMapper.toDTOList(activeReservations));
-    }
-
-
     @GetMapping("/sold")
     public ResponseEntity<List<ReservationDTO>> getSoldReservations() {
         List<Reservation> soldReservations = reservationService.getSoldReservations();
