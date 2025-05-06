@@ -133,6 +133,10 @@ public class ReservationService {
         item.setSold(item.getSold() + reservation.getReservedQuantity()); // Увеличиваем количество проданных
         itemRepository.save(item);
 
+        // Удаляем саму резервацию
+        reservationRepository.delete(reservation);
+
+
         // Удаляем QR-код
         String qrCodePath = "reservation/" + orderNumber + ".png";
         try {
