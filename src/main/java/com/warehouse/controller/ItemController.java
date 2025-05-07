@@ -1,13 +1,18 @@
 package com.warehouse.controller;
 
+import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.service.ItemService;
 import com.warehouse.utils.ItemComparator;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -82,6 +87,21 @@ public class ItemController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @GetMapping("/download/excel")
+    public ResponseEntity<InputStreamResource> downloadExcelFile() {
+        List<Item> items = itemService.getAllItems(); // Получение всех товаров
+        InputStream excelFile = itemService.generateExcelFile(items); // Генерация Excel-файла
+
+        // Настройка заголовков ответа
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=items.xlsx");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .body(new InputStreamResource(excelFile));
     }
 
 }

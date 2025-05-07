@@ -10,9 +10,18 @@ import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.repository.ItemRepository;
 import com.warehouse.repository.ReservationRepository;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -136,4 +145,35 @@ public class ItemService {
             throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
         }
     }
+
+    public InputStream generateExcelFile(List<Item> items) {
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Items");
+
+            // Создаем заголовок таблицы
+            Row headerRow = sheet.createRow(0);
+            String[] columns = {"ID", "Name", "Quantity"};
+            for (int i = 0; i < columns.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns[i]);
+            }
+
+            // Заполняем данные товаров
+            int rowNum = 1;
+            for (Item item : items) {
+                Row row = sheet.createRow(rowNum++);
+                row.createCell(0).setCellValue(item.getId());
+                row.createCell(1).setCellValue(item.getName());
+                row.createCell(2).setCellValue(item.getQuantity());
+            }
+
+            // Сохраняем файл в поток
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            workbook.write(out);
+            return new ByteArrayInputStream(out.toByteArray());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate Excel file", e);
+        }
+    }
+
 }
