@@ -160,6 +160,11 @@ public class ReservationService {
         return reservationRepository.findByReservationWeek(reservationWeek);
     }
 
+    public List<Reservation> getReservationsByOrderPrefix(String orderPrefix) {
+        return reservationRepository.findByOrderNumberStartingWith(orderPrefix);
+    }
+
+
     /**
      * Получение зарезервированных товаров за неделю с сортировкой по имени.
      */

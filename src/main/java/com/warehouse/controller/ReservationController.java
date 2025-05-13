@@ -88,6 +88,13 @@ public class ReservationController {
         return ResponseEntity.ok(reservationMapper.toDTOList(sortedReservations));
     }
 
+    @GetMapping("/search/by-order-prefix")
+    public ResponseEntity<List<ReservationDTO>> getReservationsByOrderPrefix(@RequestParam String orderPrefix) {
+        List<Reservation> reservations = reservationService.getReservationsByOrderPrefix(orderPrefix);
+        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
+    }
+
+
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
         try {
