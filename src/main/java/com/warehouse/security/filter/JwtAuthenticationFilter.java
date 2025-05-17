@@ -1,7 +1,6 @@
 package com.warehouse.security.filter;
 
 import com.warehouse.security.service.JwtTokenProvider;
-import jakarta.servlet.http.Cookie;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,50 +30,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request,
-//                                    HttpServletResponse response,
-//                                    FilterChain filterChain) throws ServletException, IOException {
-//        String token = resolveToken(request);
-//        try {
-//            if (token != null && jwtTokenProvider.validateToken(token)) {
-//                String username = jwtTokenProvider.getUsername(token);
-//                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-//                        userDetails, null, userDetails.getAuthorities());
-//                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//                SecurityContextHolder.getContext().setAuthentication(auth);
-//                logger.info("Пользователь успешно авторизован: {}", username);
-//            } else if (token != null) {
-//                logger.warn("Токен не прошел проверку валидности");
-//            }
-//        } catch (Exception e) {
-//            logger.error("Ошибка при обработке JWT: {}", e.getMessage());
-//            // Можно сбросить текущий контекст, чтобы явно показать, что авторизация не прошла
-//            SecurityContextHolder.clearContext();
-//            // Можно также отправить ошибку в ответ, например, 401 Unauthorized
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Пожалуйста, авторизуйтесь");
-//            return; // важен, чтобы не продолжать цепочку фильтров
-//        }
-//
-//        // продолжение обработки
-//        filterChain.doFilter(request, response);
-//    }
-//
-//    private String resolveToken(HttpServletRequest request) {
-//        String bearer = request.getHeader("Authorization");
-//        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-//            return bearer.substring(7);
-//        }
-//        return null;
-//    }
-//}
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        String token = extractTokenFromCookie(request, "accessToken");
+        String token = resolveToken(request);
         try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 String username = jwtTokenProvider.getUsername(token);
@@ -89,23 +49,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             logger.error("Ошибка при обработке JWT: {}", e.getMessage());
+            // Можно сбросить текущий контекст, чтобы явно показать, что авторизация не прошла
             SecurityContextHolder.clearContext();
+            // Можно также отправить ошибку в ответ, например, 401 Unauthorized
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Пожалуйста, авторизуйтесь");
-            return;
+            return; // важен, чтобы не продолжать цепочку фильтров
         }
 
+        // продолжение обработки
         filterChain.doFilter(request, response);
     }
 
-    private String extractTokenFromCookie(HttpServletRequest request, String cookieName) {
-        if (request.getCookies() != null) {
-            for (Cookie cookie : request.getCookies()) {
-                if (cookie.getName().equals(cookieName)) {
-                    return cookie.getValue();
-                }
-            }
+    private String resolveToken(HttpServletRequest request) {
+        String bearer = request.getHeader("Authorization");
+        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+            return bearer.substring(7);
         }
         return null;
     }
 }
-
