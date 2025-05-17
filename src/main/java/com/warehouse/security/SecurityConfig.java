@@ -100,7 +100,7 @@ public class SecurityConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("http://localhost:3000") // URL фронтенд-приложения
+                        .allowedOrigins("https://warehouse-qr-app-8adwv.ondigitalocean.app/api/") // URL фронтенд-приложения
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Разрешенные методы
                         .allowedHeaders("*") // Разрешенные заголовки
                         .allowCredentials(true); // Разрешить куки и авторизационные данные
