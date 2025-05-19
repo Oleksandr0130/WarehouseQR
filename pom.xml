@@ -113,9 +113,10 @@
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
-            <version>5.0.0</version>
+            <version>6.0.0</version> <!-- Используйте актуальную версию -->
             <scope>provided</scope>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.poi</groupId>

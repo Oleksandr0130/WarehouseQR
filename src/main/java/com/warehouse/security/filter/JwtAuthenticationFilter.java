@@ -60,11 +60,28 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+//    private String resolveToken(HttpServletRequest request) {
+//        String bearer = request.getHeader("Authorization");
+//        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+//            return bearer.substring(7);
+//        }
+//        return null;
+//    }
+
     private String resolveToken(HttpServletRequest request) {
-        String bearer = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
+        return getCookieValue(request, "AccessToken"); // Определяем токен только из cookies
+    }
+
+    private String getCookieValue(HttpServletRequest request, String cookieName) {
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
         }
         return null;
     }
+
+
 }
