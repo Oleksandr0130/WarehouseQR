@@ -6,7 +6,6 @@ import com.warehouse.model.dto.ReservationRequestDTO;
 import com.warehouse.service.ReservationService;
 import com.warehouse.service.mapper.interfaces.ReservationMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,24 +21,6 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationMapper reservationMapper;
 
-    /**
-     * Получение QR-кода в виде изображения (массив байтов).
-     */
-    @GetMapping("/{orderNumber}/qrcode")
-    public ResponseEntity<byte[]> getQRCode(@PathVariable String orderNumber) {
-        try {
-            byte[] qrCode = reservationService.getQRCodeByOrderNumber(orderNumber);
-
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_TYPE, "image/png")
-                    .body(qrCode);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(null);
-        }
-    }
-
-
     @PostMapping
     public ResponseEntity<ReservationDTO> reserveItem(@RequestBody ReservationRequestDTO requestDTO) {
         try {
@@ -50,10 +31,7 @@ public class ReservationController {
                     requestDTO.getReservationWeek()
             );
 
-//            String qrCodeUrl = reservationService.getReservationQrUrl(reservation.getOrderNumber()); // Генерация полного URL
-            // Генерация URL для QR-кода на основе эндпоинта getQRCode
-            String qrCodeUrl = "/reservations/" + reservation.getOrderNumber() + "/qrcode";
-
+            String qrCodeUrl = reservationService.getReservationQrUrl(reservation.getOrderNumber()); // Генерация полного URL
 
             ReservationDTO responseDTO = reservationMapper.toDTO(reservation);
             responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ReservationDTO

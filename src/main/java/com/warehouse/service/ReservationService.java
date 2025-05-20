@@ -22,45 +22,11 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ItemRepository itemRepository;
 
-//    @Value("${app.reservation-base-url}")
-//    private String reservationBaseUrl; // Значение из application.yml
-//
-//    /**
-//     * Создание резервации
-//     */
-//    public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
-//        // Поиск товара в базе данных
-//        Item item = itemRepository.findByName(itemName).orElseThrow(() ->
-//                new IllegalArgumentException("Item not found: " + itemName));
-//
-//        // Уменьшаем количество товара
-//        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
-//        itemRepository.save(item);
-//
-//        // Создаем резервацию
-//        Reservation reservation = new Reservation();
-//        reservation.setOrderNumber(orderNumber);
-//        reservation.setItemName(itemName);
-//        reservation.setReservedQuantity(quantity);
-//        reservation.setReservationWeek(reservationWeek);
-//        reservation.setStatus("RESERVED");
-//        reservationRepository.save(reservation);
-//
-//        // Генерируем QR-код
-//        String qrCodePath = "reservation/" + orderNumber + ".png";
-//        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
-//
-//        return reservation;
-//    }
-//    public String getReservationQrUrl(String orderNumber) {
-//        return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL
-//    }
-
     @Value("${app.reservation-base-url}")
     private String reservationBaseUrl; // Значение из application.yml
 
     /**
-     * Создание резервации. QR-код сохраняется как массив байтов.
+     * Создание резервации
      */
     public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
         // Поиск товара в базе данных
@@ -68,7 +34,7 @@ public class ReservationService {
                 new IllegalArgumentException("Item not found: " + itemName));
 
         // Уменьшаем количество товара
-        item.setQuantity(item.getQuantity() - quantity);
+        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
         itemRepository.save(item);
 
         // Создаем резервацию
@@ -78,24 +44,17 @@ public class ReservationService {
         reservation.setReservedQuantity(quantity);
         reservation.setReservationWeek(reservationWeek);
         reservation.setStatus("RESERVED");
+        reservationRepository.save(reservation);
 
-        // Генерируем QR-код и сохраняем в базу
-        byte[] qrCodeData = QRCodeGenerator.generateQRCode(orderNumber);
-        reservation.setQrCode(qrCodeData);
+        // Генерируем QR-код
+        String qrCodePath = "reservation/" + orderNumber + ".png";
+        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
 
-        return reservationRepository.save(reservation);
+        return reservation;
     }
-
-    /**
-     * Получение QR-кода по orderNumber. Возвращается массив байтов.
-     */
-    public byte[] getQRCodeByOrderNumber(String orderNumber) {
-        Reservation reservation = reservationRepository.findByOrderNumber(orderNumber)
-                .orElseThrow(() -> new RuntimeException("Reservation not found: " + orderNumber));
-
-        return reservation.getQrCode();
+    public String getReservationQrUrl(String orderNumber) {
+        return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL
     }
-
 
 
 
