@@ -1,9 +1,6 @@
 package com.warehouse.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -23,4 +20,9 @@ public class Reservation {
     private String reservationWeek; // Например, "KW22"
     private String status;     // Статус резервации ("RESERVED", "SOLD")
     private LocalDateTime saleDate;
+
+    // Пример сущности Reservation
+    @Column(name = "qr_code", columnDefinition = "BLOB")
+    private byte[] qrCode;
+
 }
