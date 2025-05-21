@@ -66,11 +66,16 @@ public class ItemService {
             item.setId(UUID.randomUUID().toString());
         }
         Item savedItem = itemRepository.save(item);
-// Генерация QR-кода
-        generateQRCode(savedItem.getId());
+
+        // Генерируем QR-код для товара
+        byte[] qrCodeBytes = generateQRCodeImage(savedItem.getId());
+
+//// Генерация QR-кода
+//        generateQRCode(savedItem.getId());
 
         // Установка QR-кода в объект и повторное сохранение
-        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
+//        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
+        savedItem.setQrCode(qrCodeBytes);
         return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
 
     }
@@ -132,18 +137,18 @@ public class ItemService {
         return items;
     }
 
-    private byte[] generateQRCode(String id) {
+    private byte[] generateQRCodeImage(String id) {
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
 
             // Сохраняем QR-код в поток
-            ByteArrayOutputStream pngOutputStream = new ByteArrayOutputStream();
-            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", pngOutputStream);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
 
-            return pngOutputStream.toByteArray(); // Возвращаем QR-код в виде массива байт
+            return outputStream.toByteArray(); // Возвращаем массив байтов
         } catch (WriterException | IOException e) {
-            throw new RuntimeException("Failed to generate QR code: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to generate QR code for item: " + id, e);
         }
     }
 
