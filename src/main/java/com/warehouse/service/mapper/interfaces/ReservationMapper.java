@@ -7,7 +7,7 @@ import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface ReservationMapper {
     ReservationDTO toDTO(Reservation reservation);
     Reservation toEntity(ReservationDTO dto);

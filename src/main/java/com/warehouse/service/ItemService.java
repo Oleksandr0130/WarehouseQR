@@ -53,8 +53,12 @@ public class ItemService {
 
 
     public String getQrCodeUrl(String id) {
-        return qrCodeBaseUrl + id + ".png"; // Формирование полного URL
+        if (qrCodeBaseUrl == null || qrCodeBaseUrl.isEmpty()) {
+            throw new IllegalStateException("QR Code base URL is not configured");
+        }
+        return qrCodeBaseUrl + id + ".png";
     }
+
 
 
     public Item addItem(Item item) {
@@ -63,6 +67,10 @@ public class ItemService {
         }
         Item savedItem = itemRepository.save(item);
         generateQRCode(item.getId());
+
+        // Передаем URL QR-кода в поле DTO
+        savedItem.setQrCode(getQrCodeUrl(item.getId()));
+
         return savedItem;
     }
 

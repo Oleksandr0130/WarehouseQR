@@ -14,4 +14,6 @@ public class Item {
     private String name;
     private int quantity;
     private int sold;
+    private String qrCode; // Ссылка на QR-код товара
+
 }
