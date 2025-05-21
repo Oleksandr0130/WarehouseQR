@@ -21,6 +21,7 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationMapper reservationMapper;
 
+
     @PostMapping
     public ResponseEntity<ReservationDTO> reserveItem(@RequestBody ReservationRequestDTO requestDTO) {
         try {
@@ -31,15 +32,24 @@ public class ReservationController {
                     requestDTO.getReservationWeek()
             );
 
-            String qrCodeUrl = reservationService.getReservationQrUrl(reservation.getOrderNumber()); // Генерация полного URL
+//            String qrCodeUrl = reservationService.getReservationQrUrl(reservation.getOrderNumber()); // Генерация полного URL
+//
+//            ReservationDTO responseDTO = reservationMapper.toDTO(reservation);
+//            responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ReservationDTO
+//
+//            return ResponseEntity.ok(responseDTO);
+//        } catch (IllegalArgumentException | IOException e) {
+//            return ResponseEntity.badRequest().body(null);
+//        }
 
             ReservationDTO responseDTO = reservationMapper.toDTO(reservation);
-            responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ReservationDTO
+            responseDTO.setQrCode(reservation.getQrCodePath()); // Возвращаем путь к QR-коду
 
             return ResponseEntity.ok(responseDTO);
         } catch (IllegalArgumentException | IOException e) {
             return ResponseEntity.badRequest().body(null);
         }
+
     }
 
 

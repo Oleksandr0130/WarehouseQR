@@ -23,4 +23,6 @@ public class Reservation {
     private String reservationWeek; // Например, "KW22"
     private String status;     // Статус резервации ("RESERVED", "SOLD")
     private LocalDateTime saleDate;
+    private String qrCodePath; // Путь к QR-коду
+
 }

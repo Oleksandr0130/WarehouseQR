@@ -14,4 +14,6 @@ public class Item {
     private String name;
     private int quantity;
     private int sold;
+    private String qrCodePath; // Путь к QR-коду
+
 }
