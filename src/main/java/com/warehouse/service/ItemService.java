@@ -66,12 +66,13 @@ public class ItemService {
             item.setId(UUID.randomUUID().toString());
         }
         Item savedItem = itemRepository.save(item);
-        generateQRCode(item.getId());
+// Генерация QR-кода
+        generateQRCode(savedItem.getId());
 
-        // Передаем URL QR-кода в поле DTO
-        savedItem.setQrCode(getQrCodeUrl(item.getId()));
+        // Установка QR-кода в объект и повторное сохранение
+        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
+        return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
 
-        return savedItem;
     }
 
     public Optional<Item> updateQuantity(String id, int quantity) {

@@ -50,7 +50,13 @@ public class ReservationService {
         String qrCodePath = "reservation/" + orderNumber + ".png";
         QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
 
-        return reservation;
+        // Присваиваем URL QR-кода
+        String qrCodeUrl = getReservationQrUrl(orderNumber);
+        reservation.setQrCode(qrCodeUrl); // Задаем значение qrCode
+
+        // Сохраняем резервацию
+        return reservationRepository.save(reservation);
+
     }
     public String getReservationQrUrl(String orderNumber) {
         return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL
