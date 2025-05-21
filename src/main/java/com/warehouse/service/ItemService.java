@@ -59,32 +59,21 @@ public class ItemService {
         return qrCodeBaseUrl + id + ".png";
     }
 
+
+
     public Item addItem(Item item) {
         if (item.getId() == null || item.getId().isEmpty()) {
             item.setId(UUID.randomUUID().toString());
         }
+        Item savedItem = itemRepository.save(item);
+// Генерация QR-кода
+        generateQRCode(savedItem.getId());
 
-        // Генерация QR-кода в виде байтов
-        byte[] qrCodeBytes = generateQRCode(item.getId());
-        item.setQrCode(qrCodeBytes);
+        // Установка QR-кода в объект и повторное сохранение
+        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
+        return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
 
-        return itemRepository.save(item); // Сохранение объекта вместе с QR-кодом
     }
-
-
-//    public Item addItem(Item item) {
-//        if (item.getId() == null || item.getId().isEmpty()) {
-//            item.setId(UUID.randomUUID().toString());
-//        }
-//        Item savedItem = itemRepository.save(item);
-//// Генерация QR-кода
-//        generateQRCode(savedItem.getId());
-//
-//        // Установка QR-кода в объект и повторное сохранение
-//        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
-//        return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
-//
-//    }
 
     public Optional<Item> updateQuantity(String id, int quantity) {
         Optional<Item> itemOpt = itemRepository.findById(id);

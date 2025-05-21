@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
-import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -25,33 +24,18 @@ public class ItemController {
     private final ItemMapper itemMapper;
 
 
-//    @PostMapping
-//    public ResponseEntity<ItemDTO> addItem(@RequestBody ItemDTO itemDTO) {
-//        var itemEntity = itemMapper.toEntity(itemDTO);
-//        var savedItem = itemService.addItem(itemEntity);
-//
-//        String qrCodeUrl = itemService.getQrCodeUrl(savedItem.getId()); // Генерация полного URL
-//
-//        ItemDTO responseDTO = itemMapper.toDTO(savedItem);
-//        responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ItemDTO
-//
-//        return ResponseEntity.ok(responseDTO);
-//    }
-
     @PostMapping
     public ResponseEntity<ItemDTO> addItem(@RequestBody ItemDTO itemDTO) {
         var itemEntity = itemMapper.toEntity(itemDTO);
         var savedItem = itemService.addItem(itemEntity);
 
-        // Конвертация байтов QR-кода в Base64
-        String qrCodeBase64 = Base64.getEncoder().encodeToString(savedItem.getQrCode());
+        String qrCodeUrl = itemService.getQrCodeUrl(savedItem.getId()); // Генерация полного URL
 
         ItemDTO responseDTO = itemMapper.toDTO(savedItem);
-        responseDTO.setQrCode(qrCodeBase64); // Устанавливаем строку base64 в поле qrCode
+        responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ItemDTO
 
         return ResponseEntity.ok(responseDTO);
     }
-
 
 
     @PutMapping("/{id}/add")
