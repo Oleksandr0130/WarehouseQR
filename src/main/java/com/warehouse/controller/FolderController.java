@@ -28,7 +28,7 @@ public class FolderController {
         return List.of();
     }
 
-    @GetMapping("/reservation")
+    @GetMapping("/qrcodes/reservation")
     public List<String> listReservations() {
         File folder = new File("./reservation");
         if (folder.exists() && folder.isDirectory()) {
@@ -36,7 +36,7 @@ public class FolderController {
             if (files != null) {
                 return Stream.of(files)
                         .filter(file -> !file.isDirectory())
-                        .map(file -> "/reservation/" + file.getName())
+                        .map(file -> "/qrcodes/reservation/" + file.getName())
                         .collect(Collectors.toList());
             }
         }
