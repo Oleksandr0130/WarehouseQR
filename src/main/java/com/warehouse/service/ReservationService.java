@@ -19,8 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReservationService {
 
-    private static final String QR_PATH = "qrcodes/"; // Добавляем путь к папке с QR-кодами
-
     private final ReservationRepository reservationRepository;
     private final ItemRepository itemRepository;
 
@@ -48,17 +46,11 @@ public class ReservationService {
         reservation.setStatus("RESERVED");
         reservationRepository.save(reservation);
 
-//        // Генерируем QR-код
-//        String qrCodePath = "reservation/" + orderNumber + ".png";
-//        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
-//
-//        return reservation;
-        String qrPath = QR_PATH + "reservation/" + orderNumber + ".png";
-        QRCodeGenerator.generateQRCode(orderNumber, qrPath);
-        reservation.setQrCodePath(qrPath); // Устанавливаем путь к QR-коду
+        // Генерируем QR-код
+        String qrCodePath = "reservation/" + orderNumber + ".png";
+        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
 
-        return reservationRepository.save(reservation);
-
+        return reservation;
     }
     public String getReservationQrUrl(String orderNumber) {
         return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL

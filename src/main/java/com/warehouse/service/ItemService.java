@@ -57,26 +57,14 @@ public class ItemService {
     }
 
 
-//    public Item addItem(Item item) {
-//        if (item.getId() == null || item.getId().isEmpty()) {
-//            item.setId(UUID.randomUUID().toString());
-//        }
-//        Item savedItem = itemRepository.save(item);
-//        generateQRCode(item.getId());
-//        return savedItem;
-//    }
-
     public Item addItem(Item item) {
         if (item.getId() == null || item.getId().isEmpty()) {
             item.setId(UUID.randomUUID().toString());
         }
         Item savedItem = itemRepository.save(item);
-
-        String qrPath = generateQRCode(item.getId());
-        savedItem.setQrCodePath(qrPath); // Сохраняем путь к QR-коду
-        return itemRepository.save(savedItem);
+        generateQRCode(item.getId());
+        return savedItem;
     }
-
 
     public Optional<Item> updateQuantity(String id, int quantity) {
         Optional<Item> itemOpt = itemRepository.findById(id);
@@ -136,13 +124,13 @@ public class ItemService {
     }
 
 
-    private String generateQRCode(String id) {
+    private void generateQRCode(String id) {
         try {
-//            // Создаем полный путь до папки, включая вложенные директории
-//            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
-//            if (qrFolderPath != null) {
-//                Files.createDirectories(qrFolderPath);
-//            }
+            // Создаем полный путь до папки, включая вложенные директории
+            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
+            if (qrFolderPath != null) {
+                Files.createDirectories(qrFolderPath);
+            }
 
             // Формируем полный путь к файлу
             String filePath = QR_PATH + id + ".png";
@@ -152,7 +140,7 @@ public class ItemService {
             BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
             Path path = Paths.get(filePath);
             MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-            return filePath;
+
         } catch (WriterException | IOException e) {
             throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
         }
