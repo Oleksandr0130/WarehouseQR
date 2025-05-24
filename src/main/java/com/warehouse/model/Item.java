@@ -1,5 +1,6 @@
 package com.warehouse.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
@@ -16,5 +17,10 @@ public class Item {
     private int quantity;
     private int sold;
     private String qrCode; // Ссылка на QR-код товара
+
+    @Lob
+    @Column(columnDefinition = "BLOB") // Хранение изображения как BLOB
+    private byte[] qrCodeImage; // Поле для хранения массива байтов изображения QR-кода
+
 
 }

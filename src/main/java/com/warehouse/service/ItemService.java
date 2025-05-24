@@ -57,18 +57,43 @@ public class ItemService {
     }
 
 
-    public Item addItem(Item item) {
-        if (item.getId() == null || item.getId().isEmpty()) {
-            item.setId(UUID.randomUUID().toString());
-        }
-        Item savedItem = itemRepository.save(item);
-        // Генерация QR-кода
-        generateQRCode(savedItem.getId());
+//    public Item addItem(Item item) {
+//        if (item.getId() == null || item.getId().isEmpty()) {
+//            item.setId(UUID.randomUUID().toString());
+//        }
+//        Item savedItem = itemRepository.save(item);
+//        // Генерация QR-кода
+//        generateQRCode(savedItem.getId());
+//
+//        // Установка QR-кода в объект и повторное сохранение
+//        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
+//        return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
+//
+//    }
+public Item addItem(Item item) {
+    if (item.getId() == null || item.getId().isEmpty()) {
+        item.setId(UUID.randomUUID().toString());
+    }
 
-        // Установка QR-кода в объект и повторное сохранение
-        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
-        return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
+    Item savedItem = itemRepository.save(item);
 
+    // Генерация QR-кода как массива байтов
+    byte[] qrCodeData = generateQRCode(savedItem.getId());
+
+    // Сохраняем изображение QR-кода в объект
+    savedItem.setQrCodeImage(qrCodeData);
+
+    // Также можно сохранить URL (при необходимости)
+    savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
+
+    return itemRepository.save(savedItem); // Сохраняем с изображением в БД
+}
+
+    public byte[] getQrCodeImage(String itemId) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found for ID: " + itemId));
+
+        return item.getQrCodeImage(); // Возвращаем массив байтов изображения QR-кода
     }
 
     public Optional<Item> updateQuantity(String id, int quantity) {
@@ -129,27 +154,42 @@ public class ItemService {
     }
 
 
-    private void generateQRCode(String id) {
-        try {
-            // Создаем полный путь до папки, включая вложенные директории
-            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
-            if (qrFolderPath != null) {
-                Files.createDirectories(qrFolderPath);
-            }
+//    private void generateQRCode(String id) {
+//        try {
+//            // Создаем полный путь до папки, включая вложенные директории
+//            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
+//            if (qrFolderPath != null) {
+//                Files.createDirectories(qrFolderPath);
+//            }
+//
+//            // Формируем полный путь к файлу
+//            String filePath = QR_PATH + id + ".png";
+//
+//            // Генерация и сохранение QR-кода
+//            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+//            BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
+//            Path path = Paths.get(filePath);
+//            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
+//
+//        } catch (WriterException | IOException e) {
+//            throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
+//        }
+//    }
+private byte[] generateQRCode(String text) {
+    try (ByteArrayOutputStream stream = new ByteArrayOutputStream()) {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 200, 200);
 
-            // Формируем полный путь к файлу
-            String filePath = QR_PATH + id + ".png";
+        // Генерация изображения QR-кода в поток
+        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", stream);
 
-            // Генерация и сохранение QR-кода
-            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
-            Path path = Paths.get(filePath);
-            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-
-        } catch (WriterException | IOException e) {
-            throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
-        }
+        // Возвращаем сгенерированный массив байтов
+        return stream.toByteArray();
+    } catch (WriterException | IOException e) {
+        throw new RuntimeException("Failed to generate QR code: " + e.getMessage(), e);
     }
+}
+
 
     public InputStream generateExcelFile(List<Item> items) {
         try (Workbook workbook = new XSSFWorkbook()) {

@@ -11,6 +11,7 @@ public class ItemDTO {
     private int quantity;
     private int sold;
     private String qrCode; // Новое поле для URL QR-кода
+    private byte[] qrCodeImage; // Массив байтов QR-кода
 
 }
 
