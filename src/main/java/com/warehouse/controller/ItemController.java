@@ -104,13 +104,4 @@ public class ItemController {
                 .body(new InputStreamResource(excelFile));
     }
 
-    @GetMapping("/{id}/qrcode")
-    public ResponseEntity<byte[]> getQrCode(@PathVariable String id) {
-        byte[] qrCodeImage = itemService.getQrCodeImage(id);
-
-        return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_PNG) // Возвращаем изображение PNG
-                .body(qrCodeImage);
-    }
-
 }
