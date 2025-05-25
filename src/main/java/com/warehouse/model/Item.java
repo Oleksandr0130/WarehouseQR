@@ -15,9 +15,6 @@ public class Item {
     private String name;
     private int quantity;
     private int sold;
-    private String qrCodeUrl; // Ссылка на QR-код товара
-
-    @Lob // Хранение бинарных данных в базе
-    private byte[] qrCodeImage; // Массив байтов для хранения изображения QR-кода
+    private String qrCode; // Ссылка на QR-код товара
 
 }
