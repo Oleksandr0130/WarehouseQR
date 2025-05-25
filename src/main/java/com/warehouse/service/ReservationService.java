@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -26,62 +25,39 @@ public class ReservationService {
     @Value("${app.reservation-base-url}")
     private String reservationBaseUrl; // Значение из application.yml
 
-//    /**
-//     * Создание резервации
-//     */
-//    public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
-//        // Поиск товара в базе данных
-//        Item item = itemRepository.findByName(itemName).orElseThrow(() ->
-//                new IllegalArgumentException("Item not found: " + itemName));
-//
-//        // Уменьшаем количество товара
-//        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
-//        itemRepository.save(item);
-//
-//        // Создаем резервацию
-//        Reservation reservation = new Reservation();
-//        reservation.setOrderNumber(orderNumber);
-//        reservation.setItemName(itemName);
-//        reservation.setReservedQuantity(quantity);
-//        reservation.setReservationWeek(reservationWeek);
-//        reservation.setStatus("RESERVED");
-//        reservationRepository.save(reservation);
-//
-//        // Генерируем QR-код
-//        String qrCodePath = "reservation/" + orderNumber + ".png";
-//        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
-//
-//        // Присваиваем URL QR-кода
-//        String qrCodeUrl = getReservationQrUrl(orderNumber);
-//        reservation.setQrCode(qrCodeUrl); // Задаем значение qrCode
-//
-//        // Сохраняем резервацию
-//        return reservationRepository.save(reservation);
-//
-//    }
+    /**
+     * Создание резервации
+     */
+    public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
+        // Поиск товара в базе данных
+        Item item = itemRepository.findByName(itemName).orElseThrow(() ->
+                new IllegalArgumentException("Item not found: " + itemName));
 
-    @Transactional
-    public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) {
-        Item item = itemRepository.findByName(itemName)
-                .orElseThrow(() -> new NoSuchElementException("Item not found: " + itemName));
-
-        item.setQuantity(item.getQuantity() - quantity);
+        // Уменьшаем количество товара
+        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
         itemRepository.save(item);
 
+        // Создаем резервацию
         Reservation reservation = new Reservation();
         reservation.setOrderNumber(orderNumber);
         reservation.setItemName(itemName);
         reservation.setReservedQuantity(quantity);
         reservation.setReservationWeek(reservationWeek);
         reservation.setStatus("RESERVED");
+        reservationRepository.save(reservation);
 
-        // Генерация QR-кода в формате байтов
-        reservation.setQrCode(QRCodeGenerator.generateQRCode(orderNumber));
+        // Генерируем QR-код
+        String qrCodePath = "reservation/" + orderNumber + ".png";
+        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
 
+        // Присваиваем URL QR-кода
+        String qrCodeUrl = getReservationQrUrl(orderNumber);
+        reservation.setQrCode(qrCodeUrl); // Задаем значение qrCode
+
+        // Сохраняем резервацию
         return reservationRepository.save(reservation);
+
     }
-
-
     public String getReservationQrUrl(String orderNumber) {
         return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL
     }

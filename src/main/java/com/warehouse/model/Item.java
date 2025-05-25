@@ -15,8 +15,6 @@ public class Item {
     private String name;
     private int quantity;
     private int sold;
-    @Lob
-    private byte[] qrCode; // QR-код товара в формате BLOB
-
+    private String qrCode; // Ссылка на QR-код товара
 
 }
