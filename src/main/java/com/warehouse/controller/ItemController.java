@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -29,10 +30,12 @@ public class ItemController {
         var itemEntity = itemMapper.toEntity(itemDTO);
         var savedItem = itemService.addItem(itemEntity);
 
-        String qrCodeUrl = itemService.getQrCodeUrl(savedItem.getId()); // Генерация полного URL
+        // Кодирование qrCode в Base64
+        String base64QrCode = Base64.getEncoder().encodeToString(savedItem.getQrCode());
 
         ItemDTO responseDTO = itemMapper.toDTO(savedItem);
-        responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ItemDTO
+        responseDTO.setQrCodeBase64(base64QrCode); // Устанавливаем qrCode в формате Base64
+
 
         return ResponseEntity.ok(responseDTO);
     }
