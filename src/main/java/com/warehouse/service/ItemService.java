@@ -10,6 +10,7 @@ import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.repository.ItemRepository;
 import com.warehouse.repository.ReservationRepository;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
+import com.warehouse.utils.QRCodeGenerator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -61,15 +62,13 @@ public class ItemService {
         if (item.getId() == null || item.getId().isEmpty()) {
             item.setId(UUID.randomUUID().toString());
         }
-        Item savedItem = itemRepository.save(item);
-        // Генерация QR-кода
-        generateQRCode(savedItem.getId());
 
-        // Установка QR-кода в объект и повторное сохранение
-        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
-        return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
+        // Генерация QR-кода как массива байтов
+        item.setQrCode(QRCodeGenerator.generateQRCode(item.getId()));
 
+        return itemRepository.save(item);
     }
+
 
     public Optional<Item> updateQuantity(String id, int quantity) {
         Optional<Item> itemOpt = itemRepository.findById(id);
