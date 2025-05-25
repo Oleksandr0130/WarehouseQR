@@ -2,18 +2,21 @@ package com.warehouse.controller;
 
 import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
+import com.warehouse.repository.ItemRepository;
 import com.warehouse.service.ItemService;
 import com.warehouse.utils.ItemComparator;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/items")
@@ -22,6 +25,26 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
     private final ItemMapper itemMapper;
+    private final ItemRepository itemRepository;
+
+
+    @GetMapping("/{id}/qrcode")
+    public ResponseEntity<byte[]> getQRCode(@PathVariable String id) {
+        Optional<Item> itemOpt = itemRepository.findById(id);
+        if (itemOpt.isPresent()) {
+            Item item = itemOpt.get();
+
+            // Проверяем, есть ли изображение QR-кода
+            if (item.getQrCodeImage() != null) {
+                HttpHeaders headers = new HttpHeaders();
+                headers.add("Content-Type", "image/png");
+                return new ResponseEntity<>(item.getQrCodeImage(), headers, HttpStatus.OK);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
 
 
     @PostMapping
