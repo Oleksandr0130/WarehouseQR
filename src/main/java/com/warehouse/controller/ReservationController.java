@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -32,16 +31,13 @@ public class ReservationController {
                     requestDTO.getReservationWeek()
             );
 
-            // Кодирование qrCode в Base64
-            String base64QrCode = Base64.getEncoder().encodeToString(reservation.getQrCode());
+            String qrCodeUrl = reservationService.getReservationQrUrl(reservation.getOrderNumber()); // Генерация полного URL
 
             ReservationDTO responseDTO = reservationMapper.toDTO(reservation);
-            responseDTO.setQrCodeBase64(base64QrCode); // Устанавливаем qrCode в формате Base64
-
-
+            responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ReservationDTO
 
             return ResponseEntity.ok(responseDTO);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | IOException e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
