@@ -81,13 +81,11 @@ public Item addItem(Item item) {
     }
     Item savedItem = itemRepository.save(item);
 
-    // Генерация QR-кода и сохранение в поле `qrCode`
     byte[] qrCodeBytes = generateQRCodeAsBytes(savedItem.getId());
-    savedItem.setQrCode(qrCodeBytes);
-
-    // Повторное сохранение для обновления QR-кода в базе
+    savedItem.setQrCode(qrCodeBytes); // Сохранение QR-кода
     return itemRepository.save(savedItem);
 }
+
 
 
     public Optional<Item> updateQuantity(String id, int quantity) {
