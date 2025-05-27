@@ -6,6 +6,7 @@ import com.warehouse.service.ItemService;
 import com.warehouse.utils.ItemComparator;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -36,6 +37,19 @@ public class ItemController {
 
         return ResponseEntity.ok(responseDTO);
     }
+
+    // Новый endpoint: скачивание QR-кода
+    @GetMapping("/{id}/download-qrcode")
+    public ResponseEntity<ByteArrayResource> downloadQRCode(@PathVariable String id) {
+        byte[] qrCodeBytes = itemService.getQRCode(id);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + id + ".png")
+                .contentType(MediaType.IMAGE_PNG)
+                .contentLength(qrCodeBytes.length)
+                .body(new ByteArrayResource(qrCodeBytes));
+    }
+
 
 
     @PutMapping("/{id}/add")

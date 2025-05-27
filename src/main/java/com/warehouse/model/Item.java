@@ -15,6 +15,7 @@ public class Item {
     private String name;
     private int quantity;
     private int sold;
-    private String qrCode; // Ссылка на QR-код товара
-
+    @Lob // Для хранения больших данных, добавляем аннотацию
+    private byte[] qrCode; // QR-код теперь хранится как массив байт
 }
+
