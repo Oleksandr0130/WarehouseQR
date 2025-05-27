@@ -55,7 +55,9 @@ private String qrCodeBaseUrl; // Значение из application.yml
 
 
     public String getQrCodeUrl(String id) {
-        return qrCodeBaseUrl + id + ".png"; // Формирование полного URL
+//        return qrCodeBaseUrl + id + ".png"; // Формирование полного URL
+        throw new UnsupportedOperationException("QR-коды хранятся в базе данных в формате Base64. Используйте Base64 строку.");
+
     }
 
 

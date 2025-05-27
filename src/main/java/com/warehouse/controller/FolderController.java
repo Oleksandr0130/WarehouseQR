@@ -13,20 +13,20 @@ import java.util.stream.Stream;
 @RequestMapping("/folders")
 public class FolderController {
 
-    @GetMapping("/qrcodes")
-    public List<String> listQRCodes() {
-        File folder = new File("./qrcodes");
-        if (folder.exists() && folder.isDirectory()) {
-            File[] files = folder.listFiles();
-            if (files != null) {
-                return Stream.of(files)
-                        .filter(file -> !file.isDirectory())
-                        .map(file -> "/qrcodes/" + file.getName())
-                        .collect(Collectors.toList());
-            }
-        }
-        return List.of();
-    }
+//    @GetMapping("/qrcodes")
+//    public List<String> listQRCodes() {
+//        File folder = new File("./qrcodes");
+//        if (folder.exists() && folder.isDirectory()) {
+//            File[] files = folder.listFiles();
+//            if (files != null) {
+//                return Stream.of(files)
+//                        .filter(file -> !file.isDirectory())
+//                        .map(file -> "/qrcodes/" + file.getName())
+//                        .collect(Collectors.toList());
+//            }
+//        }
+//        return List.of();
+//    }
 
     @GetMapping("/reservation")
     public List<String> listReservations() {
