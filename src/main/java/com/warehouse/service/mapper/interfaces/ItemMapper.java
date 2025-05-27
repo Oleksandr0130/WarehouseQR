@@ -4,6 +4,7 @@ import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 import org.mapstruct.ReportingPolicy;
 
 import java.util.Base64;
@@ -11,6 +12,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface ItemMapper {
+
     @Mapping(source = "qrCode", target = "qrCode", qualifiedByName = "mapQrCodeToString")
     ItemDTO toDTO(Item item);
 
@@ -19,7 +21,8 @@ public interface ItemMapper {
 
     List<ItemDTO> toDTOList(List<Item> items);
 
-    // Метод для преобразования byte[] в Base64 String (для DTO)
+    // Метод для преобразования byte[] в Base64 String (помечаем @Named!)
+    @Named("mapQrCodeToString")
     default String mapQrCodeToString(byte[] qrCode) {
         if (qrCode == null) {
             return null;
@@ -27,13 +30,14 @@ public interface ItemMapper {
         return Base64.getEncoder().encodeToString(qrCode);
     }
 
-    // Метод для преобразования Base64 String в byte[] (для сущности Item)
+    // Метод для преобразования Base64 String в byte[] (помечаем @Named!)
+    @Named("mapStringToQrCode")
     default byte[] mapStringToQrCode(String qrCode) {
         if (qrCode == null) {
             return null;
         }
         return Base64.getDecoder().decode(qrCode);
     }
-
 }
+
 
