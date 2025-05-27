@@ -34,7 +34,7 @@ public class ReservationService {
                 new IllegalArgumentException("Item not found: " + itemName));
 
         // Уменьшаем количество товара
-        item.setQuantity(item.getQuantity() - quantity); // Позволяем указывать отрицательные значения
+        item.setQuantity(item.getQuantity() - quantity);
         itemRepository.save(item);
 
         // Создаем резервацию
@@ -46,18 +46,15 @@ public class ReservationService {
         reservation.setStatus("RESERVED");
         reservationRepository.save(reservation);
 
-        // Генерируем QR-код
-        String qrCodePath = "reservation/" + orderNumber + ".png";
-        QRCodeGenerator.generateQRCode(orderNumber, qrCodePath);
-
-        // Присваиваем URL QR-кода
-        String qrCodeUrl = getReservationQrUrl(orderNumber);
-        reservation.setQrCode(qrCodeUrl); // Задаем значение qrCode
+        // Генерация QR-кода
+        byte[] qrCodeBytes = QRCodeGenerator.generateQRCodeAsBytes(orderNumber); // Генерация байт
+        String qrCodeBase64 = java.util.Base64.getEncoder().encodeToString(qrCodeBytes); // Конвертация в Base64
+        reservation.setQrCode(qrCodeBase64); // Сохранение Base64-кода в поле
 
         // Сохраняем резервацию
         return reservationRepository.save(reservation);
-
     }
+
     public String getReservationQrUrl(String orderNumber) {
         return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL
     }

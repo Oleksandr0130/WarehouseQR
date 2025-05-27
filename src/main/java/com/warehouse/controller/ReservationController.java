@@ -31,16 +31,18 @@ public class ReservationController {
                     requestDTO.getReservationWeek()
             );
 
-            String qrCodeUrl = reservationService.getReservationQrUrl(reservation.getOrderNumber()); // Генерация полного URL
+            // Генерация QR-кода как Base64
+            String qrCodeBase64 = reservation.getQrCode(); // Получаем уже закодированный QR-код
 
             ReservationDTO responseDTO = reservationMapper.toDTO(reservation);
-            responseDTO.setQrCode(qrCodeUrl); // Убедитесь, что поле qrCode существует в ReservationDTO
+            responseDTO.setQrCode(qrCodeBase64); // Устанавливаем Base64-код в DTO
 
             return ResponseEntity.ok(responseDTO);
         } catch (IllegalArgumentException | IOException e) {
             return ResponseEntity.badRequest().body(null);
         }
     }
+
 
 
     @PostMapping("/reservations")
