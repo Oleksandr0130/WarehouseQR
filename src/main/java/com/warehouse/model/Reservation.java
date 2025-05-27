@@ -21,7 +21,7 @@ public class Reservation {
     private String status;     // Статус резервации ("RESERVED", "SOLD")
     private LocalDateTime saleDate;
     @Lob // Для хранения длинных строк (Base64 содержимого QR-кода)
-    private String qrCode; // QR-код резервации в формате Base64
+    private byte[] qrCode; // QR-код резервации в формате Base64
 
 
 }

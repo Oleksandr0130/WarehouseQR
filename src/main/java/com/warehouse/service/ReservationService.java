@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -28,12 +29,17 @@ public class ReservationService {
     /**
      * Создание резервации
      */
+    @Transactional // Обеспечивает транзакционность для работы с LOB
     public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
-        // Поиск товара в базе данных
+        // Поиск товара
         Item item = itemRepository.findByName(itemName).orElseThrow(() ->
                 new IllegalArgumentException("Item not found: " + itemName));
 
-        // Уменьшаем количество товара
+        // Проверяем, хватает ли количества на складе
+        if (item.getQuantity() < quantity) {
+            throw new IllegalStateException("Not enough quantity available for item: " + itemName);
+        }
+
         item.setQuantity(item.getQuantity() - quantity);
         itemRepository.save(item);
 
@@ -44,16 +50,20 @@ public class ReservationService {
         reservation.setReservedQuantity(quantity);
         reservation.setReservationWeek(reservationWeek);
         reservation.setStatus("RESERVED");
-        reservationRepository.save(reservation);
 
         // Генерация QR-кода
-        byte[] qrCodeBytes = QRCodeGenerator.generateQRCodeAsBytes(orderNumber); // Генерация байт
-        String qrCodeBase64 = java.util.Base64.getEncoder().encodeToString(qrCodeBytes); // Конвертация в Base64
-        reservation.setQrCode(qrCodeBase64); // Сохранение Base64-кода в поле
+        try {
+            byte[] qrCodeBytes = QRCodeGenerator.generateQRCodeAsBytes(orderNumber); // Генерируем массив байтов
+            reservation.setQrCode(qrCodeBytes); // Сохраняем как byte[]
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate QR code for reservation: " + orderNumber, e);
+        }
 
         // Сохраняем резервацию
         return reservationRepository.save(reservation);
     }
+
+
 
     public String getReservationQrUrl(String orderNumber) {
         return reservationBaseUrl + orderNumber + ".png"; // Формирование полного URL
