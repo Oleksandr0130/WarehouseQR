@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,14 +44,18 @@ public class ItemController {
     // Новый endpoint: скачивание QR-кода
     @GetMapping("/{id}/download-qrcode")
     public ResponseEntity<ByteArrayResource> downloadQRCode(@PathVariable String id) {
-        byte[] qrCodeBytes = itemService.getQRCode(id);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + id + ".png")
-                .contentType(MediaType.IMAGE_PNG)
-                .contentLength(qrCodeBytes.length)
-                .body(new ByteArrayResource(qrCodeBytes));
+        try {
+            byte[] qrCodeBytes = itemService.getQRCode(id);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + id + ".png")
+                    .contentType(MediaType.IMAGE_PNG)
+                    .contentLength(qrCodeBytes.length)
+                    .body(new ByteArrayResource(qrCodeBytes));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Вернуть 404, если QR-код не найден
+        }
     }
+
 
 
 
