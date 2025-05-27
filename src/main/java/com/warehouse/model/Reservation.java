@@ -1,9 +1,6 @@
 package com.warehouse.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -23,6 +20,8 @@ public class Reservation {
     private String reservationWeek; // Например, "KW22"
     private String status;     // Статус резервации ("RESERVED", "SOLD")
     private LocalDateTime saleDate;
-    private String qrCode; // Ссылка на QR-код резервации
+    @Lob // Для хранения длинных строк (Base64 содержимого QR-кода)
+    private String qrCode; // QR-код резервации в формате Base64
+
 
 }
