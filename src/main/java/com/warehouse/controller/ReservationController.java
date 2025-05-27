@@ -6,6 +6,7 @@ import com.warehouse.model.dto.ReservationRequestDTO;
 import com.warehouse.service.ReservationService;
 import com.warehouse.service.mapper.interfaces.ReservationMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -118,5 +119,28 @@ public class ReservationController {
         List<Reservation> soldReservations = reservationService.getSoldReservations();
         return ResponseEntity.ok(reservationMapper.toDTOList(soldReservations));
     }
+
+    @GetMapping("/{id}/download-qrcode")
+    public ResponseEntity<byte[]> downloadQrCode(@PathVariable Long id) {
+        try {
+            // Получаем резервацию по ID
+            Reservation reservation = reservationService.getReservationById(id);
+
+            if (reservation == null || reservation.getQrCode() == null) {
+                // Если резервация не найдена или QR-код отсутствует
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            // Возвращаем QR-код как бинарный файл
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, "image/png") // MIME-тип — PNG
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            String.format("attachment; filename=%s_qrcode.png", reservation.getOrderNumber())) // Название файла с использованием orderNumber
+                    .body(reservation.getQrCode());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
 
 }

@@ -225,4 +225,10 @@ public class ReservationService {
                 .toList();
     }
 
+    public Reservation getReservationById(Long id) {
+        // Используем ReservationRepository для поиска резервации по ID
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + id));
+    }
+
 }
