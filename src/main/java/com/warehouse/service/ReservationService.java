@@ -231,8 +231,4 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + id));
     }
 
-    public List<Reservation> searchReservationsByItemName(String searchQuery) {
-        return reservationRepository.findByItemNameContainingIgnoreCase(searchQuery);
-    }
-
 }

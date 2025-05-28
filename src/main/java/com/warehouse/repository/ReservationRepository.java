@@ -22,6 +22,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT SUM(r.reservedQuantity) FROM Reservation r WHERE r.itemName = :itemName AND r.status = 'SOLD'")
     Optional<Integer> getTotalSoldQuantityForItem(@Param("itemName") String itemName);
 
-    @Query("SELECT r FROM Reservation r WHERE LOWER(r.itemName) LIKE LOWER(CONCAT('%', :searchQuery, '%'))")
-    List<Reservation> findByItemNameContainingIgnoreCase(@Param("searchQuery") String searchQuery);
 }

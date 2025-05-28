@@ -43,11 +43,7 @@ public class ReservationController {
         }
     }
 
-    @GetMapping("/search/by-item-name")
-    public ResponseEntity<List<ReservationDTO>> searchReservationsByItemName(@RequestParam String itemName) {
-        List<Reservation> reservations = reservationService.searchReservationsByItemName(itemName);
-        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
-    }
+
 
 
     @PostMapping("/reservations")
