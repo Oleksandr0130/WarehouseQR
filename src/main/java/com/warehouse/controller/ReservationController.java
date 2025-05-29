@@ -93,9 +93,18 @@ public class ReservationController {
 
     @GetMapping("/search/by-order-prefix")
     public ResponseEntity<List<ReservationDTO>> getReservationsByOrderPrefix(@RequestParam String orderPrefix) {
+        if (orderPrefix == null || orderPrefix.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(List.of());
+        }
+
         List<Reservation> reservations = reservationService.getReservationsByOrderPrefix(orderPrefix);
+        if (reservations.isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+
         return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
     }
+
 
 
     @DeleteMapping("/{id}")
