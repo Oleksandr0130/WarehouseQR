@@ -100,8 +100,6 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteReservation(@PathVariable Long id) {
-        System.out.println("Получен ID для удаления: " + id); // Лог перед вызовом сервиса.
-
         try {
             Reservation removedReservation = reservationService.deleteReservation(id);
             String responseMessage = String.format(
@@ -112,7 +110,6 @@ public class ReservationController {
             );
             return ResponseEntity.ok(responseMessage);
         } catch (RuntimeException ex) {
-            System.out.println("Ошибка удаления резервации: " + ex.getMessage()); // Лог ошибки
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
