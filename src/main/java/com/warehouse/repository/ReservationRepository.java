@@ -14,8 +14,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     // Новый метод: Поиск по неделе с сортировкой по имени товара
     List<Reservation> findByReservationWeekOrderByItemName(String reservationWeek);
 
-    @Query("SELECT r FROM Reservation r WHERE r.orderNumber LIKE :orderPrefix%")
+    @Query("SELECT r FROM Reservation r WHERE r.orderNumber LIKE CONCAT(:orderPrefix, '%')")
     List<Reservation> findByOrderNumberStartingWith(@Param("orderPrefix") String orderPrefix);
+
 
     Optional<Reservation> findByOrderNumber(String orderNumber);
 
