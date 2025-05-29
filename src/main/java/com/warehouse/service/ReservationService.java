@@ -188,6 +188,7 @@ public class ReservationService {
     /**
      * Удаление резервации и возврат списанного количества на склад
      */
+    @Transactional
     public Reservation deleteReservation(Long reservationId) {
         // Найти резервацию по ID
         Reservation reservation = reservationRepository.findById(reservationId)
