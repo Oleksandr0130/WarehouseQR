@@ -169,10 +169,12 @@ public class ReservationService {
     /**
      * Получение резерваций за конкретную неделю
      */
+    @Transactional
     public List<Reservation> getReservationsByWeek(String reservationWeek) {
         return reservationRepository.findByReservationWeek(reservationWeek);
     }
 
+    @Transactional
     public List<Reservation> getReservationsByOrderPrefix(String orderPrefix) {
         return reservationRepository.findByOrderNumberStartingWith(orderPrefix);
     }
@@ -181,6 +183,7 @@ public class ReservationService {
     /**
      * Получение зарезервированных товаров за неделю с сортировкой по имени.
      */
+    @Transactional
     public List<Reservation> getSortedReservationsByWeek(String reservationWeek) {
         return reservationRepository.findByReservationWeekOrderByItemName(reservationWeek);
     }
