@@ -17,6 +17,6 @@ public class FrontendController {
 
     @GetMapping(value = {"/api", "/api/{path:^(?!api$).*$}", "/api/{path:^(?!api$).*$}/**"})
     public String redirect() {
-        return "forward:/index.html";
+        return "forward:/api/index.html";
     }
 }
