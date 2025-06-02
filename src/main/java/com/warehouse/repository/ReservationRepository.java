@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Query("SELECT r FROM Reservation r WHERE r.reservationWeek = :reservationWeek AND r.status = 'RESERVED'")
     List<Reservation> findByReservationWeek(String reservationWeek);
 
     // Новый метод: Поиск по неделе с сортировкой по имени товара
+    @Query("SELECT r FROM Reservation r WHERE r.reservationWeek = :reservationWeek AND r.status = 'RESERVED' ORDER BY r.itemName")
     List<Reservation> findByReservationWeekOrderByItemName(String reservationWeek);
 
     @Query("SELECT r FROM Reservation r WHERE r.orderNumber LIKE CONCAT(:orderPrefix, '%') AND r.status = 'RESERVED'")
