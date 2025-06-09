@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 //    }
 //}
 @Controller
+@RequestMapping("/")
 public class FrontendController {
 
-    @RequestMapping(value = { "/", "/{path:^(?!api).*}" })
+    @GetMapping(value = {"/", "/**/{[path:[^\\.]*}"})
     public String index() {
+        // Перенаправляем запросы к React
         return "forward:/index.html";
     }
 }
