@@ -17,9 +17,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/")
 public class FrontendController {
 
-    @GetMapping(value = {"/", "/**/{[path:[^\\.]*}"})
+    @RequestMapping(value = { "/", "/{path:^((?!\\.).)*$}" })
     public String index() {
-        // Перенаправляем запросы к React
         return "forward:/index.html";
     }
+
 }
