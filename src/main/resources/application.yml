@@ -10,6 +10,7 @@ spring:
     properties:
       hibernate:
         auto_quote_keyword: true
+    # Автоматическое создание и обновление таблиц по мере изменения модели
     hibernate:
       ddl-auto: update
   liquibase:
@@ -29,15 +30,14 @@ spring:
             protocol: TLSv1.2
             trust: smtp.gmail.com
           debug: true
-  web:
-    resources:
-      static-locations: classpath:/static/ # Современное свойство для статического контента
   main:
     allow-bean-definition-overriding: true
 app:
-  base-url: /
-  qrcode-base-url: /api/qrcodes/
-  reservation-base-url: /api/reservation/
+  qrcode-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/qrcodes/
+  reservation-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/reservation/
+server:
+  servlet:
+    context-path: /api
 
 key:
   access: ${KEY_ACCESS}

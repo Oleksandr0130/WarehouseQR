@@ -2,7 +2,6 @@ package com.warehouse.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 
 //@Controller
 //public class FrontendController {
@@ -14,12 +13,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 //    }
 //}
 @Controller
-@RequestMapping("/")
 public class FrontendController {
 
-    @RequestMapping(value = { "/", "/{path:^((?!\\.).)*$}" })
-    public String index() {
+    @GetMapping(value = {"/api", "/api/{path:^(?!api$).*$}", "/api/{path:^(?!api$).*$}/**"})
+    public String redirect() {
         return "forward:/index.html";
     }
-
 }
