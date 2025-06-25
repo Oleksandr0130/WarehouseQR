@@ -27,17 +27,22 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody UserRegistrationDTO registrationDTO) {
+        // Проверка уникальности пользователя по username
         if (userRepository.existsByUsername(registrationDTO.getUsername())) {
             return ResponseEntity.badRequest().body("Пользователь с таким именем уже существует.");
         }
 
+        // Проверка уникальности пользователя по email
         if (userRepository.existsByEmail(registrationDTO.getEmail())) {
             return ResponseEntity.badRequest().body("Пользователь с таким email уже существует.");
         }
 
+        // Передаём логику регистрации (включая привязку компании) в UserService
         userService.registerUser(registrationDTO);
+
         return ResponseEntity.ok("Регистрация завершена. Проверьте email для активации учётной записи.");
     }
+
 
 //    @PostMapping("/login")
 //    public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
