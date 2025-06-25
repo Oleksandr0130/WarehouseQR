@@ -1,17 +1,13 @@
 package com.warehouse.service;
 
-import com.warehouse.model.Company;
 import com.warehouse.model.Item;
 import com.warehouse.model.Reservation;
-import com.warehouse.model.User;
-import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.ItemRepository;
 import com.warehouse.repository.ReservationRepository;
 import com.warehouse.utils.QRCodeGenerator;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -26,7 +22,6 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ItemRepository itemRepository;
-    private final CompanyRepository companyRepository; // Добавляем зависимость
 
     @Value("${app.reservation-base-url}")
     private String reservationBaseUrl; // Значение из application.yml
@@ -34,13 +29,19 @@ public class ReservationService {
     /**
      * Создание резервации
      */
-    @Transactional
+    @Transactional // Обеспечивает транзакционность для работы с LOB
     public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
-        Long companyId = getCurrentUserCompanyId();
+        // Поиск товара
+        Item item = itemRepository.findByName(itemName).orElseThrow(() ->
+                new IllegalArgumentException("Item not found: " + itemName));
 
-        // Поиск компании пользователя
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new IllegalArgumentException("Компания не найдена."));
+        // Проверяем, хватает ли количества на складе
+        if (item.getQuantity() < quantity) {
+            throw new IllegalStateException("Not enough quantity available for item: " + itemName);
+        }
+
+        item.setQuantity(item.getQuantity() - quantity);
+        itemRepository.save(item);
 
         // Создаем резервацию
         Reservation reservation = new Reservation();
@@ -49,16 +50,18 @@ public class ReservationService {
         reservation.setReservedQuantity(quantity);
         reservation.setReservationWeek(reservationWeek);
         reservation.setStatus("RESERVED");
-        reservation.setCompany(company);
 
         // Генерация QR-кода
-        byte[] qrCodeBytes = QRCodeGenerator.generateQRCodeAsBytes(orderNumber);
-        reservation.setQrCode(qrCodeBytes);
+        try {
+            byte[] qrCodeBytes = QRCodeGenerator.generateQRCodeAsBytes(orderNumber); // Генерируем массив байтов
+            reservation.setQrCode(qrCodeBytes); // Сохраняем как byte[]
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate QR code for reservation: " + orderNumber, e);
+        }
 
         // Сохраняем резервацию
         return reservationRepository.save(reservation);
     }
-
 
 
 
@@ -163,26 +166,7 @@ public class ReservationService {
 
     }
 
-    // Получение всех резерваций для текущей компании
-    public List<Reservation> getAllReservationsForCurrentCompany() {
-        Long companyId = getCurrentUserCompanyId();
-        return reservationRepository.findAllByCompanyId(companyId);
-    }
-
-    // Получение резерваций за конкретную неделю для текущей компании
-    public List<Reservation> getReservationsByWeekForCurrentCompany(String reservationWeek) {
-        Long companyId = getCurrentUserCompanyId();
-        return reservationRepository.findByReservationWeekAndCompanyIdOrderByItemName(reservationWeek, companyId);
-    }
-
-    // Получение текущей компании пользователя
-    private Long getCurrentUserCompanyId() {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return currentUser.getCompany().getId();
-    }
-
-
-/**
+    /**
      * Получение резерваций за конкретную неделю
      */
     @Transactional

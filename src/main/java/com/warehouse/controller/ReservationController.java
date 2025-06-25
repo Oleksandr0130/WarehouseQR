@@ -77,13 +77,13 @@ public class ReservationController {
         }
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
-//        List<Reservation> reservations = (reservationWeek == null)
-//                ? reservationService.getAllReservations()
-//                : reservationService.getReservationsByWeek(reservationWeek);
-//        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
-//    }
+    @GetMapping
+    public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
+        List<Reservation> reservations = (reservationWeek == null)
+                ? reservationService.getAllReservations()
+                : reservationService.getReservationsByWeek(reservationWeek);
+        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
+    }
 
     @GetMapping("/sorted")
     public ResponseEntity<List<ReservationDTO>> getSortedReservationsByWeek(@RequestParam String reservationWeek) {
@@ -157,21 +157,5 @@ public class ReservationController {
         List<Reservation> reservations = reservationService.searchReservationsByItemName(itemName);
         return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
     }
-
-    // Получение всех резерваций для текущей компании
-    @GetMapping
-    public ResponseEntity<List<ReservationDTO>> getAllReservations() {
-        List<Reservation> reservations = reservationService.getAllReservationsForCurrentCompany();
-        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
-    }
-
-    // Получение резерваций за конкретную неделю
-    @GetMapping("/by-week")
-    public ResponseEntity<List<ReservationDTO>> getReservationsByWeek(@RequestParam String reservationWeek) {
-        List<Reservation> reservations = reservationService.getReservationsByWeekForCurrentCompany(reservationWeek);
-        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
-    }
-
-
 
 }

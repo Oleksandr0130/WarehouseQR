@@ -12,44 +12,49 @@ import org.springframework.stereotype.Service;
 /**
  * Сервис регистрации и подтверждения пользователя.
  */
-@Service
 @RequiredArgsConstructor
+@Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final CompanyService companyService; // Используем сервис вместо репозитория
+    private final CompanyRepository companyRepository; // Репозиторий компаний
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final ConfirmationCodeService codeService;
 
     public User registerUser(UserRegistrationDTO registrationDTO) {
-        // Проверяем, есть ли пользователь с указанным email
         if (userRepository.findByEmail(registrationDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Пользователь с таким email уже зарегистрирован");
         }
 
-        // Используем метод CompanyService для нахождения или создания компании
-        Company company = companyService.registerOrFindCompany(registrationDTO.getCompanyName());
+        // Найти или создать компанию по названию
+        Company company = companyRepository.findByNameIgnoreCase(registrationDTO.getCompanyName())
+                .orElseGet(() -> {
+                    // Создаём новую компанию, если она не существует
+                    Company newCompany = new Company();
+                    newCompany.setName(registrationDTO.getCompanyName());
+                    newCompany.setEnabled(true); // Сразу включаем компанию, либо требуем подтверждение отдельно
+                    return companyRepository.save(newCompany);
+                });
 
-        // Создаём нового пользователя
+        // Создание нового пользователя
         User user = new User();
         user.setUsername(registrationDTO.getUsername());
         user.setEmail(registrationDTO.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
         user.setRole(registrationDTO.getRole());
         user.setEnabled(false);
-        user.setCompany(company); // Привязываем компанию к пользователю
+        user.setCompany(company); // Привязка к компании
 
-        // Сохраняем пользователя в базе
         User savedUser = userRepository.save(user);
 
-        // Генерируем код подтверждения
+        // Генерация уникального кода подтверждения
         String code = codeService.generateConfirmationCode(savedUser);
 
-        // Формируем ссылку подтверждения
+        // Ссылка для подтверждения
         String confirmationLink = "https://warehouse-qr-app-8adwv.ondigitalocean.app/api/confirmation?code=" + code;
 
-        // Отправляем email с ссылкой подтверждения
+        // Отправляем письмо
         emailService.sendConfirmationEmail(savedUser.getEmail(), savedUser.getUsername(), confirmationLink);
 
         return savedUser;
