@@ -27,6 +27,5 @@ public class User {
 
     private String confirmationCode;
 
-    private String companyName;
 }
 
