@@ -14,7 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequiredArgsConstructor
 public class DataSourceService {
 
-    private final Map<Object, Object> dataSources = new ConcurrentHashMap<>(); // Используем потокобезопасную мапу
+    private final ConcurrentHashMap<Object, Object> dataSources = new ConcurrentHashMap<>();
     private final DynamicDataSource dynamicDataSource;
 
     @Value("${spring.datasource.dynamic.host}")
@@ -30,19 +30,18 @@ public class DataSourceService {
     private String dbPassword;
 
     public void addNewCompanyDataSource(String companyName, String dbName) {
-        // Создание нового HikariDataSource
+        // Создаем новый источник данных через HikariCP
         HikariDataSource newDataSource = new HikariDataSource();
-        newDataSource.setJdbcUrl(
-                "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=require"
-        );
+        newDataSource.setJdbcUrl("jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=require");
         newDataSource.setUsername(dbUsername);
         newDataSource.setPassword(dbPassword);
         newDataSource.setDriverClassName("org.postgresql.Driver");
 
-        // Добавление в динамический источник данных
+        // Добавляем в список источников данных
         dataSources.put(companyName.toLowerCase(), newDataSource);
         dynamicDataSource.addDataSource(companyName.toLowerCase(), newDataSource);
     }
 }
+
 
 
