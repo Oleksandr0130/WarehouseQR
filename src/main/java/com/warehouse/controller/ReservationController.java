@@ -77,13 +77,13 @@ public class ReservationController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
-        List<Reservation> reservations = (reservationWeek == null)
-                ? reservationService.getAllReservations()
-                : reservationService.getReservationsByWeek(reservationWeek);
-        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
-    }
+//    @GetMapping
+//    public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
+//        List<Reservation> reservations = (reservationWeek == null)
+//                ? reservationService.getAllReservations()
+//                : reservationService.getReservationsByWeek(reservationWeek);
+//        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
+//    }
 
     @GetMapping("/sorted")
     public ResponseEntity<List<ReservationDTO>> getSortedReservationsByWeek(@RequestParam String reservationWeek) {
