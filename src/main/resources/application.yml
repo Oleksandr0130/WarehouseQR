@@ -16,6 +16,7 @@ spring:
   jpa:
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         auto_quote_keyword: true
     # Автоматическое создание и обновление таблиц по мере изменения модели
     hibernate:

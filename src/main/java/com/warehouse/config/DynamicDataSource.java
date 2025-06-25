@@ -15,14 +15,19 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
 
     @PostConstruct
     public void init() {
-        // Обязательно инициализируем targetDataSources, даже если пока нет источников
+        // Добавляем дефолтный placeholder источник данных (пустой, до реальной загрузки)
+        DataSource defaultDataSource = createDefaultPlaceholderDataSource();
+        this.dataSources.put("default", defaultDataSource);
+
+        // Устанавливаем дефолтный источник данных
+        super.setDefaultTargetDataSource(defaultDataSource);
         super.setTargetDataSources(dataSources);
         super.afterPropertiesSet(); // Применяем изменения
     }
 
     @Override
     protected Object determineCurrentLookupKey() {
-        return TenantContext.getCurrentTenant();
+        return TenantContext.getCurrentTenant() != null ? TenantContext.getCurrentTenant() : "default";
     }
 
     public void addDataSource(String tenantId, DataSource dataSource) {
@@ -31,4 +36,8 @@ public class DynamicDataSource extends AbstractRoutingDataSource {
         super.afterPropertiesSet(); // Перезагрузить источники данных
     }
 
+    private DataSource createDefaultPlaceholderDataSource() {
+        // К примеру, пустая заглушка
+        return null;
+    }
 }

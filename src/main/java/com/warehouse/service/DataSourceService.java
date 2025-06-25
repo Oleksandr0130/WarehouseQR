@@ -8,15 +8,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
 public class DataSourceService {
 
-    private final Map<Object, Object> dataSources = new HashMap<>();
+    private final Map<Object, Object> dataSources = new ConcurrentHashMap<>(); // Используем потокобезопасную мапу
     private final DynamicDataSource dynamicDataSource;
 
-    // Извлекаем значения из application.yml с помощью @Value
     @Value("${spring.datasource.dynamic.host}")
     private String dbHost;
 
@@ -29,20 +29,20 @@ public class DataSourceService {
     @Value("${spring.datasource.dynamic.password}")
     private String dbPassword;
 
-    // Метод для добавления нового источника данных
     public void addNewCompanyDataSource(String companyName, String dbName) {
+        // Создание нового HikariDataSource
         HikariDataSource newDataSource = new HikariDataSource();
-        newDataSource.setJdbcUrl("jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=require");
+        newDataSource.setJdbcUrl(
+                "jdbc:postgresql://" + dbHost + ":" + dbPort + "/" + dbName + "?sslmode=require"
+        );
         newDataSource.setUsername(dbUsername);
         newDataSource.setPassword(dbPassword);
         newDataSource.setDriverClassName("org.postgresql.Driver");
 
-        // Сохраняем в мап источников данных
+        // Добавление в динамический источник данных
         dataSources.put(companyName.toLowerCase(), newDataSource);
-        dynamicDataSource.setTargetDataSources(dataSources);
-
-        // Перезагружаем источники данных
-        dynamicDataSource.afterPropertiesSet();
+        dynamicDataSource.addDataSource(companyName.toLowerCase(), newDataSource);
     }
 }
+
 
