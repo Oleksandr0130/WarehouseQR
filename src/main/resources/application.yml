@@ -6,6 +6,13 @@ spring:
     username: ${DB_USER}
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+    # Добавляем параметры для управления динамическими источниками данных
+    dynamic:
+      host: ${DB_DYNAMIC_HOST}     # Хост для динамических баз данных
+      port: ${DB_DYNAMIC_PORT}     # Порт для динамических баз данных
+      username: ${DB_DYNAMIC_USER} # Логин для подключения
+      password: ${DB_DYNAMIC_PASS} # Пароль для подключения
+
   jpa:
     properties:
       hibernate:
