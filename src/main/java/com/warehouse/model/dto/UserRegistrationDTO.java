@@ -8,5 +8,7 @@ public class UserRegistrationDTO {
     private String password;
     private String email;
     private String role; // например, ROLE_USER
+    private String companyName; // Название компании, указанное пользователем
 }
+
 
