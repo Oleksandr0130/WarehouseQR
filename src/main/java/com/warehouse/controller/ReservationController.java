@@ -158,4 +158,19 @@ public class ReservationController {
         return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
     }
 
+    // Получение всех резерваций для текущей компании
+    @GetMapping
+    public ResponseEntity<List<ReservationDTO>> getAllReservations() {
+        List<Reservation> reservations = reservationService.getAllReservationsForCurrentCompany();
+        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
+    }
+
+    // Получение резерваций за конкретную неделю для текущей компании
+    @GetMapping("/week")
+    public ResponseEntity<List<ReservationDTO>> getReservationsByWeek(@RequestParam String reservationWeek) {
+        List<Reservation> reservations = reservationService.getReservationsByWeekForCurrentCompany(reservationWeek);
+        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
+    }
+
+
 }

@@ -23,5 +23,8 @@ public class Reservation {
     @Lob // Для хранения длинных строк (Base64 содержимого QR-кода)
     private byte[] qrCode; // QR-код резервации в формате Base64
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false) // Связь с компанией
+    private Company company;
 
 }

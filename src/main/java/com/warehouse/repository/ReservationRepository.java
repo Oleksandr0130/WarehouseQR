@@ -27,4 +27,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT r FROM Reservation r WHERE LOWER(r.itemName) LIKE LOWER(CONCAT('%', :searchQuery, '%'))")
     List<Reservation> findByItemNameContainingIgnoreCase(@Param("searchQuery") String searchQuery);
+
+    @Query("SELECT r FROM Reservation r WHERE r.company.id = :companyId")
+    List<Reservation> findAllByCompanyId(@Param("companyId") Long companyId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.reservationWeek = :reservationWeek AND r.status = 'RESERVED' AND r.company.id = :companyId ORDER BY r.itemName")
+    List<Reservation> findByReservationWeekAndCompanyIdOrderByItemName(@Param("reservationWeek") String reservationWeek, @Param("companyId") Long companyId);
 }
