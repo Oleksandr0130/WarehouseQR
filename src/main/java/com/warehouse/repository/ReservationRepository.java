@@ -16,8 +16,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE r.reservationWeek = :reservationWeek AND r.status = 'RESERVED' ORDER BY r.itemName")
     List<Reservation> findByReservationWeekOrderByItemName(String reservationWeek);
 
-    @Query("SELECT r FROM Reservation r WHERE r.orderNumber LIKE CONCAT(:orderPrefix, '%') AND r.status = 'RESERVED'")
-    List<Reservation> findByOrderNumberStartingWith(@Param("orderPrefix") String orderPrefix);
+    @Query("SELECT r FROM Reservation r WHERE r.orderNumber LIKE CONCAT(:orderPrefix, '%') AND r.company.id = :companyId")
+    List<Reservation> findByOrderNumberStartingWith(@Param("orderPrefix") String orderPrefix, @Param("companyId") Long companyId);
 
 
     Optional<Reservation> findByOrderNumber(String orderNumber);
@@ -27,4 +27,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT r FROM Reservation r WHERE LOWER(r.itemName) LIKE LOWER(CONCAT('%', :searchQuery, '%'))")
     List<Reservation> findByItemNameContainingIgnoreCase(@Param("searchQuery") String searchQuery);
+
+    @Query("SELECT r FROM Reservation r WHERE r.company.id = :companyId")
+    List<Reservation> findAllByCompanyId(@Param("companyId") Long companyId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.reservationWeek = :reservationWeek AND r.company.id = :companyId")
+    List<Reservation> findByReservationWeekAndCompanyId(@Param("reservationWeek") String reservationWeek, @Param("companyId") Long companyId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.orderNumber = :orderNumber AND r.company.id = :companyId")
+    Optional<Reservation> findByOrderNumberAndCompanyId(@Param("orderNumber") String orderNumber, @Param("companyId") Long companyId);
+
+    @Query("SELECT r FROM Reservation r WHERE LOWER(r.itemName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) AND r.company.id = :companyId")
+    List<Reservation> searchByItemNameAndCompanyId(@Param("searchQuery") String searchQuery, @Param("companyId") Long companyId);
 }
