@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Base64;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -238,15 +237,6 @@ public class ReservationService {
 
     public List<Reservation> searchReservationsByItemName(String searchQuery) {
         return reservationRepository.findByItemNameContainingIgnoreCase(searchQuery);
-    }
-
-    public List<Reservation> getAllReservationsByCompany(Long companyId) {
-        return reservationRepository.findAllByCompanyId(companyId);
-    }
-
-    public Optional<Reservation> getReservationByIdAndCompanyId(Long id, Long companyId) {
-        return reservationRepository.findById(id)
-                .filter(reservation -> reservation.getCompany().getId().equals(companyId));
     }
 
 }

@@ -3,7 +3,6 @@ package com.warehouse.controller;
 import com.warehouse.model.Reservation;
 import com.warehouse.model.dto.ReservationDTO;
 import com.warehouse.model.dto.ReservationRequestDTO;
-import com.warehouse.service.CurrentCompanyService;
 import com.warehouse.service.ReservationService;
 import com.warehouse.service.mapper.interfaces.ReservationMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +22,6 @@ public class ReservationController {
 
     private final ReservationService reservationService;
     private final ReservationMapper reservationMapper;
-    private final CurrentCompanyService currentCompanyService;
-
 
     @PostMapping
     public ResponseEntity<ReservationDTO> reserveItem(@RequestBody ReservationRequestDTO requestDTO) {
@@ -80,29 +77,13 @@ public class ReservationController {
         }
     }
 
-//    @GetMapping
-//    public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
-//        List<Reservation> reservations = (reservationWeek == null)
-//                ? reservationService.getAllReservations()
-//                : reservationService.getReservationsByWeek(reservationWeek);
-//        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
-//    }
-
     @GetMapping
-    public List<ReservationDTO> getAllReservations() {
-        Long companyId = currentCompanyService.getCurrentCompanyId();
-        List<Reservation> reservations = reservationService.getAllReservationsByCompany(companyId);
-        return reservationMapper.toDTOList(reservations);
+    public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
+        List<Reservation> reservations = (reservationWeek == null)
+                ? reservationService.getAllReservations()
+                : reservationService.getReservationsByWeek(reservationWeek);
+        return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ReservationDTO> getReservationById(@PathVariable Long id) {
-        Long companyId = currentCompanyService.getCurrentCompanyId();
-        return reservationService.getReservationByIdAndCompanyId(id, companyId)
-                .map(reservation -> ResponseEntity.ok(reservationMapper.toDTO(reservation)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
 
     @GetMapping("/sorted")
     public ResponseEntity<List<ReservationDTO>> getSortedReservationsByWeek(@RequestParam String reservationWeek) {

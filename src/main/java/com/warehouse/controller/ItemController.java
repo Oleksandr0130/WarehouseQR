@@ -2,7 +2,6 @@ package com.warehouse.controller;
 
 import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
-import com.warehouse.service.CurrentCompanyService;
 import com.warehouse.service.ItemService;
 import com.warehouse.utils.ItemComparator;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
@@ -25,8 +24,6 @@ import java.util.List;
 public class ItemController {
     private final ItemService itemService;
     private final ItemMapper itemMapper;
-    private final CurrentCompanyService currentCompanyService;
-
 
 
     @PostMapping
@@ -76,26 +73,10 @@ public class ItemController {
                 .orElse(ResponseEntity.badRequest().build());
     }
 
-//    @GetMapping
-//    public List<ItemDTO> getAllItems() {
-//        return itemMapper.toDTOList(itemService.getAllItems());
-//    }
-
     @GetMapping
     public List<ItemDTO> getAllItems() {
-        Long companyId = currentCompanyService.getCurrentCompanyId();
-        return itemMapper.toDTOList(itemService.getAllItemsByCompany(companyId));
+        return itemMapper.toDTOList(itemService.getAllItems());
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<ItemDTO> getItem(@PathVariable String id) {
-        Long companyId = currentCompanyService.getCurrentCompanyId();
-        return itemService.getItemByIdAndCompanyId(id, companyId)
-                .map(item -> ResponseEntity.ok(itemMapper.toDTO(item)))
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-
 
     @GetMapping("/sorted")
     public List<ItemDTO> getSortedItems(@RequestParam("sortBy") String sortBy) {
