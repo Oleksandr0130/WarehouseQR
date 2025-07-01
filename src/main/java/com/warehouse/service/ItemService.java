@@ -145,8 +145,17 @@ public Item addItem(Item item) {
         return items;
     }
 
+    public List<Item> getAllItemsByCompany(Long companyId) {
+        return itemRepository.findAllByCompanyId(companyId);
+    }
 
-//    private void generateQRCode(String id) {
+    public Optional<Item> getItemByIdAndCompanyId(String id, Long companyId) {
+        return itemRepository.findById(id)
+                .filter(item -> item.getCompany().getId().equals(companyId));
+    }
+
+
+    //    private void generateQRCode(String id) {
 //        try {
 //            // Создаем полный путь до папки, включая вложенные директории
 //            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
