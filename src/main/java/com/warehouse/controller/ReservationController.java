@@ -38,20 +38,9 @@ public class ReservationController {
             responseDTO.setQrCode(Base64.getEncoder().encodeToString(reservation.getQrCode())); // Конвертация в Base64
 
             return ResponseEntity.ok(responseDTO);
-        } catch (IllegalArgumentException e) {
-            // Ошибка валидации или не найденный товар
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        } catch (IOException e) {
-            // Ошибка генерации QR-кода
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
-        } catch (Exception e) {
-            // Для всех остальных исключений
-            e.printStackTrace(); // Логирование
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null);
+        } catch (IllegalArgumentException | IOException e) {
+            return ResponseEntity.badRequest().body(null);
         }
-
     }
 
 
