@@ -144,7 +144,9 @@ public Item addItem(Item item) {
 
 
     public List<Item> getAllItems() {
-        return itemRepository.findAll();
+        Company currentCompany = userService.getCurrentUser().getCompany();
+        return itemRepository.findAllByCompany(currentCompany);
+
     }
 
     public List<Item> getAllItemsSorted(Comparator<Item> comparator) {

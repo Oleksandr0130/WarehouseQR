@@ -82,7 +82,9 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDTO> getAllItems() {
-        return itemMapper.toDTOList(itemService.getAllItems());
+        // Получаем только товары текущей компании
+        List<Item> items = itemService.getAllItems();
+        return itemMapper.toDTOList(items);
     }
 
     @GetMapping("/sorted")
