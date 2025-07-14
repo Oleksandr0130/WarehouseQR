@@ -34,8 +34,12 @@ public class ReservationService {
      */
     @Transactional // Обеспечивает транзакционность для работы с LOB
     public Reservation reserveItem(String orderNumber, String itemName, int quantity, String reservationWeek) throws IOException {
+
+        // Получаем текущую компанию
+        Company currentCompany = userService.getCurrentUser().getCompany();
+
         // Поиск товара
-        Item item = itemRepository.findByName(itemName).orElseThrow(() ->
+        Item item = itemRepository.findByName(itemName, currentCompany).orElseThrow(() ->
                 new IllegalArgumentException("Item not found: " + itemName));
 
         // Проверяем, хватает ли количества на складе
@@ -104,9 +108,13 @@ public class ReservationService {
             throw new IllegalStateException("Only RESERVED reservations can be completed.");
         }
 
+        // Получаем текущую компанию
+        Company currentCompany = userService.getCurrentUser().getCompany();
+
+
         // Обработка товара
         // Находим товар по имени, связанному с резервацией
-        Item item = itemRepository.findByName(reservation.getItemName())
+        Item item = itemRepository.findByName(reservation.getItemName(), currentCompany)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
 
         // Списываем окончательно зарезервированную продукцию
@@ -138,13 +146,17 @@ public class ReservationService {
             throw new IllegalStateException("Reservation is not available for selling");
         }
 
+        // Получаем текущую компанию
+        Company currentCompany = userService.getCurrentUser().getCompany();
+
+
         // Обновляем статус резервации
         reservation.setStatus("SOLD");
         reservation.setSaleDate(LocalDateTime.now(ZoneId.systemDefault()));
         reservationRepository.save(reservation);
 
         // Обновляем статистику в Item
-        Item item = itemRepository.findByName(reservation.getItemName())
+        Item item = itemRepository.findByName(reservation.getItemName(), currentCompany)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
         item.setSold(item.getSold() + reservation.getReservedQuantity()); // Увеличиваем количество проданных
         itemRepository.save(item);
@@ -204,8 +216,11 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new IllegalArgumentException("Reservation not found with ID: " + reservationId));
 
+        // Получаем текущую компанию
+        Company currentCompany = userService.getCurrentUser().getCompany();
+
         // Получаем связанную запись товара
-        Item item = itemRepository.findByName(reservation.getItemName())
+        Item item = itemRepository.findByName(reservation.getItemName(),currentCompany)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
 
         // Возвращаем зарезервированное количество обратно в склад
