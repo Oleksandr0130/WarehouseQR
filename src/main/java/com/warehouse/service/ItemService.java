@@ -5,6 +5,7 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.warehouse.model.Company;
 import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.repository.ItemRepository;
@@ -36,15 +37,17 @@ public class ItemService {
     private static final String QR_PATH = "qrcodes/";
     private final ItemRepository itemRepository;
     private final ReservationRepository reservationRepository;
+    private final UserService userService;
     private final ItemMapper itemMapper;
 
 //    @Value("${app.qrcode-base-url}")
 @Value("${app.qrcode-base-url}")
 private String qrCodeBaseUrl; // Значение из application.yml
 
-    public ItemService(ItemRepository itemRepository, ReservationRepository reservationRepository, ItemMapper itemMapper) {
+    public ItemService(ItemRepository itemRepository, ReservationRepository reservationRepository, ItemMapper itemMapper, UserService userService) {
         this.itemRepository = itemRepository;
         this.reservationRepository = reservationRepository;
+        this.userService = userService;
         this.itemMapper = itemMapper;
         try {
             Files.createDirectories(Paths.get(QR_PATH));
@@ -79,6 +82,11 @@ public Item addItem(Item item) {
     if (item.getId() == null || item.getId().isEmpty()) {
         item.setId(UUID.randomUUID().toString());
     }
+
+    // Устанавливаем текущую компанию для товара
+    Company currentCompany = userService.getCurrentUser().getCompany();
+    item.setCompany(currentCompany);
+
     Item savedItem = itemRepository.save(item);
 
     byte[] qrCodeBytes = generateQRCodeAsBytes(savedItem.getId());

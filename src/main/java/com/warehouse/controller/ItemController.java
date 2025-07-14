@@ -28,17 +28,24 @@ public class ItemController {
 
     @PostMapping
     public ResponseEntity<ItemDTO> addItem(@RequestBody ItemDTO itemDTO) {
-        var itemEntity = itemMapper.toEntity(itemDTO); // Маппинг DTO в сущность
-        var savedItem = itemService.addItem(itemEntity); // Сохранение в базе
+        try {
+            var itemEntity = itemMapper.toEntity(itemDTO); // Маппинг DTO в сущность
+            var savedItem = itemService.addItem(itemEntity); // Сохранение в базе
 
-        // Генерация QR-кода Base64
-        String qrCodeBase64 = itemMapper.mapQrCodeToString(savedItem.getQrCode()); // Преобразуем byte[] в Base64
+            // Генерация QR-кода Base64
+            String qrCodeBase64 = itemMapper.mapQrCodeToString(savedItem.getQrCode()); // Преобразуем byte[] в Base64
 
-        ItemDTO responseDTO = itemMapper.toDTO(savedItem);
-        responseDTO.setQrCode(qrCodeBase64); // Устанавливаем строку Base64 в итоговый ответ
+            ItemDTO responseDTO = itemMapper.toDTO(savedItem);
+            responseDTO.setQrCode(qrCodeBase64); // Устанавливаем строку Base64 в итоговый ответ
 
-        return ResponseEntity.ok(responseDTO);
+            return ResponseEntity.ok(responseDTO);
+        } catch (Exception e) {
+            e.printStackTrace(); // Логирование ошибки
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(null); // Возврат ошибки
+        }
     }
+
 
 
     // Новый endpoint: скачивание QR-кода
