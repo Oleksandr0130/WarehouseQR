@@ -37,10 +37,14 @@ public class ReservationService {
 
         // Получаем текущую компанию
         Company currentCompany = userService.getCurrentUser().getCompany();
+        System.out.println("Текущая компания: " + currentCompany);
+
 
         // Поиск товара
         Item item = itemRepository.findByNameAndCompany(itemName, currentCompany).orElseThrow(() ->
                 new IllegalArgumentException("Item not found: " + itemName));
+        System.out.println("Найден товар: " + item.getName() + ", количество на складе: " + item.getQuantity());
+
 
         // Проверяем, хватает ли количества на складе
         if (item.getQuantity() < quantity) {
@@ -49,6 +53,8 @@ public class ReservationService {
 
         item.setQuantity(item.getQuantity() - quantity);
         itemRepository.save(item);
+        System.out.println("Количество товара обновлено. Зарезервировано: " + quantity);
+
 
         // Создаем резервацию
         Reservation reservation = new Reservation();
@@ -63,6 +69,8 @@ public class ReservationService {
             byte[] qrCodeBytes = QRCodeGenerator.generateQRCodeAsBytes(orderNumber); // Генерируем массив байтов
             reservation.setQrCode(qrCodeBytes); // Сохраняем как byte[]
         } catch (Exception e) {
+            System.err.println("Ошибка генерации QR-кода: " + e.getMessage());
+
             throw new RuntimeException("Failed to generate QR code for reservation: " + orderNumber, e);
         }
 
