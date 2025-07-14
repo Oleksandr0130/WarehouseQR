@@ -6,6 +6,9 @@ import com.warehouse.model.dto.UserRegistrationDTO;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -62,4 +65,11 @@ public class UserService {
         user.setConfirmationCode(null);
         userRepository.save(user);
     }
+
+    public User getCurrentUser() {
+        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+    }
+
 }

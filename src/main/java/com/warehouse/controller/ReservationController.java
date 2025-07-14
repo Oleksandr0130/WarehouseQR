@@ -81,13 +81,13 @@ public class ReservationController {
     public ResponseEntity<List<ReservationDTO>> getAllReservations(@RequestParam(required = false) String reservationWeek) {
         List<Reservation> reservations = (reservationWeek == null)
                 ? reservationService.getAllReservations()
-                : reservationService.getReservationsByWeek(reservationWeek);
+                : reservationService.getReservationsByWeekForCompany(reservationWeek);
         return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
     }
 
     @GetMapping("/sorted")
     public ResponseEntity<List<ReservationDTO>> getSortedReservationsByWeek(@RequestParam String reservationWeek) {
-        List<Reservation> sortedReservations = reservationService.getSortedReservationsByWeek(reservationWeek);
+        List<Reservation> sortedReservations = reservationService.getReservationsByWeekForCompany(reservationWeek);
         return ResponseEntity.ok(reservationMapper.toDTOList(sortedReservations));
     }
 
@@ -97,7 +97,7 @@ public class ReservationController {
             return ResponseEntity.badRequest().body(List.of());
         }
 
-        List<Reservation> reservations = reservationService.getReservationsByOrderPrefix(orderPrefix);
+        List<Reservation> reservations = reservationService.getReservationsByOrderPrefixForCompany(orderPrefix);
         if (reservations.isEmpty()) {
             return ResponseEntity.noContent().build(); // 204 No Content
         }
@@ -154,7 +154,7 @@ public class ReservationController {
 
     @GetMapping("/search/by-item-name")
     public ResponseEntity<List<ReservationDTO>> searchReservationsByItemName(@RequestParam String itemName) {
-        List<Reservation> reservations = reservationService.searchReservationsByItemName(itemName);
+        List<Reservation> reservations = reservationService.searchReservationsByItemNameForCompany(itemName);
         return ResponseEntity.ok(reservationMapper.toDTOList(reservations));
     }
 

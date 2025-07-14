@@ -1,5 +1,6 @@
 package com.warehouse.service;
 
+import com.warehouse.model.Company;
 import com.warehouse.model.Item;
 import com.warehouse.model.Reservation;
 import com.warehouse.repository.ItemRepository;
@@ -22,6 +23,8 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ItemRepository itemRepository;
+    private final UserService userService; // Новый сервис пользователя для извлечения компании
+
 
     @Value("${app.reservation-base-url}")
     private String reservationBaseUrl; // Значение из application.yml
@@ -170,23 +173,27 @@ public class ReservationService {
      * Получение резерваций за конкретную неделю
      */
     @Transactional
-    public List<Reservation> getReservationsByWeek(String reservationWeek) {
-        return reservationRepository.findByReservationWeek(reservationWeek);
+    public List<Reservation> getReservationsByWeekForCompany(String reservationWeek) {
+        Company company = userService.getCurrentUser().getCompany(); // Извлечение компании
+        return reservationRepository.findByReservationWeekAndCompanyOrderByItemName(reservationWeek, company);
     }
+
 
     @Transactional
-    public List<Reservation> getReservationsByOrderPrefix(String orderPrefix) {
-        return reservationRepository.findByOrderNumberStartingWith(orderPrefix);
+    public List<Reservation> getReservationsByOrderPrefixForCompany(String orderPrefix) {
+        Company company = userService.getCurrentUser().getCompany();
+        return reservationRepository.findByOrderNumberStartingWithAndCompany(orderPrefix, company);
     }
 
 
-    /**
-     * Получение зарезервированных товаров за неделю с сортировкой по имени.
-     */
-    @Transactional
-    public List<Reservation> getSortedReservationsByWeek(String reservationWeek) {
-        return reservationRepository.findByReservationWeekOrderByItemName(reservationWeek);
-    }
+
+//    /**
+//     * Получение зарезервированных товаров за неделю с сортировкой по имени.
+//     */
+//    @Transactional
+//    public List<Reservation> getSortedReservationsByWeek(String reservationWeek) {
+//        return reservationRepository.findByReservationWeekOrderByItemName(reservationWeek);
+//    }
 
     /**
      * Удаление резервации и возврат списанного количества на склад
@@ -235,8 +242,11 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Reservation not found with ID: " + id));
     }
 
-    public List<Reservation> searchReservationsByItemName(String searchQuery) {
-        return reservationRepository.findByItemNameContainingIgnoreCase(searchQuery);
+    @Transactional
+    public List<Reservation> searchReservationsByItemNameForCompany(String searchQuery) {
+        Company company = userService.getCurrentUser().getCompany();
+        return reservationRepository.findByItemNameContainingIgnoreCaseAndCompany(searchQuery, company);
     }
+
 
 }
