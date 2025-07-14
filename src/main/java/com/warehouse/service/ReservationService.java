@@ -39,7 +39,7 @@ public class ReservationService {
         Company currentCompany = userService.getCurrentUser().getCompany();
 
         // Поиск товара
-        Item item = itemRepository.findByName(itemName, currentCompany).orElseThrow(() ->
+        Item item = itemRepository.findByNameAndCompany(itemName, currentCompany).orElseThrow(() ->
                 new IllegalArgumentException("Item not found: " + itemName));
 
         // Проверяем, хватает ли количества на складе
@@ -114,7 +114,7 @@ public class ReservationService {
 
         // Обработка товара
         // Находим товар по имени, связанному с резервацией
-        Item item = itemRepository.findByName(reservation.getItemName(), currentCompany)
+        Item item = itemRepository.findByNameAndCompany(reservation.getItemName(), currentCompany)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
 
         // Списываем окончательно зарезервированную продукцию
@@ -156,7 +156,7 @@ public class ReservationService {
         reservationRepository.save(reservation);
 
         // Обновляем статистику в Item
-        Item item = itemRepository.findByName(reservation.getItemName(), currentCompany)
+        Item item = itemRepository.findByNameAndCompany(reservation.getItemName(), currentCompany)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
         item.setSold(item.getSold() + reservation.getReservedQuantity()); // Увеличиваем количество проданных
         itemRepository.save(item);
@@ -220,7 +220,7 @@ public class ReservationService {
         Company currentCompany = userService.getCurrentUser().getCompany();
 
         // Получаем связанную запись товара
-        Item item = itemRepository.findByName(reservation.getItemName(),currentCompany)
+        Item item = itemRepository.findByNameAndCompany(reservation.getItemName(),currentCompany)
                 .orElseThrow(() -> new RuntimeException("Item not found: " + reservation.getItemName()));
 
         // Возвращаем зарезервированное количество обратно в склад

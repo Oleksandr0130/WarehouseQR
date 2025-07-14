@@ -152,7 +152,7 @@ public Item addItem(Item item) {
     @Transactional
     public Optional<Item> getItemByName(String name) {
         Company currentCompany = userService.getCurrentUser().getCompany();
-        return itemRepository.findByName(name, currentCompany);
+        return itemRepository.findByNameAndCompany(name, currentCompany);
     }
 
 
