@@ -142,12 +142,23 @@ public Item addItem(Item item) {
         return itemDTOs;
     }
 
-
+@Transactional
     public List<Item> getAllItems() {
-        Company currentCompany = userService.getCurrentUser().getCompany();
-        return itemRepository.findAllByCompany(currentCompany);
+        try {
+            Company currentCompany = userService.getCurrentUser().getCompany();
+            System.out.println("Текущая компания: " + currentCompany.getId());
 
+            List<Item> items = itemRepository.findAllByCompany(currentCompany);
+            if (items.isEmpty()) {
+                System.out.println("Нет доступных товаров для компании ID: " + currentCompany.getId());
+            }
+            return items;
+        } catch (Exception e) {
+            e.printStackTrace(); // Лог возможного исключения
+            throw new RuntimeException("Ошибка при загрузке товаров: " + e.getMessage());
+        }
     }
+
 
     @Transactional
     public Optional<Item> getItemByName(String name) {

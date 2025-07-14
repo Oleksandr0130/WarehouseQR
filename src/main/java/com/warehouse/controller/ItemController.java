@@ -82,12 +82,18 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDTO> getAllItems() {
-        // Получаем только товары текущей компании
-        List<Item> items = itemService.getAllItems();
-        return itemMapper.toDTOList(items);
+        try {
+            System.out.println("Запрос на получение всех товаров начат."); // Лог начала запроса
+            List<Item> items = itemService.getAllItems();
+            System.out.println("Получено количество товаров: " + items.size()); // Лог количества товаров из базы
+            return itemMapper.toDTOList(items);
+        } catch (Exception e) {
+            e.printStackTrace(); // Печать стека ошибки в консоль
+            throw e; // Проброс ошибки, чтобы GlobalExceptionHandler обработал ее
+        }
     }
 
-    @GetMapping("/sorted")
+        @GetMapping("/sorted")
     public List<ItemDTO> getSortedItems(@RequestParam("sortBy") String sortBy) {
         switch (sortBy.toLowerCase()) {
             case "name":
