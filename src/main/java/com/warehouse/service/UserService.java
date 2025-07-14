@@ -67,9 +67,16 @@ public class UserService {
     }
 
     public User getCurrentUser() {
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-    }
+        try {
+            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
+                    .getUsername();
+            System.out.println("Текущий пользователь: " + username);
 
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '" + username + "' не найден"));
+        } catch (Exception ex) {
+            System.err.println("Ошибка получения текущего пользователя: " + ex.getMessage());
+            throw new RuntimeException("Не удалось определить текущего пользователя.", ex);
+        }
+    }
 }

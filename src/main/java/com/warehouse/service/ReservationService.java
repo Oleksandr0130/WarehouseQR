@@ -37,6 +37,7 @@ public class ReservationService {
 
         // Получаем текущую компанию
         Company currentCompany = userService.getCurrentUser().getCompany();
+        System.out.println("Резервация для компании: " + currentCompany.getName()); // Лог для проверки текущей компании
 
         // Поиск товара
         Item item = itemRepository.findByNameAndCompany(itemName, currentCompany).orElseThrow(() ->
@@ -99,6 +100,7 @@ public class ReservationService {
 //        return true; // Операция завершена успешно
 //    }
 
+    @Transactional
     public boolean completeReservation(Long id) {
         // Ищем резервацию по ID
         Reservation reservation = reservationRepository.findById(id)
@@ -175,6 +177,7 @@ public class ReservationService {
     /**
      * Получение всех резерваций
      */
+    @Transactional
     public List<Reservation> getAllReservations() {
         Company currentCompany = userService.getCurrentUser().getCompany(); // Получение текущей компании
 
@@ -248,6 +251,7 @@ public class ReservationService {
     /**
      * Получение всех проданных резерваций
      */
+    @Transactional
     public List<Reservation> getSoldReservations() {
         Company currentCompany = userService.getCurrentUser().getCompany(); // Получение текущей компании
 
@@ -256,6 +260,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public Reservation getReservationById(Long id) {
         // Используем ReservationRepository для поиска резервации по ID
         return reservationRepository.findById(id)
