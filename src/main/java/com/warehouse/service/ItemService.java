@@ -149,6 +149,13 @@ public Item addItem(Item item) {
 
     }
 
+    @Transactional
+    public Optional<Item> getItemByName(String name) {
+        Company currentCompany = userService.getCurrentUser().getCompany();
+        return itemRepository.findByName(name, currentCompany);
+    }
+
+
     public List<Item> getAllItemsSorted(Comparator<Item> comparator) {
         List<Item> items = getAllItems(); // Получаем все товары
         items.sort(comparator); // Сортируем с использованием переданного компаратора

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, String> {
-    Optional<Item> findByNameAndCompany(String name, Company company); // Найти товар по названию и компании
+    Optional<Item> findByName(String name, Company company); // Найти товар по названию и компании
 
     List<Item> findAllByCompany(Company company); // Найти все товары для определенной компании
 }
