@@ -31,4 +31,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE LOWER(r.itemName) LIKE LOWER(CONCAT('%', :searchQuery, '%')) AND r.company = :company")
     List<Reservation> findByItemNameContainingIgnoreCaseAndCompany(@Param("searchQuery") String searchQuery, @Param("company") Company company);
 
+    @Query("SELECT r FROM Reservation r WHERE r.company = :company")
+    List<Reservation> findByCompany(@Param("company") Company company);
+
 }

@@ -176,7 +176,9 @@ public class ReservationService {
      * Получение всех резерваций
      */
     public List<Reservation> getAllReservations() {
-        return reservationRepository.findAll().stream()
+        Company currentCompany = userService.getCurrentUser().getCompany(); // Получение текущей компании
+
+        return reservationRepository.findByCompany(currentCompany).stream()
                 .filter(reservation -> "RESERVED".equals(reservation.getStatus())) // Только активные резервы
                 .toList();
 
@@ -247,7 +249,9 @@ public class ReservationService {
      * Получение всех проданных резерваций
      */
     public List<Reservation> getSoldReservations() {
-        return reservationRepository.findAll().stream()
+        Company currentCompany = userService.getCurrentUser().getCompany(); // Получение текущей компании
+
+        return reservationRepository.findByCompany(currentCompany).stream()
                 .filter(reservation -> "SOLD".equals(reservation.getStatus()))
                 .toList();
     }
