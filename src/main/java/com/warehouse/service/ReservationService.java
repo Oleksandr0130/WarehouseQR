@@ -57,6 +57,7 @@ public class ReservationService {
         reservation.setReservedQuantity(quantity);
         reservation.setReservationWeek(reservationWeek);
         reservation.setStatus("RESERVED");
+        reservation.setCompany(currentCompany);
 
         // Генерация QR-кода
         try {
