@@ -176,13 +176,22 @@ public Item addItem(Item item) {
 
         System.out.println("Текущая компания ID: " + currentCompany.getId());
 
-        // Загружаем товары
+// Загружаем товары
         List<Item> items = itemRepository.findAllByCompany(currentCompany);
+
+        if (items == null) {
+            // Логируем, если вдруг случилось нечто необычное и элементы оказались null
+            System.err.println("Ошибка: метод findAllByCompany вернул null вместо пустого списка.");
+            return List.of(); // Возвращаем пустой список, чтобы избежать NullPointerException
+        }
+
         if (items.isEmpty()) {
+            // Логируем, если нет подходящих товаров
             System.out.println("Нет доступных товаров для компании ID: " + currentCompany.getId());
         }
 
         return items;
+
     } catch (IllegalStateException e) {
         // Логируем ошибки состояния
         System.err.println("Ошибка состояния при загрузке товаров: " + e.getMessage());
