@@ -79,19 +79,36 @@ private String qrCodeBaseUrl; // Значение из application.yml
 //    }
 @Transactional
 public Item addItem(Item item) {
-    if (item.getId() == null || item.getId().isEmpty()) {
-        item.setId(UUID.randomUUID().toString());
+    try {
+        var currentUser = userService.getCurrentUser();
+        if (currentUser == null) {
+            throw new IllegalStateException("Текущий пользователь не найден.");
+        }
+
+        Company currentCompany = currentUser.getCompany();
+        if (currentCompany == null) {
+            throw new IllegalStateException("Компания текущего пользователя не определена.");
+        }
+
+        // Устанавливаем текущую компанию
+        item.setCompany(currentCompany);
+
+        if (item.getId() == null || item.getId().isEmpty()) {
+            item.setId(UUID.randomUUID().toString());
+        }
+
+        Item savedItem = itemRepository.save(item);
+
+        // Генерация QR-кода
+        byte[] qrCodeBytes = generateQRCodeAsBytes(savedItem.getId());
+        savedItem.setQrCode(qrCodeBytes);
+
+        return itemRepository.save(savedItem);
+    } catch (Exception e) {
+        System.err.println("Ошибка при добавлении товара: " + e.getMessage());
+        e.printStackTrace();
+        throw new RuntimeException("Не удалось добавить товар. Обратитесь к администратору.", e);
     }
-
-    // Устанавливаем текущую компанию для товара
-    Company currentCompany = userService.getCurrentUser().getCompany();
-    item.setCompany(currentCompany);
-
-    Item savedItem = itemRepository.save(item);
-
-    byte[] qrCodeBytes = generateQRCodeAsBytes(savedItem.getId());
-    savedItem.setQrCode(qrCodeBytes); // Сохранение QR-кода
-    return itemRepository.save(savedItem);
 }
 
 
@@ -144,20 +161,40 @@ public Item addItem(Item item) {
 
 @Transactional
     public List<Item> getAllItems() {
-        try {
-            Company currentCompany = userService.getCurrentUser().getCompany();
-            System.out.println("Текущая компания: " + currentCompany.getId());
-
-            List<Item> items = itemRepository.findAllByCompany(currentCompany);
-            if (items.isEmpty()) {
-                System.out.println("Нет доступных товаров для компании ID: " + currentCompany.getId());
-            }
-            return items;
-        } catch (Exception e) {
-            e.printStackTrace(); // Лог возможного исключения
-            throw new RuntimeException("Ошибка при загрузке товаров: " + e.getMessage());
+    try {
+        // Получаем текущего пользователя
+        var currentUser = userService.getCurrentUser();
+        if (currentUser == null) {
+            throw new IllegalStateException("Текущий пользователь не найден. Необходимо выполнить вход.");
         }
+
+        // Получаем компанию пользователя
+        Company currentCompany = currentUser.getCompany();
+        if (currentCompany == null) {
+            throw new IllegalStateException("Компания текущего пользователя не определена. Проверьте настройки пользователя.");
+        }
+
+        System.out.println("Текущая компания ID: " + currentCompany.getId());
+
+        // Загружаем товары
+        List<Item> items = itemRepository.findAllByCompany(currentCompany);
+        if (items.isEmpty()) {
+            System.out.println("Нет доступных товаров для компании ID: " + currentCompany.getId());
+        }
+
+        return items;
+    } catch (IllegalStateException e) {
+        // Логируем ошибки состояния
+        System.err.println("Ошибка состояния при загрузке товаров: " + e.getMessage());
+        throw e;
+    } catch (Exception e) {
+        // Любые другие ошибки
+        System.err.println("Произошла ошибка при загрузке товаров: " + e.getMessage());
+        e.printStackTrace();
+        throw new RuntimeException("Ошибка при загрузке товаров. Обратитесь к администратору.", e);
     }
+}
+
 
 
     @Transactional
