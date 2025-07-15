@@ -25,30 +25,26 @@ public class ItemController {
     private final ItemService itemService;
     private final ItemMapper itemMapper;
 
-
     @PostMapping
     public ResponseEntity<ItemDTO> addItem(@RequestBody ItemDTO itemDTO) {
         try {
-            var itemEntity = itemMapper.toEntity(itemDTO); // Маппинг DTO в сущность
-            var savedItem = itemService.addItem(itemEntity); // Сохранение в базе
-
-            // Генерация QR-кода Base64
-            String qrCodeBase64 = itemMapper.mapQrCodeToString(savedItem.getQrCode()); // Преобразуем byte[] в Base64
-
+            var itemEntity = itemMapper.toEntity(itemDTO);
+            var savedItem = itemService.addItem(itemEntity);
+            String qrCodeBase64 = itemMapper.mapQrCodeToString(savedItem.getQrCode());
             ItemDTO responseDTO = itemMapper.toDTO(savedItem);
-            responseDTO.setQrCode(qrCodeBase64); // Устанавливаем строку Base64 в итоговый ответ
-
+            responseDTO.setQrCode(qrCodeBase64);
             return ResponseEntity.ok(responseDTO);
+        } catch (IllegalArgumentException e) {
+            // Логируем ошибку перед возвратом BAD_REQUEST
+            e.printStackTrace();
+            throw new IllegalArgumentException("Ошибка при добавлении товара: " + e.getMessage(), e);
         } catch (Exception e) {
-            e.printStackTrace(); // Логирование ошибки
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(null); // Возврат ошибки
+            // Для остальных исключений пробрасываем ошибку, чтобы обработать в глобальном обработчике
+            e.printStackTrace();
+            throw new RuntimeException("Произошла ошибка при обработке запроса на добавление товара", e);
         }
     }
 
-
-
-    // Новый endpoint: скачивание QR-кода
     @GetMapping("/{id}/download-qrcode")
     public ResponseEntity<ByteArrayResource> downloadQRCode(@PathVariable String id) {
         try {
@@ -59,85 +55,107 @@ public class ItemController {
                     .contentLength(qrCodeBytes.length)
                     .body(new ByteArrayResource(qrCodeBytes));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Вернуть 404, если QR-код не найден
+            e.printStackTrace();
+            throw new IllegalArgumentException("QR-код для товара с ID " + id + " не найден. Причина: " + e.getMessage(), e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка при загрузке QR-кода для товара ID: " + id, e);
         }
     }
 
-
-
-
     @PutMapping("/{id}/add")
     public ResponseEntity<ItemDTO> addQuantity(@PathVariable("id") String id, @RequestParam("quantity") int quantity) {
-        return itemService.updateQuantity(id, quantity)
-                .map(item -> ResponseEntity.ok(itemMapper.toDTO(item)))
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            return itemService.updateQuantity(id, quantity)
+                    .map(item -> ResponseEntity.ok(itemMapper.toDTO(item)))
+                    .orElseThrow(() -> new IllegalArgumentException("Товар с ID " + id + " не найден."));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ошибка при попытке увеличить количество товара с ID " + id + ": " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Серверная ошибка при увеличении количества. ID товара: " + id, e);
+        }
     }
 
     @PutMapping("/{id}/remove")
     public ResponseEntity<ItemDTO> removeQuantity(@PathVariable("id") String id, @RequestParam("quantity") int quantity) {
-        return itemService.removeQuantity(id, quantity)
-                .map(item -> ResponseEntity.ok(itemMapper.toDTO(item)))
-                .orElse(ResponseEntity.badRequest().build());
+        try {
+            return itemService.removeQuantity(id, quantity)
+                    .map(item -> ResponseEntity.ok(itemMapper.toDTO(item)))
+                    .orElseThrow(() -> new IllegalArgumentException("Товар с ID " + id + " не найден или недостаточное количество для снятия."));
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ошибка при попытке уменьшить количество товара с ID " + id + ": " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Серверная ошибка при уменьшении количества товара. ID товара: " + id, e);
+        }
     }
 
     @GetMapping
     public List<ItemDTO> getAllItems() {
         try {
-            System.out.println("Запрос на получение всех товаров начат."); // Лог начала запроса
             List<Item> items = itemService.getAllItems();
-            System.out.println("Получено количество товаров: " + items.size()); // Лог количества товаров из базы
             return itemMapper.toDTOList(items);
         } catch (Exception e) {
-            e.printStackTrace(); // Печать стека ошибки в консоль
-            throw e; // Проброс ошибки, чтобы GlobalExceptionHandler обработал ее
+            throw new RuntimeException("Ошибка при получении всех товаров.", e);
         }
     }
 
-        @GetMapping("/sorted")
+    @GetMapping("/sorted")
     public List<ItemDTO> getSortedItems(@RequestParam("sortBy") String sortBy) {
-        switch (sortBy.toLowerCase()) {
-            case "name":
-                return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_NAME));
-            case "quantity":
-                return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_QUANTITY));
-            case "sold":
-                return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_SOLD));
-            default:
-                throw new IllegalArgumentException("Invalid sortBy parameter. Use 'name', 'quantity', or 'sold'.");
+        try {
+            switch (sortBy.toLowerCase()) {
+                case "name":
+                    return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_NAME));
+                case "quantity":
+                    return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_QUANTITY));
+                case "sold":
+                    return itemMapper.toDTOList(itemService.getAllItemsSorted(ItemComparator.BY_SOLD));
+                default:
+                    throw new IllegalArgumentException("Параметр sortBy недействителен. Используйте 'name', 'quantity' или 'sold'.");
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ошибка при сортировке товаров. Причина: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка сервера при сортировке товаров.", e);
         }
     }
 
-    // API для получения всего списка товаров с данными о продажах
     @GetMapping("/sold")
     public ResponseEntity<List<ItemDTO>> getAllItemsWithSoldData() {
-        List<ItemDTO> items = itemService.getAllItemsWithSoldData();
-        return ResponseEntity.ok(items);
+        try {
+            List<ItemDTO> items = itemService.getAllItemsWithSoldData();
+            return ResponseEntity.ok(items);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при получении товаров с данными о продажах.", e);
+        }
     }
 
-    // API для получения количества проданных единиц для конкретного товара
     @GetMapping("/{id}/sold")
     public ResponseEntity<Integer> getSoldQuantityForItem(@PathVariable String id) {
         try {
             int soldQuantity = itemService.getSoldQuantityForItem(id);
             return ResponseEntity.ok(soldQuantity);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
+            throw new IllegalArgumentException("Ошибка при получении данных о проданных единицах товара с ID: " + id + ". Причина: " + e.getMessage(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при обработке запроса на проданные единицы товара. ID товара: " + id, e);
         }
     }
 
     @GetMapping("/download/excel")
     public ResponseEntity<InputStreamResource> downloadExcelFile() {
-        List<Item> items = itemService.getAllItems(); // Получение всех товаров
-        InputStream excelFile = itemService.generateExcelFile(items); // Генерация Excel-файла
+        try {
+            List<Item> items = itemService.getAllItems();
+            InputStream excelFile = itemService.generateExcelFile(items);
 
-        // Настройка заголовков ответа
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=items.xlsx");
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Content-Disposition", "attachment; filename=items.xlsx");
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
-                .body(new InputStreamResource(excelFile));
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                    .body(new InputStreamResource(excelFile));
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при генерации Excel-файла с товарами.", e);
+        }
     }
-
 }
