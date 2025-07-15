@@ -68,15 +68,29 @@ public class UserService {
 
     public User getCurrentUser() {
         try {
-            String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal())
-                    .getUsername();
-            System.out.println("Текущий пользователь: " + username);
+            Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '" + username + "' не найден"));
-        } catch (Exception ex) {
-            System.err.println("Ошибка получения текущего пользователя: " + ex.getMessage());
-            throw new RuntimeException("Не удалось определить текущего пользователя.", ex);
+            // Проверяем, является ли principal строкой (имя пользователя)
+            if (principal instanceof String username) {
+                System.out.println("Имя текущего пользователя: " + username);
+
+                return userRepository.findByUsername(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '" + username + "' не найден."));
+            }
+
+            // Если principal - это UserDetails
+            if (principal instanceof UserDetails userDetails) {
+                System.out.println("Детали текущего пользователя: " + userDetails.getUsername());
+
+                return userRepository.findByUsername(userDetails.getUsername())
+                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '" + userDetails.getUsername() + "' не найден."));
+            }
+
+            throw new IllegalStateException("Принципал содержит недопустимый объект: " + principal.getClass());
+        } catch (Exception e) {
+            System.err.println("Ошибка получения текущего пользователя: " + e.getMessage());
+            throw new RuntimeException("Не удалось определить текущего пользователя.", e);
         }
     }
+
 }
