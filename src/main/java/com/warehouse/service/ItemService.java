@@ -159,50 +159,55 @@ public Item addItem(Item item) {
         return itemDTOs;
     }
 
-@Transactional
+    @Transactional
     public List<Item> getAllItems() {
-    try {
-        // Получаем текущего пользователя
-        var currentUser = userService.getCurrentUser();
-        if (currentUser == null) {
-            throw new IllegalStateException("Текущий пользователь не найден. Необходимо выполнить вход.");
+        try {
+            // Логируем старт метода
+            System.out.println("Вызов ItemService.getAllItems() начат.");
+
+            // Проверка текущего пользователя
+            var currentUser = userService.getCurrentUser();
+            if (currentUser == null) {
+                throw new IllegalStateException("Текущий пользователь не определен. Авторизация отсутствует.");
+            }
+
+            // Проверка компании текущего пользователя
+            Company currentCompany = currentUser.getCompany();
+            if (currentCompany == null) {
+                throw new IllegalStateException("Компания текущего пользователя не определена. Свяжите пользователя с компанией.");
+            }
+
+            // Логируем ID и имя компании
+            System.out.println("Компания пользователя: ID = " + currentCompany.getId() + ", Name = " + currentCompany.getName());
+
+            // Получаем товары из репозитория
+            List<Item> items = itemRepository.findAllByCompany(currentCompany);
+
+            // Логируем, что было возвращено из репозитория
+            if (items == null) {
+                System.err.println("findAllByCompany вернул null для компании ID: " + currentCompany.getId());
+                return List.of(); // Возвращаем пустой список для предотвращения NPE
+            }
+            System.out.println("Найдено товаров: " + items.size());
+
+            // Если список пустой, предупреждаем, но это не ошибка.
+            if (items.isEmpty()) {
+                System.out.println("Для компании ID: " + currentCompany.getId() + " товары отсутствуют.");
+            }
+
+            return items;
+        } catch (IllegalStateException e) {
+            // Логируем ошибки состояния
+            System.err.println("Ошибка состояния: " + e.getMessage());
+            throw e; // Пробрасываем исключения для обработки в глобальном обработчике
+        } catch (Exception e) {
+            // Логируем любые другие непредвиденные ошибки
+            System.err.println("Внутренняя ошибка при загрузке товаров: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Ошибка при загрузке товаров. Подробности в логах сервера.", e);
         }
-
-        // Получаем компанию пользователя
-        Company currentCompany = currentUser.getCompany();
-        if (currentCompany == null) {
-            throw new IllegalStateException("Компания текущего пользователя не определена. Проверьте настройки пользователя.");
-        }
-
-        System.out.println("Текущая компания ID: " + currentCompany.getId());
-
-// Загружаем товары
-        List<Item> items = itemRepository.findAllByCompany(currentCompany);
-
-        if (items == null) {
-            // Логируем, если вдруг случилось нечто необычное и элементы оказались null
-            System.err.println("Ошибка: метод findAllByCompany вернул null вместо пустого списка.");
-            return List.of(); // Возвращаем пустой список, чтобы избежать NullPointerException
-        }
-
-        if (items.isEmpty()) {
-            // Логируем, если нет подходящих товаров
-            System.out.println("Нет доступных товаров для компании ID: " + currentCompany.getId());
-        }
-
-        return items;
-
-    } catch (IllegalStateException e) {
-        // Логируем ошибки состояния
-        System.err.println("Ошибка состояния при загрузке товаров: " + e.getMessage());
-        throw e;
-    } catch (Exception e) {
-        // Любые другие ошибки
-        System.err.println("Произошла ошибка при загрузке товаров: " + e.getMessage());
-        e.printStackTrace();
-        throw new RuntimeException("Ошибка при загрузке товаров. Обратитесь к администратору.", e);
     }
-}
+
 
 
 
