@@ -13,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 /**
  * Сервис регистрации и подтверждения пользователя.
  */
@@ -43,6 +45,13 @@ public class UserService {
         user.setRole(registrationDTO.getRole());
         user.setEnabled(false);
         user.setCompany(company); // Привязываем компанию к пользователю
+
+        // Устанавливаем пробный период
+        LocalDate now = LocalDate.now();
+        user.setTrialStartDate(now);
+        user.setTrialEndDate(now.plusDays(7)); // Пробный период длится 7 дней
+        user.setPaid(false);
+
 
         // Сохраняем пользователя в базе
         User savedUser = userRepository.save(user);
@@ -100,5 +109,12 @@ public class UserService {
         }
     }
 
+
+    public void updateUserPaymentStatus(Long userId, boolean status) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден!"));
+        user.setPaid(status);
+        userRepository.save(user);
+    }
 
 }

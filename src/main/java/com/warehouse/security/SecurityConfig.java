@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.time.LocalDate;
+
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -23,8 +25,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         http.csrf(csrf -> csrf.disable()) // отключаем CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/confirm").permitAll()
-                        .anyRequest().permitAll()
+                        .requestMatchers("/auth/register", "/auth/confirm", "/payment/**").permitAll()
+                        .requestMatchers("/api/**").authenticated()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
@@ -36,6 +39,13 @@ public class SecurityConfig {
         return username -> {
             var user = userRepository.findByUsername(username).orElseThrow();
             if (!user.isEnabled()) throw new RuntimeException("Пожалуйста, подтвердите email");
+
+            // Проверка пробного периода и оплаты
+            LocalDate now = LocalDate.now();
+            if (!user.isPaid() && (user.getTrialEndDate() == null || now.isAfter(user.getTrialEndDate()))) {
+                throw new RuntimeException("Ваш пробный период истёк. Пожалуйста, оплатите доступ.");
+            }
+
             return org.springframework.security.core.userdetails.User
                     .withUsername(user.getUsername())
                     .password(user.getPassword())

@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 
 @Entity
 @Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email") })
@@ -26,6 +29,10 @@ public class User {
     private boolean enabled = false; // активен после подтверждения email
 
     private String confirmationCode;
+
+    private LocalDate trialStartDate;
+    private LocalDate  trialEndDate;
+    private boolean isPaid;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
