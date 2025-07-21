@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+
 @RestController
 @RequestMapping("/payment")
 @RequiredArgsConstructor
@@ -24,16 +26,20 @@ public class PaymentController {
 
     @GetMapping("/success")
     public ResponseEntity<?> paymentSuccess(@RequestParam Long userId) {
-        // Проверяем наличие пользователя
         User user = userService.getUserById(userId);
         if (user == null) {
             return ResponseEntity.status(404).body("Пользователь не найден.");
         }
 
-        // Статус подписки
-        userService.updateUserPaymentStatus(userId, true);
-        return ResponseEntity.ok("Подписка успешно активирована.");
+        // Продление подписки или установка новой даты оплаты
+        LocalDate newEndDate = LocalDate.now().plusMonths(1); // Допустим, подписка на 1 месяц
+        user.setPaid(true);
+        user.setTrialEndDate(newEndDate);
+        userService.saveUser(user);
+
+        return ResponseEntity.ok("Подписка успешно продлена до " + newEndDate);
     }
+
 
 
     @GetMapping("/cancel")
