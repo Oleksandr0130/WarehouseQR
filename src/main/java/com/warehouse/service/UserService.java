@@ -122,4 +122,7 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("Пользователь с ID " + userId + " не найден."));
     }
 
+    public User saveUser(User user) {
+        return userRepository.save(user);
+    }
 }
