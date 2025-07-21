@@ -35,15 +35,9 @@ spring:
 app:
   qrcode-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/qrcodes/
   reservation-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/reservation/
-  base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/
 server:
   servlet:
     context-path: /api
-
-stripe:
-  api:
-    key: sk_test_51RnJuqD8IZD1nmoxpSWZWx9Wqkj2Zmw3vpMDENF2RzNNt9gvnydrlAmd6mywJsmyYX2sODmwYqW53G7Rk4VZqNKW00UqruGbXS
-    currency: euro
 
 key:
   access: ${KEY_ACCESS}
