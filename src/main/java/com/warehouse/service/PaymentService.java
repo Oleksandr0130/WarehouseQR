@@ -28,7 +28,7 @@ public class PaymentService {
                                 .setQuantity(1L)
                                 .setPriceData(
                                         SessionCreateParams.LineItem.PriceData.builder()
-                                                .setCurrency("usd")
+                                                .setCurrency("euro")
                                                 .setUnitAmount((long) amount * 100) // Сумма в центах
                                                 .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
                                                         .setName("Pro Account Subscription")

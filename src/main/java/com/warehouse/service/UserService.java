@@ -117,4 +117,9 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь с ID " + userId + " не найден."));
+    }
+
 }
