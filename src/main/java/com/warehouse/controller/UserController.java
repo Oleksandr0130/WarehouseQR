@@ -31,13 +31,19 @@ public class UserController {
         response.put("trialEndDate", user.getTrialEndDate());
 
         LocalDate today = LocalDate.now();
+        LocalDate threeDaysBeforeTrialEnd = user.getTrialEndDate() != null ? user.getTrialEndDate().minusDays(3) : null;
 
         if (user.isPaid()) {
             response.put("message", "Подписка активна.");
             response.put("status", "active");
         } else if (user.getTrialEndDate() != null && today.isBefore(user.getTrialEndDate())) {
-            response.put("message", "Пробный период активен.");
-            response.put("status", "trial");
+            if (threeDaysBeforeTrialEnd != null && !today.isBefore(threeDaysBeforeTrialEnd)) {
+                response.put("message", "Пробный период скоро истекает.");
+                response.put("status", "trial_ending_soon");
+            } else {
+                response.put("message", "Пробный период активен.");
+                response.put("status", "trial");
+            }
         } else {
             response.put("message", "Пробный период истёк или отсутствует.");
             response.put("status", "expired");
@@ -45,6 +51,4 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
-
-
 }
