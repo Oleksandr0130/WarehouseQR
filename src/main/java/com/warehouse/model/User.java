@@ -32,6 +32,7 @@ public class User {
 
     private LocalDate trialStartDate;
     private LocalDate  trialEndDate;
+    @Column(name = "is_paid", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     private boolean isPaid;
 
     @ManyToOne(fetch = FetchType.LAZY)
