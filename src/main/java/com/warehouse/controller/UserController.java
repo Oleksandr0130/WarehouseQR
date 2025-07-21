@@ -30,23 +30,19 @@ public class UserController {
         response.put("trialStartDate", user.getTrialStartDate());
         response.put("trialEndDate", user.getTrialEndDate());
 
-        // Проверяем, истек ли пробный период
         LocalDate today = LocalDate.now();
-        if (!user.isPaid() && (user.getTrialEndDate() == null || today.isAfter(user.getTrialEndDate()))) {
-            response.put("message", "Ваш пробный период истёк. Подпишитесь, чтобы продолжить пользоваться системой.");
+
+        if (user.isPaid()) {
+            response.put("message", "Подписка активна.");
+            response.put("status", "active");
+        } else if (user.getTrialEndDate() != null && today.isBefore(user.getTrialEndDate())) {
+            response.put("message", "Пробный период активен.");
+            response.put("status", "trial");
+        } else {
+            response.put("message", "Пробный период истёк или отсутствует.");
             response.put("status", "expired");
-            return ResponseEntity.status(403).body(response); // Отправляем статус 403
         }
 
-        if (user.getTrialEndDate() == null && !user.isPaid()) {
-            response.put("message", "Информация о пробном периоде отсутствует. Подпишитесь, чтобы получить доступ.");
-            response.put("status", "expired");
-            return ResponseEntity.status(403).body(response);
-        }
-
-
-        response.put("message", user.isPaid() ? "Подписка оплачена." : "Пробный период активен.");
-        response.put("status", user.isPaid() ? "active" : "trial");
         return ResponseEntity.ok(response);
     }
 
