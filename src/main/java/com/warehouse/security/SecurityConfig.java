@@ -20,15 +20,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
-    private final UserService userService;
-    private final CompanyService companyService;
+    private final CompanyService companyService; // Для фильтрации подписок
+    private final UserService userService; // Для фильтрации аутентификации
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
-        http.csrf(csrf -> csrf.disable()) // отключаем CSRF
+        // Настройка цепочки безопасности
+        http.csrf(csrf -> csrf.disable()) // Отключаем CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService(), userService, companyService),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
@@ -37,15 +38,17 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> {
-            var user = userRepository.findByUsername(username).orElseThrow();
-            if (!user.isEnabled()) throw new RuntimeException("Пожалуйста, подтвердите email");
-            return org.springframework.security.core.userdetails.User
-                    .withUsername(user.getUsername())
-                    .password(user.getPassword())
-                    .roles(user.getRole().replace("ROLE_", ""))
-                    .build();
-        };
+        // Обходим использование UserService
+        return username -> userRepository.findByUsername(username)
+                .map(user -> {
+                    if (!user.isEnabled()) throw new RuntimeException("Пожалуйста, подтвердите email.");
+                    return org.springframework.security.core.userdetails.User
+                            .withUsername(user.getUsername())
+                            .password(user.getPassword())
+                            .roles(user.getRole().replace("ROLE_", ""))
+                            .build();
+                })
+                .orElseThrow(() -> new RuntimeException("Пользователь с именем " + username + " не найден."));
     }
 
     @Bean
