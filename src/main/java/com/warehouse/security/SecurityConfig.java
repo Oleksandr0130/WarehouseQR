@@ -36,15 +36,16 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByUsername(username)
+        return username -> userRepository.findByUsernameWithCompany(username) // Используем метод с JOIN FETCH
                 .map(user -> {
                     if (!user.isEnabled()) {
                         throw new RuntimeException("Пожалуйста, подтвердите email.");
                     }
-                    return new CustomUserDetails(user); // Ваш кастомный UserDetails с объектом User
+                    return new CustomUserDetails(user); // Кастомный UserDetails
                 })
                 .orElseThrow(() -> new RuntimeException("Пользователь с именем " + username + " не найден."));
     }
+
 
 
     @Bean

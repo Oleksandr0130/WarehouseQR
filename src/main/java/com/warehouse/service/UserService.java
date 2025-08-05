@@ -80,6 +80,7 @@ public class UserService {
             }
 
             if (principal instanceof CustomUserDetails customUserDetails) {
+                // Пользователь с загруженной компанией
                 return customUserDetails.getUser();
             }
 
@@ -89,6 +90,7 @@ public class UserService {
             throw new RuntimeException("Не удалось определить текущего пользователя.", e);
         }
     }
+
 
 
 
