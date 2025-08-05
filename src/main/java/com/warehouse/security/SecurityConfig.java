@@ -36,18 +36,16 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        // Обходим использование UserService
         return username -> userRepository.findByUsername(username)
                 .map(user -> {
-                    if (!user.isEnabled()) throw new RuntimeException("Пожалуйста, подтвердите email.");
-                    return org.springframework.security.core.userdetails.User
-                            .withUsername(user.getUsername())
-                            .password(user.getPassword())
-                            .roles(user.getRole().replace("ROLE_", ""))
-                            .build();
+                    if (!user.isEnabled()) {
+                        throw new RuntimeException("Пожалуйста, подтвердите email.");
+                    }
+                    return new CustomUserDetails(user); // Ваш кастомный UserDetails с объектом User
                 })
                 .orElseThrow(() -> new RuntimeException("Пользователь с именем " + username + " не найден."));
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

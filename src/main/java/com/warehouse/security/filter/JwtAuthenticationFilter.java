@@ -2,6 +2,7 @@ package com.warehouse.security.filter;
 
 import com.warehouse.model.Company;
 import com.warehouse.model.User;
+import com.warehouse.security.CustomUserDetails;
 import com.warehouse.security.service.JwtTokenProvider;
 import com.warehouse.service.CompanyService;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,18 +47,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Загрузка данных пользователя через UserDetailsService
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-                // Получение текущего пользователя через UserService
-                User user = ((User) userDetails); // Приведение userDetails, если используется ваш кастомный UserDetails
-                Long companyId = user.getCompany().getId(); // Получение идентификатора компании
+                // Преобразуем к CustomUserDetails
+                CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
 
-                // Проверка подписки компании
-                Company company = companyService.findById(companyId)
-                        .orElseThrow(() -> new RuntimeException("Компания с ID " + companyId + " не найдена."));
-
+                // Получаем текущего пользователя и компанию
+                Company company = customUserDetails.getCompany();
                 if (!companyService.isSubscriptionActive(company)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Подписка компании истекла. Пожалуйста, обновите подписку.");
                     return;
                 }
+
 
 
                 // Установка аутентификационного контекста

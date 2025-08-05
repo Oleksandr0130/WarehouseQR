@@ -5,6 +5,7 @@ import com.warehouse.model.User;
 import com.warehouse.model.dto.UserRegistrationDTO;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
+import com.warehouse.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -73,26 +74,13 @@ public class UserService {
         try {
             Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-            // Проверка на анонимного пользователя
             if (principal.equals("anonymousUser") ||
                     SecurityContextHolder.getContext().getAuthentication() instanceof AnonymousAuthenticationToken) {
                 throw new IllegalStateException("Пожалуйста, выполните вход.");
             }
 
-            // Если principal - это строка (имя пользователя)
-            if (principal instanceof String username) {
-                System.out.println("Имя текущего пользователя: " + username);
-
-                return userRepository.findByUsername(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '" + username + "' не найден."));
-            }
-
-            // Если principal - это UserDetails
-            if (principal instanceof UserDetails userDetails) {
-                System.out.println("Детали текущего пользователя: " + userDetails.getUsername());
-
-                return userRepository.findByUsername(userDetails.getUsername())
-                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '" + userDetails.getUsername() + "' не найден."));
+            if (principal instanceof CustomUserDetails customUserDetails) {
+                return customUserDetails.getUser();
             }
 
             throw new IllegalStateException("Принципал содержит недопустимый объект: " + principal.getClass());
@@ -101,6 +89,7 @@ public class UserService {
             throw new RuntimeException("Не удалось определить текущего пользователя.", e);
         }
     }
+
 
 
     public Optional<User> findByUsername(String username) {
