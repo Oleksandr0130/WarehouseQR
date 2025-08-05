@@ -4,6 +4,8 @@ package com.warehouse.security;
 import com.warehouse.repository.UserRepository;
 import com.warehouse.security.filter.JwtAuthenticationFilter;
 import com.warehouse.security.service.JwtTokenProvider;
+import com.warehouse.service.CompanyService;
+import com.warehouse.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final UserService userService;
+    private final CompanyService companyService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
@@ -26,7 +30,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .anyRequest().permitAll()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService(), userService, companyService),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
