@@ -5,6 +5,9 @@ import com.warehouse.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Service
 public class CompanyService {
@@ -29,9 +32,28 @@ public class CompanyService {
                     company.setName(normalizedName);
                     company.setIdentifier(generateIdentifier(normalizedName)); // Генерация уникального идентификатора
                     company.setEnabled(true); // Сразу активируем компанию
+                    company.setRegistrationDate(LocalDate.now());
+                    company.setSubscriptionEndDate(LocalDate.now().plusDays(5)); // 5-дневный триал
+
                     return companyRepository.save(company);
                 });
     }
+
+    public boolean isSubscriptionActive(Company company) {
+        return company.getSubscriptionEndDate() != null && company.getSubscriptionEndDate().isAfter(LocalDate.now());
+    }
+    public void extendSubscription(Company company, int additionalDays) {
+        company.setSubscriptionEndDate(company.getSubscriptionEndDate().plusDays(additionalDays));
+        companyRepository.save(company);
+    }
+
+    /**
+     * Поиск компании по ID.
+     */
+    public Optional<Company> findById(Long id) {
+        return companyRepository.findById(id);
+    }
+
 
     /**
      * Генератор уникального идентификатора компании.

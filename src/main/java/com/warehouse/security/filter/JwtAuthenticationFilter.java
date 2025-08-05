@@ -1,9 +1,14 @@
 package com.warehouse.security.filter;
 
+import com.warehouse.model.Company;
+import com.warehouse.model.User;
 import com.warehouse.security.service.JwtTokenProvider;
+import com.warehouse.service.CompanyService;
+import com.warehouse.service.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,10 +29,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
+    private final UserService userService;
+    private final CompanyService companyService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService, UserService userService, CompanyService companyService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
+        this.userService = userService;
+        this.companyService = companyService;
     }
 
     @Override
@@ -38,6 +47,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 String username = jwtTokenProvider.getUsername(token);
+                User user = userService.findByUsername(username)
+                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '\" + username + \"' не найден.\n"));
+
+                Company company = user.getCompany();
+
+                // Проверка подписки компании
+                if (company != null && !companyService.isSubscriptionActive(company)) {
+                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Подписка компании истекла. Пожалуйста, обновите подписку.");
+                    return;
+                }
+
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());

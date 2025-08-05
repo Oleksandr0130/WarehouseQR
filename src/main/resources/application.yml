@@ -54,3 +54,7 @@ messages:
 
 jwt:
   secret: ${JWT_SECRET}
+
+stripe:
+  public-key: ${STRIPE_PUBLIC_KEY}
+  secret-key: ${STRIPE_SECRET_KEY}

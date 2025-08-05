@@ -54,4 +54,26 @@ public class EmailService {
             throw new RuntimeException(e);
         }
     }
+
+    public void sendGenericEmail(String email, String subject, String message) {
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            String fromAddress = System.getenv("MAIL_USERNAME"); // Отправить от имени MAIL_USERNAME
+            if (fromAddress == null) {
+                throw new IllegalStateException("Переменная окружения MAIL_USERNAME не установлена");
+            }
+
+            helper.setFrom(fromAddress);
+            helper.setTo(email);
+            helper.setSubject(subject);
+            helper.setText(message, true);
+
+            mailSender.send(mimeMessage); // Отправка сообщения через JavaMailSender
+        } catch (MessagingException e) {
+            throw new RuntimeException("Ошибка при отправке email", e);
+        }
+    }
+
 }
