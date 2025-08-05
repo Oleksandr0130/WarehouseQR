@@ -4,13 +4,10 @@ import com.warehouse.model.Company;
 import com.warehouse.model.User;
 import com.warehouse.security.service.JwtTokenProvider;
 import com.warehouse.service.CompanyService;
-import com.warehouse.service.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -29,13 +26,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final UserService userService;
     private final CompanyService companyService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService, UserService userService, CompanyService companyService) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService, CompanyService companyService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
-        this.userService = userService;
         this.companyService = companyService;
     }
 
@@ -47,18 +42,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 String username = jwtTokenProvider.getUsername(token);
-                User user = userService.findByUsername(username)
-                        .orElseThrow(() -> new UsernameNotFoundException("Пользователь с именем '\" + username + \"' не найден.\n"));
 
-                Company company = user.getCompany();
+                // Загрузка данных пользователя через UserDetailsService
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                // Получение текущего пользователя через UserService
+                User user = ((User) userDetails); // Приведение userDetails, если используется ваш кастомный UserDetails
+                Long companyId = user.getCompany().getId(); // Получение идентификатора компании
 
                 // Проверка подписки компании
-                if (company != null && !companyService.isSubscriptionActive(company)) {
+                Company company = companyService.findById(companyId)
+                        .orElseThrow(() -> new RuntimeException("Компания с ID " + companyId + " не найдена."));
+
+                if (!companyService.isSubscriptionActive(company)) {
                     response.sendError(HttpServletResponse.SC_FORBIDDEN, "Подписка компании истекла. Пожалуйста, обновите подписку.");
                     return;
                 }
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                // Установка аутентификационного контекста
+
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

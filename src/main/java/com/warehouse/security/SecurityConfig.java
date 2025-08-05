@@ -21,8 +21,6 @@ public class SecurityConfig {
 
     private final UserRepository userRepository;
     private final CompanyService companyService; // Для фильтрации подписок
-    private final UserService userService; // Для фильтрации аутентификации
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         // Настройка цепочки безопасности
@@ -31,7 +29,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService(), userService, companyService),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService(), companyService),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
