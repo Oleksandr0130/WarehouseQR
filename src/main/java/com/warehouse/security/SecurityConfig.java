@@ -4,8 +4,6 @@ package com.warehouse.security;
 import com.warehouse.repository.UserRepository;
 import com.warehouse.security.filter.JwtAuthenticationFilter;
 import com.warehouse.security.service.JwtTokenProvider;
-import com.warehouse.service.CompanyService;
-import com.warehouse.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,34 +18,31 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
-    private final CompanyService companyService; // Для фильтрации подписок
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
-        // Настройка цепочки безопасности
-        http.csrf(csrf -> csrf.disable()) // Отключаем CSRF
+        http.csrf(csrf -> csrf.disable()) // отключаем CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/").permitAll()
-                        .requestMatchers("/auth/register", "/auth/confirm","/public/**","/error").permitAll()
+                        .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .anyRequest().permitAll()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService(), companyService),
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> userRepository.findByUsernameWithCompany(username) // Используем метод с JOIN FETCH
-                .map(user -> {
-                    if (!user.isEnabled()) {
-                        throw new RuntimeException("Пожалуйста, подтвердите email.");
-                    }
-                    return new CustomUserDetails(user); // Кастомный UserDetails
-                })
-                .orElseThrow(() -> new RuntimeException("Пользователь с именем " + username + " не найден."));
+        return username -> {
+            var user = userRepository.findByUsername(username).orElseThrow();
+            if (!user.isEnabled()) throw new RuntimeException("Пожалуйста, подтвердите email");
+            return org.springframework.security.core.userdetails.User
+                    .withUsername(user.getUsername())
+                    .password(user.getPassword())
+                    .roles(user.getRole().replace("ROLE_", ""))
+                    .build();
+        };
     }
-
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

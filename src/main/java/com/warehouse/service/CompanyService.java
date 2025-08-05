@@ -1,13 +1,9 @@
 package com.warehouse.service;
 
 import com.warehouse.model.Company;
-import com.warehouse.model.dto.CompanyDTO;
 import com.warehouse.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -33,41 +29,9 @@ public class CompanyService {
                     company.setName(normalizedName);
                     company.setIdentifier(generateIdentifier(normalizedName)); // Генерация уникального идентификатора
                     company.setEnabled(true); // Сразу активируем компанию
-                    company.setRegistrationDate(LocalDate.now());
-                    company.setSubscriptionEndDate(LocalDate.now().plusDays(5)); // 5-дневный триал
-
                     return companyRepository.save(company);
                 });
     }
-
-    public boolean isSubscriptionActive(Company company) {
-        if (company.getSubscriptionEndDate() == null) {
-            return false; // Подписка закончена если нет даты
-        }
-        return !LocalDate.now().isAfter(company.getSubscriptionEndDate());
-    }
-
-
-    public boolean isSubscriptionActive(CompanyDTO companyDTO) {
-        if (companyDTO.getSubscriptionEndDate() == null) {
-            return false;
-        }
-        return !LocalDate.now().isAfter(companyDTO.getSubscriptionEndDate());
-    }
-
-    public void extendSubscription(Company company, int additionalDays) {
-        company.setSubscriptionEndDate(company.getSubscriptionEndDate().plusDays(additionalDays));
-        companyRepository.save(company);
-    }
-
-    /**
-     * Поиск компании по ID.
-     */
-    public Optional<Company> findById(Long companyId) {
-        return companyRepository.findById(companyId);
-    }
-
-
 
     /**
      * Генератор уникального идентификатора компании.

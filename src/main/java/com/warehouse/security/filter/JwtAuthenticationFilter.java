@@ -1,14 +1,11 @@
 package com.warehouse.security.filter;
 
-import com.warehouse.model.Company;
-import com.warehouse.model.User;
-import com.warehouse.security.CustomUserDetails;
 import com.warehouse.security.service.JwtTokenProvider;
-import com.warehouse.service.CompanyService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -27,12 +24,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final UserDetailsService userDetailsService;
-    private final CompanyService companyService;
 
-    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService, CompanyService companyService) {
+    public JwtAuthenticationFilter(JwtTokenProvider jwtTokenProvider, UserDetailsService userDetailsService) {
         this.jwtTokenProvider = jwtTokenProvider;
         this.userDetailsService = userDetailsService;
-        this.companyService = companyService;
     }
 
     @Override
@@ -43,24 +38,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             if (token != null && jwtTokenProvider.validateToken(token)) {
                 String username = jwtTokenProvider.getUsername(token);
-
-                // Загрузка данных пользователя через UserDetailsService
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-                // Преобразуем к CustomUserDetails
-                CustomUserDetails customUserDetails = (CustomUserDetails) userDetails;
-
-                // Получаем текущего пользователя и компанию
-                Company company = customUserDetails.getCompany();
-                if (!companyService.isSubscriptionActive(company)) {
-                    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Подписка компании истекла. Пожалуйста, обновите подписку.");
-                    return;
-                }
-
-
-
-                // Установка аутентификационного контекста
-
                 UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

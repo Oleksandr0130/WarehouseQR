@@ -54,7 +54,3 @@ messages:
 
 jwt:
   secret: ${JWT_SECRET}
-
-stripe:
-  public-key: pktest51RnJuqD8IZD1nmoxO0OtlG2Jcyb4pWkDBoByk4wF7KKWedvmxBVMHGu6SIin4cwCLXKIiqgdaZzk5RFcMqm4Ywj700Zjbk6FjK
-  secret-key: sktest51RnJuqD8IZD1nmoxpSWZWx9Wqkj2Zmw3vpMDENF2RzNNt9gvnydrlAmd6mywJsmyYX2sODmwYqW53G7Rk4VZqNKW00UqruGbXS
