@@ -26,7 +26,8 @@ public class SecurityConfig {
         // Настройка цепочки безопасности
         http.csrf(csrf -> csrf.disable()) // Отключаем CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/confirm","/auth/login","/public/**").permitAll()
+                        .requestMatchers("/api/").permitAll()
+                        .requestMatchers("/auth/register", "/auth/confirm","/public/**","/error").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService(), companyService),
