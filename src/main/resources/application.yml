@@ -54,8 +54,3 @@ messages:
 
 jwt:
   secret: ${JWT_SECRET}
-
-stripe:
-  secret-key: ${STRIPE_SECRET_KEY}
-  publishable-key: sk_test_51RnJuqD8IZD1nmoxpSWZWx9Wqkj2Zmw3vpMDENF2RzNNt9gvnydrlAmd6mywJsmyYX2sODmwYqW53G7Rk4VZqNKW00UqruGbXS
-  price-id: pk_test_51RnJuqD8IZD1nmoxO0OtlG2Jcyb4pWkDBoByk4wF7KKWedvmxBVMHGu6SIin4cwCLXKIiqgdaZzk5RFcMqm4Ywj700Zjbk6FjK
