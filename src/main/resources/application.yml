@@ -54,3 +54,8 @@ messages:
 
 jwt:
   secret: ${JWT_SECRET}
+
+stripe:
+  secret-key: ${STRIPE_SECRET_KEY}
+  publishable-key: ${STRIPE_PUBLISHABLE_KEY}
+  price-id: ${STRIPE_PRICE_ID}
