@@ -40,8 +40,10 @@ public class UserService {
         user.setUsername(registrationDTO.getUsername());
         user.setEmail(registrationDTO.getEmail());
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
-        user.setRole(registrationDTO.getRole());
+        user.setRole("ROLE_ADMIN");
         user.setEnabled(false);
+        companyService.startTrial(company, 14); // внутри save
+        company.setEnabled(true);
         user.setCompany(company); // Привязываем компанию к пользователю
 
         // Сохраняем пользователя в базе

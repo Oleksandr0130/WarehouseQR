@@ -3,6 +3,7 @@ package com.warehouse.security;
 
 import com.warehouse.repository.UserRepository;
 import com.warehouse.security.filter.JwtAuthenticationFilter;
+import com.warehouse.security.filter.SubscriptionGuardFilter;
 import com.warehouse.security.service.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -18,16 +19,26 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final SubscriptionGuardFilter subscriptionGuardFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         http.csrf(csrf -> csrf.disable()) // отключаем CSRF
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/billing/webhook",
+                                "/api/billing/checkout",
+                                "/api/billing/portal",
+                                "/api/billing/status").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
-                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(subscriptionGuardFilter, JwtAuthenticationFilter.class);
+
         return http.build();
     }
 
