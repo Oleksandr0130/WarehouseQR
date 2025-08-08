@@ -1,10 +1,13 @@
+// Company.java
 package com.warehouse.model;
 
 import jakarta.persistence.*;
 import java.time.Instant;
 
 @Entity
-@Table(name = "companies")
+@Table(name = "companies", indexes = {
+        @Index(name = "idx_company_identifier", columnList = "identifier", unique = true)
+})
 public class Company {
 
     @Id
@@ -20,12 +23,16 @@ public class Company {
     private Instant trialStart;
     private Instant trialEnd;
 
-    private Instant currentPeriodEnd; // дата конца платного периода (из Stripe)
+    private Instant currentPeriodEnd;
 
     @Column(name = "payment_customer_id")
-    private String paymentCustomerId; // Stripe Customer ID
+    private String paymentCustomerId;
 
-    // --- getters/setters ---
+    // >>> НОВОЕ ПОЛЕ <<<
+    @Column(name = "identifier", unique = true, length = 64, nullable = false)
+    private String identifier;
+
+    // --- getters / setters ---
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -51,11 +58,12 @@ public class Company {
     public String getPaymentCustomerId() { return paymentCustomerId; }
     public void setPaymentCustomerId(String paymentCustomerId) { this.paymentCustomerId = paymentCustomerId; }
 
+    // >>> НОВЫЕ ГЕТТЕР/СЕТТЕР <<<
+    public String getIdentifier() { return identifier; }
+    public void setIdentifier(String identifier) { this.identifier = identifier; }
+
     @Transient
     public String getSubscriptionStatus() {
-        // ACTIVE — если оплата активна и сейчас до конца оплаченного периода
-        // TRIAL — если идёт триал
-        // иначе EXPIRED
         Instant now = Instant.now();
         if (subscriptionActive && currentPeriodEnd != null && now.isBefore(currentPeriodEnd)) {
             return "ACTIVE";
