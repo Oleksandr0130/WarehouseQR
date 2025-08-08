@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestController
@@ -24,19 +25,30 @@ public class BillingController {
     /** Статус для фронта */
     @GetMapping("/status")
     public ResponseEntity<?> status(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) return ResponseEntity.ok(Map.of("status", "ANON"));
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.ok(Map.of("status", "ANON"));
+        }
 
         var user = userRepository.findByUsername(auth.getName()).orElse(null);
-        if (user == null || user.getCompany() == null) return ResponseEntity.ok(Map.of("status", "NO_COMPANY"));
+        if (user == null || user.getCompany() == null) {
+            return ResponseEntity.ok(Map.of("status", "NO_COMPANY"));
+        }
 
         var c = user.getCompany();
-        return ResponseEntity.ok(Map.of(
-                "status", c.getSubscriptionStatus(),
-                "trialEnd", c.getTrialEnd(),
-                "currentPeriodEnd", c.getCurrentPeriodEnd(),
-                "daysLeft", companyService.daysLeft(c),
-                "isAdmin", "ROLE_ADMIN".equals(user.getRole())
-        ));
+
+        // ВАЖНО: Map.of нельзя использовать с null -> используем LinkedHashMap
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", c.getSubscriptionStatus()); // TRIAL/ACTIVE/EXPIRED
+        if (c.getTrialEnd() != null) {
+            body.put("trialEnd", c.getTrialEnd());
+        }
+        if (c.getCurrentPeriodEnd() != null) {
+            body.put("currentPeriodEnd", c.getCurrentPeriodEnd());
+        }
+        body.put("daysLeft", companyService.daysLeft(c)); // всегда число
+        body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
+
+        return ResponseEntity.ok(body);
     }
 
     /** Создаём «сессию оплаты». Пока фейковый URL — страницу настроишь позже (Stripe/CloudPayments/…)
