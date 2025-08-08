@@ -35,6 +35,12 @@ spring:
 app:
   qrcode-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/qrcodes/
   reservation-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/reservation/
+  billing:
+    frontend-base-url: ${FRONTEND_BASE_URL}
+  stripe:
+    api-key: ${STRIPE_API_KEY}
+    price-id: ${STRIPE_PRICE_ID}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET}
 server:
   servlet:
     context-path: /api

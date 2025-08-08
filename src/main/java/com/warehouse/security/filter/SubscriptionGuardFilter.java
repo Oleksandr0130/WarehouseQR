@@ -10,66 +10,58 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Set;
 
-@Component
 @RequiredArgsConstructor
 public class SubscriptionGuardFilter extends OncePerRequestFilter {
 
-    private final CompanyService companyService;
     private final UserRepository userRepository;
+    private final CompanyService companyService;
 
     private static final Set<String> ALLOWLIST = Set.of(
-            "/auth",           // логин/регистрация/refresh
-            "/billing/checkout",
-            "/billing/webhook",
-            "/billing/portal",
-            "/billing/status"  // фронту нужно
+            "/auth", "/billing/checkout", "/billing/webhook", "/billing/portal", "/billing/status"
     );
 
     @Override
-    protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain) throws ServletException, IOException {
 
-        String path = req.getRequestURI();
+        String path = request.getServletPath(); // важно: без /api
 
-        // пускаем системные и публичные урлы
+        // Разрешённые пути (auth, billing)
         for (String prefix : ALLOWLIST) {
             if (path.startsWith(prefix)) {
-                chain.doFilter(req, res);
+                chain.doFilter(request, response);
                 return;
             }
         }
 
+        // Если не авторизован — пропускаем (пусть отработает Security)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
-            chain.doFilter(req, res);
+            chain.doFilter(request, response);
             return;
         }
 
         String username = auth.getName();
         User user = userRepository.findByUsername(username).orElse(null);
         if (user == null || user.getCompany() == null) {
-            chain.doFilter(req, res);
+            chain.doFilter(request, response);
             return;
         }
 
-        var company = user.getCompany();
-        if (!companyService.isCompanyAccessAllowed(company)) {
-            res.setStatus(402); // Payment Required
-            res.setContentType("application/json");
-            res.getWriter().write("""
-               {"error":"subscription_required",
-                "message":"Подписка компании истекла. Продлите, чтобы продолжить.",
-                "action":"/api/billing/checkout"}
-            """);
+        // Проверка доступа компании
+        if (!companyService.isCompanyAccessAllowed(user.getCompany())) {
+            response.setStatus(402); // Payment Required
+            response.setContentType("application/json; charset=UTF-8");
+            response.getWriter().write("{\"error\":\"payment_required\",\"message\":\"subscription_expired\"}");
             return;
         }
 
-        chain.doFilter(req, res);
+        chain.doFilter(request, response);
     }
 }

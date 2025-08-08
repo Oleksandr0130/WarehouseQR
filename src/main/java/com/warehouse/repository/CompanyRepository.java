@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
     // Метод для поиска компании по имени (нечувствителен к регистру)
     Optional<Company> findByNameIgnoreCase(String name);
+    Optional<Company> findByPaymentCustomerId(String paymentCustomerId);
+
 }
 
 

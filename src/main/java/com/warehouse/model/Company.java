@@ -1,49 +1,68 @@
 package com.warehouse.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.time.Instant;
 
 @Entity
 @Table(name = "companies")
-@Data
-@NoArgsConstructor
 public class Company {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Стратегия генерации идентификаторов
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false) // Уникальное название компании
     private String name;
 
-    @Column(unique = true, nullable = false) // Уникальный идентификатор компании (может быть опциональным)
-    private String identifier;
+    private boolean enabled;
 
-    private boolean enabled = false; // Активность компании
+    private boolean subscriptionActive;
 
-    // новая логика подписки
-    private Instant trialStart;           // начало пробного периода
-    private Instant trialEnd;             // конец пробного периода
-    private boolean subscriptionActive;   // флаг активной подписки
-    private String stripeCustomerId;      // ID клиента в Stripe
-    private String stripeSubscriptionId;  // ID подписки в Stripe
-    private Instant currentPeriodEnd; // конец текущего оплаченного периода (если оплачено)
+    private Instant trialStart;
+    private Instant trialEnd;
 
-    // удобно иметь геттер статуса
+    private Instant currentPeriodEnd; // дата конца платного периода (из Stripe)
+
+    @Column(name = "payment_customer_id")
+    private String paymentCustomerId; // Stripe Customer ID
+
+    // --- getters/setters ---
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getName() {return name;}
+    public void setName(String name) { this.name = name; }
+
+    public boolean isEnabled() {return enabled;}
+    public void setEnabled(boolean enabled) { this.enabled = enabled; }
+
+    public boolean isSubscriptionActive() { return subscriptionActive; }
+    public void setSubscriptionActive(boolean subscriptionActive) { this.subscriptionActive = subscriptionActive; }
+
+    public Instant getTrialStart() { return trialStart; }
+    public void setTrialStart(Instant trialStart) { this.trialStart = trialStart; }
+
+    public Instant getTrialEnd() { return trialEnd; }
+    public void setTrialEnd(Instant trialEnd) { this.trialEnd = trialEnd; }
+
+    public Instant getCurrentPeriodEnd() { return currentPeriodEnd; }
+    public void setCurrentPeriodEnd(Instant currentPeriodEnd) { this.currentPeriodEnd = currentPeriodEnd; }
+
+    public String getPaymentCustomerId() { return paymentCustomerId; }
+    public void setPaymentCustomerId(String paymentCustomerId) { this.paymentCustomerId = paymentCustomerId; }
+
     @Transient
     public String getSubscriptionStatus() {
+        // ACTIVE — если оплата активна и сейчас до конца оплаченного периода
+        // TRIAL — если идёт триал
+        // иначе EXPIRED
         Instant now = Instant.now();
         if (subscriptionActive && currentPeriodEnd != null && now.isBefore(currentPeriodEnd)) {
             return "ACTIVE";
         }
-        if (trialStart != null && trialEnd != null) {
-            if (now.isBefore(trialEnd)) return "TRIAL";
+        if (trialEnd != null && now.isBefore(trialEnd)) {
+            return "TRIAL";
         }
-        // можно потом расширить PAST_DUE/GRACE
         return "EXPIRED";
     }
 }
-
