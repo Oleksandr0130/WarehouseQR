@@ -27,7 +27,7 @@ public class User {
 
     private String confirmationCode;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company; // Указание на компанию, к которой привязан пользователь
 }

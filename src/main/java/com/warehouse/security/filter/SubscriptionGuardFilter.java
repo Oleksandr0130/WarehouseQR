@@ -24,11 +24,11 @@ public class SubscriptionGuardFilter extends OncePerRequestFilter {
     private final UserRepository userRepository;
 
     private static final Set<String> ALLOWLIST = Set.of(
-            "/api/auth",           // логин/регистрация/refresh
-            "/api/billing/checkout",
-            "/api/billing/webhook",
-            "/api/billing/portal",
-            "/api/billing/status"  // фронту нужно
+            "/auth",           // логин/регистрация/refresh
+            "/billing/checkout",
+            "/billing/webhook",
+            "/billing/portal",
+            "/billing/status"  // фронту нужно
     );
 
     @Override

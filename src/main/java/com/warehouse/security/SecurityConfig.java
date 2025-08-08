@@ -28,11 +28,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .requestMatchers(
-                                "/api/auth/**",
-                                "/api/billing/webhook",
-                                "/api/billing/checkout",
-                                "/api/billing/portal",
-                                "/api/billing/status").permitAll()
+                                "/auth/**",
+                                "/billing/webhook",
+                                "/billing/checkout",
+                                "/billing/portal",
+                                "/billing/status").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),

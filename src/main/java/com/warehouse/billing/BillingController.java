@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/billing")
+@RequestMapping("/billing")
 @RequiredArgsConstructor
 public class BillingController {
 
