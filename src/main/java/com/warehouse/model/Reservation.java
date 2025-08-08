@@ -21,6 +21,7 @@ public class Reservation {
     private String status;     // Статус резервации ("RESERVED", "SOLD")
     private LocalDateTime saleDate;
     @Lob // Для хранения длинных строк (Base64 содержимого QR-кода)
+    @Column(name = "qr_code")
     private byte[] qrCode; // QR-код резервации в формате Base64
 
     @ManyToOne(fetch = FetchType.LAZY)

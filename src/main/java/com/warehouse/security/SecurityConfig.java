@@ -5,6 +5,7 @@ import com.warehouse.repository.UserRepository;
 import com.warehouse.security.filter.JwtAuthenticationFilter;
 import com.warehouse.security.filter.SubscriptionGuardFilter;
 import com.warehouse.security.service.JwtTokenProvider;
+import com.warehouse.service.CompanyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 public class SecurityConfig {
 
     private final UserRepository userRepository;
+    private final CompanyService companyService;
     private final JwtTokenProvider jwtTokenProvider;
     private final SubscriptionGuardFilter subscriptionGuardFilter;
 
@@ -40,6 +42,11 @@ public class SecurityConfig {
                 .addFilterAfter(subscriptionGuardFilter, JwtAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    @Bean
+    public SubscriptionGuardFilter subscriptionGuardFilter() {
+        return new SubscriptionGuardFilter(userRepository, companyService);
     }
 
     @Bean

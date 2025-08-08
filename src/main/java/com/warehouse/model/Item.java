@@ -14,6 +14,7 @@ public class Item {
     private int quantity;
     private int sold;
     @Lob // Для хранения больших данных, добавляем аннотацию
+    @Column(name = "qr_code")
     private byte[] qrCode; // QR-код теперь хранится как массив байт
 
     @ManyToOne(fetch = FetchType.LAZY)
