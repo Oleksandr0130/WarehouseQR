@@ -22,7 +22,7 @@ public class SecurityConfig {
     private final UserRepository userRepository;
     private final CompanyService companyService;
     private final JwtTokenProvider jwtTokenProvider;
-    private final SubscriptionGuardFilter subscriptionGuardFilter;
+
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
@@ -39,7 +39,7 @@ public class SecurityConfig {
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(subscriptionGuardFilter, JwtAuthenticationFilter.class);
+                .addFilterBefore(subscriptionGuardFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
     }
