@@ -13,12 +13,11 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
 public class UserController {
     private final UserService userService;
 
     /** Профиль текущего пользователя */
-    @GetMapping("/me")
+    @GetMapping("/users/me")
     public ResponseEntity<UserDTO> me() {
         User user = userService.getCurrentUser(); // уже есть в сервисе
         UserDTO dto = new UserDTO(
