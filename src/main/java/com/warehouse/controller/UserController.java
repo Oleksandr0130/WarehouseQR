@@ -6,6 +6,7 @@ import com.warehouse.model.dto.UserDTO;
 import com.warehouse.model.dto.UserRegistrationDTO;
 import com.warehouse.service.CompanyService;
 import com.warehouse.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
