@@ -5,6 +5,7 @@ import com.warehouse.model.User;
 import com.warehouse.model.dto.UserRegistrationDTO;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -102,5 +103,34 @@ public class UserService {
         }
     }
 
+    /**
+     * Создать пользователя в своей компании (только для ROLE_ADMIN).
+     * Новому пользователю автоматически ставится роль ROLE_USER.
+     */
+    @Transactional
+    public User createUserByAdmin(String username, String email, String rawPassword) {
+        User current = getCurrentUser();
 
+        if (!"ROLE_ADMIN".equalsIgnoreCase(current.getRole())) {
+            throw new IllegalStateException("Недостаточно прав. Требуется ROLE_ADMIN.");
+        }
+
+        // проверки уникальности в рамках компании (или глобально)
+        if (userRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Пользователь с таким email уже существует");
+        }
+        if (userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("Пользователь с таким именем уже существует");
+        }
+
+        User u = new User();
+        u.setUsername(username);
+        u.setEmail(email);
+        u.setPassword(passwordEncoder.encode(rawPassword));
+        u.setRole("ROLE_USER");                    // фиксированная роль
+        u.setEnabled(true);                        // админ создал — сразу активен
+        u.setCompany(current.getCompany());        // та же компания, что у админа
+
+        return userRepository.save(u);
+    }
 }
