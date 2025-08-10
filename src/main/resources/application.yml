@@ -1,6 +1,6 @@
 spring:
   application:
-    name: WarehouseQrApplication
+    name: FlowQR
   datasource:
     url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=require
     username: ${DB_USER}
