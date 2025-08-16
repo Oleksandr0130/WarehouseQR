@@ -39,8 +39,11 @@ public class BillingController {
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
 
-    @Value("${app.billing.frontend-base-url}")
+    @Value("${app.billing.frontend-base-url-front}")
     private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
+
+    @Value("${app.billing.frontend-base-url}")
+    private String frontendBaseBackend;
 
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
@@ -96,8 +99,8 @@ public class BillingController {
             // 2) Checkout Session (SUBSCRIPTION)
 //            String successUrl = frontendBase + "/?billing=success";
 //            String cancelUrl  = frontendBase + "/?billing=cancel";
-            String successUrl = frontendBase.replaceAll("/$", "") + "/billing/success";
-            String cancelUrl  = frontendBase.replaceAll("/$", "") + "/billing/cancel";
+            String successUrl = frontendBaseBackend.replaceAll("/$", "") + "/billing/success";
+            String cancelUrl  = frontendBaseBackend.replaceAll("/$", "") + "/billing/cancel";
 
             var params = new SessionCreateParams.Builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
