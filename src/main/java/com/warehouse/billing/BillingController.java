@@ -42,6 +42,8 @@ public class BillingController {
     @Value("${app.billing.frontend-base-url}")
     private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
 
+    @Value("${app.billing.backend-base-url")
+    private String backendBase;
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
     public ResponseEntity<?> status(Authentication auth) {
@@ -96,8 +98,8 @@ public class BillingController {
             // 2) Checkout Session (SUBSCRIPTION)
 //            String successUrl = frontendBase + "/?billing=success";
 //            String cancelUrl  = frontendBase + "/?billing=cancel";
-            String successUrl = frontendBase.replaceAll("/$", "") + "/billing/success";
-            String cancelUrl  = frontendBase.replaceAll("/$", "") + "/billing/cancel";
+            String successUrl = backendBase.replaceAll("/$", "") + "/billing/success";
+            String cancelUrl  = backendBase.replaceAll("/$", "") + "/billing/cancel";
 
             var params = new SessionCreateParams.Builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
