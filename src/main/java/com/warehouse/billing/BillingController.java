@@ -39,11 +39,11 @@ public class BillingController {
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
 
-    @Value("${app.billing.frontend-base-url-front}")
+    @Value("${app.billing.frontend-base-url}")
     private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
 
-    @Value("${app.billing.frontend-base-url}")
-    private String frontendBaseBackend;
+    @Value("${app.billing.frontend-base-url-front}")
+    private String frontendBaseFront; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
 
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
@@ -99,8 +99,8 @@ public class BillingController {
             // 2) Checkout Session (SUBSCRIPTION)
 //            String successUrl = frontendBase + "/?billing=success";
 //            String cancelUrl  = frontendBase + "/?billing=cancel";
-            String successUrl = frontendBaseBackend.replaceAll("/$", "") + "/billing/success";
-            String cancelUrl  = frontendBaseBackend.replaceAll("/$", "") + "/billing/cancel";
+            String successUrl = frontendBase.replaceAll("/$", "") + "/billing/success";
+            String cancelUrl  = frontendBase.replaceAll("/$", "") + "/billing/cancel";
 
             var params = new SessionCreateParams.Builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
@@ -258,13 +258,13 @@ public class BillingController {
     // ------------------- REDIRECTS -------------------
     @GetMapping("/cancel")
     public ResponseEntity<Void> cancel() {
-        String target = frontendBase.replaceAll("/$", "") + "/account";
+        String target = frontendBaseFront.replaceAll("/$", "") + "/account";
         return ResponseEntity.status(302).header("Location", target).build();
     }
 
     @GetMapping("/success")
     public ResponseEntity<Void> success() {
-        String target = frontendBase.replaceAll("/$", "") + "/account";
+        String target = frontendBaseFront.replaceAll("/$", "") + "/account";
         return ResponseEntity.status(302).header("Location", target).build();
     }
 }

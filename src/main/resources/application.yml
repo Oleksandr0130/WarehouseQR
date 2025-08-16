@@ -37,7 +37,7 @@ app:
   reservation-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/reservation/
   billing:
     frontend-base-url: ${FRONTEND_BASE_URL}
-    frontend-base-url-front: https://warehouse-qr-app-8adwv.ondigitalocean.app
+    front-base-url-front: https://warehouse-qr-app-8adwv.ondigitalocean.app
   stripe:
     api-key: ${STRIPE_API_KEY}
     price-id: ${STRIPE_PRICE_ID}
