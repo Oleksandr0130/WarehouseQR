@@ -42,9 +42,6 @@ public class BillingController {
     @Value("${app.billing.frontend-base-url}")
     private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
 
-    @Value("${app.billing.frontend-base-url-front}")
-    private String frontendBaseFront; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
-
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
     public ResponseEntity<?> status(Authentication auth) {
@@ -258,13 +255,13 @@ public class BillingController {
     // ------------------- REDIRECTS -------------------
     @GetMapping("/cancel")
     public ResponseEntity<Void> cancel() {
-        String target = frontendBaseFront.replaceAll("/$", "") + "/account";
+        String target = frontendBase.replaceAll("/$", "") + "/account";
         return ResponseEntity.status(302).header("Location", target).build();
     }
 
     @GetMapping("/success")
     public ResponseEntity<Void> success() {
-        String target = frontendBaseFront.replaceAll("/$", "") + "/account";
+        String target = frontendBase.replaceAll("/$", "") + "/account";
         return ResponseEntity.status(302).header("Location", target).build();
     }
 }
