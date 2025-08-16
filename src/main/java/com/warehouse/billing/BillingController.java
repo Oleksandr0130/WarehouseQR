@@ -255,13 +255,13 @@ public class BillingController {
     // ------------------- REDIRECTS -------------------
     @GetMapping("/cancel")
     public ResponseEntity<Void> cancel() {
-        String target = frontendBase.replaceAll("/$", "") + "/users/me";
+        String target = frontendBase.replaceAll("/$", "") + "/account";
         return ResponseEntity.status(302).header("Location", target).build();
     }
 
     @GetMapping("/success")
     public ResponseEntity<Void> success() {
-        String target = frontendBase.replaceAll("/$", "") + "/users/me";
+        String target = frontendBase.replaceAll("/$", "") + "/account";
         return ResponseEntity.status(302).header("Location", target).build();
     }
 }
