@@ -96,8 +96,8 @@ public class BillingController {
             // 2) Checkout Session (SUBSCRIPTION)
 //            String successUrl = frontendBase + "/?billing=success";
 //            String cancelUrl  = frontendBase + "/?billing=cancel";
-            String successUrl = frontendBase + "/billing/success";
-            String cancelUrl  = frontendBase + "/billing/cancel";
+            String successUrl = frontendBase.replaceAll("/$", "") + "/billing/success";
+            String cancelUrl  = frontendBase.replaceAll("/$", "") + "/billing/cancel";
 
             var params = new SessionCreateParams.Builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
