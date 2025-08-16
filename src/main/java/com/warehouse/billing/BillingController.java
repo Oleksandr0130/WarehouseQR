@@ -1,6 +1,7 @@
 package com.warehouse.billing;
 
 import com.stripe.exception.SignatureVerificationException;
+import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;
@@ -53,14 +54,10 @@ public class BillingController {
     @GetMapping("/status")
     public ResponseEntity<?> status(Authentication auth) {
         if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).body(Map.of("error", "unauthorized"));
+            return ResponseEntity.ok(Map.of("status", "ANON"));
         }
 
-        var userOpt = userRepository.findByEmail(auth.getName());
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(404).body(Map.of("error", "user_not_found"));
-        }
-        var user = userOpt.get();
+        var user = userRepository.findByUsername(auth.getName()).orElse(null);
         if (user == null || user.getCompany() == null) {
             return ResponseEntity.ok(Map.of("status", "NO_COMPANY"));
         }
@@ -84,25 +81,23 @@ public class BillingController {
 
         try {
             if (auth == null || !auth.isAuthenticated()) {
+                log.warn("billing/checkout: unauthorized");
                 return ResponseEntity.status(401).body(Map.of("error", "unauthorized"));
             }
 
-            var userOpt = userRepository.findByEmail(auth.getName());
-            if (userOpt.isEmpty()) {
-                return ResponseEntity.status(404).body(Map.of("error", "user_not_found"));
-            }
-            var user = userOpt.get();
-
+            var user = userRepository.findByUsername(auth.getName()).orElseThrow();
             if (!"ROLE_ADMIN".equals(user.getRole())) {
+                log.warn("billing/checkout: forbidden (not admin)");
                 return ResponseEntity.status(403).body(Map.of("error", "admin_only"));
             }
 
             Company company = user.getCompany();
             if (company == null) {
+                log.warn("billing/checkout: no_company");
                 return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
             }
 
-            // 1) Stripe Customer
+            // 1) Customer на уровне company (создаём один раз)
             String customerId = company.getPaymentCustomerId();
             if (customerId == null) {
                 log.info("billing/checkout: creating Stripe customer for company {}", company.getId());
@@ -118,9 +113,10 @@ public class BillingController {
             }
 
             // 2) Checkout Session (SUBSCRIPTION)
-            String backend = backendBase.replaceAll("/$", "");
-            String successUrl = backend + "/billing/success";
-            String cancelUrl  = backend + "/billing/cancel";
+            // CALLBACK-и → на БЭКЕНД, который потом редиректит на фронт.
+            String frontend = frontendBase.replaceAll("/$", "");
+            String successUrl = frontend + "/billing/success";
+            String cancelUrl  = frontend + "/billing/cancel";
 
             log.info("billing/checkout: creating session (priceId={}, success={}, cancel={})",
                     priceId, successUrl, cancelUrl);
@@ -132,7 +128,7 @@ public class BillingController {
                     .setCancelUrl(cancelUrl)
                     .addLineItem(
                             new SessionCreateParams.LineItem.Builder()
-                                    .setPrice(priceId)
+                                    .setPrice(priceId) // ВАЖНО: price_..., не prod_...
                                     .setQuantity(1L)
                                     .build()
                     )
@@ -142,13 +138,16 @@ public class BillingController {
             log.info("billing/checkout: session {} created in {} ms",
                     session.getId(), (System.currentTimeMillis() - t0));
 
-            return ResponseEntity.ok(Map.of(
-                    "id", session.getId(),
-                    "url", session.getUrl()
-            ));
+            return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
 
+        } catch (StripeException e) {
+            log.error("billing/checkout: Stripe error", e);
+            return ResponseEntity.status(502).body(Map.of(
+                    "error", "stripe_error",
+                    "message", e.getMessage()
+            ));
         } catch (Exception e) {
-            log.error("billing/checkout: server error", e);
+            log.error("billing/checkout: server_error", e);
             return ResponseEntity.internalServerError().body(Map.of(
                     "error", "server_error",
                     "message", e.getMessage()
@@ -156,16 +155,14 @@ public class BillingController {
         }
     }
 
-    // ------------------- ПОРТАЛ ОПЛАТ -------------------
-    @PostMapping("/portal")
+    // ------------------- BILLING PORTAL -------------------
+    @GetMapping("/portal")
     public ResponseEntity<?> portal(Authentication auth) {
         try {
             if (auth == null || !auth.isAuthenticated()) {
                 return ResponseEntity.status(401).body(Map.of("error", "unauthorized"));
             }
-            var user = userRepository.findByEmail(auth.getName()).orElse(null);
-            if (user == null) return ResponseEntity.status(404).body(Map.of("error", "user_not_found"));
-
+            var user = userRepository.findByUsername(auth.getName()).orElseThrow();
             if (!"ROLE_ADMIN".equals(user.getRole())) {
                 return ResponseEntity.status(403).body(Map.of("error", "admin_only"));
             }
@@ -177,13 +174,21 @@ public class BillingController {
 
             var portalParams = new com.stripe.param.billingportal.SessionCreateParams.Builder()
                     .setCustomer(company.getPaymentCustomerId())
-                    .setReturnUrl(frontendBase.replaceAll("/$", "") + "/account")
+                    .setReturnUrl(frontendBase.replaceAll("/$", ""))
                     .build();
 
             var portalSession = com.stripe.model.billingportal.Session.create(portalParams);
-            return ResponseEntity.ok(Map.of("url", portalSession.getUrl()));
+            return ResponseEntity.ok(Map.of("portalUrl", portalSession.getUrl()));
+        } catch (StripeException e) {
+            return ResponseEntity.status(502).body(Map.of(
+                    "error", "stripe_error",
+                    "message", e.getMessage()
+            ));
         } catch (Exception e) {
-            return ResponseEntity.status(502).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "error", "server_error",
+                    "message", e.getMessage()
+            ));
         }
     }
 
@@ -217,37 +222,67 @@ public class BillingController {
 
         try {
             switch (event.getType()) {
-                case "invoice.payment_succeeded": {
-                    var invoice = (Invoice) event.getDataObjectDeserializer().getObject().orElse(null);
-                    if (invoice != null) {
-                        String customerId = invoice.getCustomer();
+                case "customer.subscription.created":
+                case "customer.subscription.updated": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    if (obj.isPresent() && obj.get() instanceof Subscription sub) {
+                        String customerId = sub.getCustomer();
                         Optional<Company> opt = companyRepository.findByPaymentCustomerId(customerId);
                         if (opt.isPresent()) {
                             Company c = opt.get();
-                            // оставляем твой исходный код без изменений, только интеграция webhook
-                            Instant periodEnd = invoice.getLines().getData().isEmpty() ? null :
-                                    Instant.ofEpochSecond(invoice.getLines().getData().get(0).getPeriod().getEnd());
-                            c.setCurrentPeriodEnd(periodEnd);
-                            companyRepository.save(c);
+                            Long end = sub.getCurrentPeriodEnd(); // epoch seconds
+                            if (end != null) {
+                                c.setSubscriptionActive(true);
+                                c.setCurrentPeriodEnd(Instant.ofEpochSecond(end));
+                                companyRepository.save(c);
+                            }
                         }
                     }
                     break;
                 }
-                case "customer.subscription.deleted": {
-                    var sub = (Subscription) event.getDataObjectDeserializer().getObject().orElse(null);
-                    if (sub != null) {
-                        Optional<Company> opt = companyRepository.findByPaymentCustomerId(sub.getCustomer());
-                        if (opt.isPresent()) {
-                            Company c = opt.get();
-                            // оставляем твой исходный код без изменений, только интеграция webhook
-                            companyRepository.save(c);
+                case "invoice.payment_succeeded": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    if (obj.isPresent() && obj.get() instanceof Invoice invoice) {
+                        if (invoice.getCustomer() != null && invoice.getSubscription() != null) {
+                            Optional<Company> opt = companyRepository.findByPaymentCustomerId(invoice.getCustomer());
+                            if (opt.isPresent()) {
+                                Company c = opt.get();
+                                Subscription subscription = Subscription.retrieve(invoice.getSubscription());
+                                Long end = subscription.getCurrentPeriodEnd();
+                                if (end != null) {
+                                    c.setSubscriptionActive(true);
+                                    c.setCurrentPeriodEnd(Instant.ofEpochSecond(end));
+                                    companyRepository.save(c);
+                                }
+                            }
                         }
+                    }
+                    break;
+                }
+                case "invoice.payment_failed":
+                case "customer.subscription.deleted": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    String customerId = null;
+                    if (obj.isPresent()) {
+                        if (obj.get() instanceof Invoice invoice) {
+                            customerId = invoice.getCustomer();
+                        } else if (obj.get() instanceof Subscription sub) {
+                            customerId = sub.getCustomer();
+                        }
+                    }
+                    if (customerId != null) {
+                        companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+                            // при желании можно пометить как неактивную
+                            companyRepository.save(c);
+                        });
                     }
                     break;
                 }
                 default:
                     // ignore others
             }
+        } catch (StripeException e) {
+            return ResponseEntity.status(502).body("stripe_error: " + e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("server_error");
         }
