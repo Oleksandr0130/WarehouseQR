@@ -42,9 +42,6 @@ public class BillingController {
     @Value("${app.billing.frontend-base-url}")
     private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
 
-    @Value("${app.billing.backend-base-url}")
-    private String backendBase;
-
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
     public ResponseEntity<?> status(Authentication auth) {
