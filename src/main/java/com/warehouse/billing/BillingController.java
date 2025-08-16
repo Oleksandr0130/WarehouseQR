@@ -43,7 +43,7 @@ public class BillingController {
     private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
 
     @Value("${app.billing.backend-base-url}")
-    private String backendBase;  // например, https://warehouse-qr-app-8adwv.ondigitalocean.app/api
+    private String backendBase;
 
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
@@ -97,10 +97,8 @@ public class BillingController {
             }
 
             // 2) Checkout Session (SUBSCRIPTION)
-            // ВАЖНО: в Stripe указываем callback-и НА БЭКЕНД, он уже сделает редирект на фронт
-            String backend = backendBase.replaceAll("/$", "");
-            String successUrl = backend + "/billing/success";
-            String cancelUrl  = backend + "/billing/cancel";
+            String successUrl = frontendBase + "/?billing=success";
+            String cancelUrl  = frontendBase + "/?billing=cancel";
 
             var params = new SessionCreateParams.Builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
@@ -147,7 +145,7 @@ public class BillingController {
             com.stripe.param.billingportal.SessionCreateParams portalParams =
                     new com.stripe.param.billingportal.SessionCreateParams.Builder()
                             .setCustomer(company.getPaymentCustomerId())
-                            .setReturnUrl(frontendBase.replaceAll("/$", ""))
+                            .setReturnUrl(frontendBase)
                             .build();
 
             com.stripe.model.billingportal.Session portalSession =
@@ -165,19 +163,6 @@ public class BillingController {
                     "message", e.getMessage()
             ));
         }
-    }
-
-    // ------------------- REDIRECTS (возврат со Stripe) -------------------
-    @GetMapping("/cancel")
-    public ResponseEntity<Void> cancel() {
-        String target = frontendBase.replaceAll("/$", "") + "/account";
-        return ResponseEntity.status(302).header("Location", target).build();
-    }
-
-    @GetMapping("/success")
-    public ResponseEntity<Void> success() {
-        String target = frontendBase.replaceAll("/$", "") + "/account";
-        return ResponseEntity.status(302).header("Location", target).build();
     }
 
     // ----------------------- WEBHOOK ----------------------
