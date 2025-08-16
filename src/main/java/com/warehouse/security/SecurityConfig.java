@@ -34,7 +34,9 @@ public class SecurityConfig {
                                 "/billing/webhook",
                                 "/billing/checkout",
                                 "/billing/portal",
-                                "/billing/status").permitAll()
+                                "/billing/status",
+                                "/billing/cancel",
+                                "/billing/success").permitAll()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),

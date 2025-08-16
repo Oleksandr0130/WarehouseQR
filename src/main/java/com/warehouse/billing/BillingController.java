@@ -94,8 +94,10 @@ public class BillingController {
             }
 
             // 2) Checkout Session (SUBSCRIPTION)
-            String successUrl = frontendBase + "/?billing=success";
-            String cancelUrl  = frontendBase + "/?billing=cancel";
+//            String successUrl = frontendBase + "/?billing=success";
+//            String cancelUrl  = frontendBase + "/?billing=cancel";
+            String successUrl = frontendBase + "/billing/success";
+            String cancelUrl  = frontendBase + "/billing/cancel";
 
             var params = new SessionCreateParams.Builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
@@ -248,5 +250,18 @@ public class BillingController {
         }
 
         return ResponseEntity.ok("ok");
+    }
+
+    // ------------------- REDIRECTS -------------------
+    @GetMapping("/cancel")
+    public ResponseEntity<Void> cancel() {
+        String target = frontendBase.replaceAll("/$", "") + "/account";
+        return ResponseEntity.status(302).header("Location", target).build();
+    }
+
+    @GetMapping("/success")
+    public ResponseEntity<Void> success() {
+        String target = frontendBase.replaceAll("/$", "") + "/account";
+        return ResponseEntity.status(302).header("Location", target).build();
     }
 }
