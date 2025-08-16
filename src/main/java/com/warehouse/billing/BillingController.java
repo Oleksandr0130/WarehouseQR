@@ -114,9 +114,9 @@ public class BillingController {
 
             // 2) Checkout Session (SUBSCRIPTION)
             // CALLBACK-и → на БЭКЕНД, который потом редиректит на фронт.
-            String backend = backendBase.replaceAll("/$", "");
-            String successUrl = backend + "/billing/success";
-            String cancelUrl  = backend + "/billing/cancel";
+            String frontend = frontendBase.replaceAll("/$", "");
+            String successUrl = frontend + "/billing/success";
+            String cancelUrl  = frontend + "/billing/cancel";
 
             log.info("billing/checkout: creating session (priceId={}, success={}, cancel={})",
                     priceId, successUrl, cancelUrl);
