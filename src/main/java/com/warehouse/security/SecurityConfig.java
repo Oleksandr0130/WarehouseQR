@@ -28,7 +28,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         http.csrf(csrf -> csrf.disable()) // отключаем CSRF
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/register", "/auth/confirm", "/auth/confirmation").permitAll()
+                        .requestMatchers("/auth/register", "/auth/confirm", "/confirmation").permitAll()
                         .requestMatchers(
                                 "/auth/**",
                                 "/billing/webhook",
