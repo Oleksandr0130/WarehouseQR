@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
+
 
 @Entity
 @Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email") })
@@ -26,6 +28,8 @@ public class User {
     private boolean enabled = false; // активен после подтверждения email
 
     private String confirmationCode;
+
+    private Instant confirmationExpiry;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id", nullable = false)
