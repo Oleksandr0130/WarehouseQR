@@ -18,7 +18,7 @@ public class ConfirmController {
 
     private final ConfirmationCodeService confirmationCodeService;
 
-    @Value("${app.frontend-base-url}")
+    @Value("${app.billing.frontend-base-url}")
     private String frontendBaseUrl;
 
     public ConfirmController(ConfirmationCodeService confirmationCodeService) {
