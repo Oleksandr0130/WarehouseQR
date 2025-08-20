@@ -17,7 +17,7 @@ public class ConfirmController {
 
     private final UserService userService;
 
-    @Value("${app.frontend-base-url}") // например https://app.example.com
+    @Value("${app.billing.frontend-base-url}") // например https://app.example.com
     private String frontendUrl;
 
     public ConfirmController(UserService userService) {
