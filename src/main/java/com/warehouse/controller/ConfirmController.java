@@ -13,7 +13,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/confirmation")
 public class ConfirmController {
 
     private final ConfirmationCodeService confirmationCodeService;
@@ -25,7 +25,7 @@ public class ConfirmController {
         this.confirmationCodeService = confirmationCodeService;
     }
 
-    @GetMapping("/confirm")
+    @GetMapping
     public ResponseEntity<Void> confirmEmail(@RequestParam("code") String code) {
         boolean confirmed;
         try {
