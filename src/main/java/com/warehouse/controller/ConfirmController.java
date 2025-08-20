@@ -27,13 +27,14 @@ public class ConfirmController {
 
     @GetMapping("/confirm")
     public ResponseEntity<Void> confirmEmail(@RequestParam("code") String code) {
-        boolean confirmed = confirmationCodeService.confirmCode(code);
+        boolean confirmed;
+        try {
+            confirmed = confirmationCodeService.confirmCode(code);
+        } catch (Exception e) {
+            confirmed = false;
+        }
 
         String redirectUrl = frontendBaseUrl + "/confirmed?status=" + (confirmed ? "success" : "error");
-
-        return ResponseEntity
-                .status(HttpStatus.FOUND) // 302 Redirect
-                .location(URI.create(redirectUrl))
-                .build();
+        return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
     }
 }
