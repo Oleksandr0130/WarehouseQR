@@ -53,7 +53,7 @@ public class SubscriptionService {
         int port = req.getServerPort();
         String ctx = req.getContextPath();
         String base = scheme + "://" + host + ((port == 80 || port == 443) ? "" : ":" + port) + (ctx != null ? ctx : "");
-        return base + "/billing/status";
+        return base + "/api/billing/status";
     }
 
     /** Понимает Instant/OffsetDateTime/LocalDate; для LocalDate — до конца дня (exclusive). */

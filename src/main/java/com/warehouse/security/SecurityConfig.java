@@ -82,9 +82,9 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/auth/**",
                                 "/billing/webhook",
-                                "/billing/checkout",
-                                "/billing/portal",
-                                "/billing/status",
+                                "/api/billing/checkout",
+                                "/api/billing/portal",
+                                "/api/billing/status",
                                 "/status"
                         ).permitAll()
                         .anyRequest().permitAll()

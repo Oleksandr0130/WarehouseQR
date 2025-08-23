@@ -74,10 +74,10 @@ public class SubscriptionGuardFilter extends OncePerRequestFilter {
     /** Пути, доступные без активной подписки (логин/регистрация/биллинг/статусы) */
     private static final Set<String> ALLOWLIST = Set.of(
             "/auth",                // всё под /auth/**
-            "/billing/checkout",
+            "/api/billing/checkout",
             "/billing/webhook",
-            "/billing/portal",
-            "/billing/status",
+            "/api/billing/portal",
+            "/api/billing/status",
             "/status",               // на скрине именно этот путь был 200
             "/users/me"
     );
