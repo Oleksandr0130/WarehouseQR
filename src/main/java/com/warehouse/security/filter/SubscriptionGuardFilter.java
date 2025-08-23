@@ -78,7 +78,8 @@ public class SubscriptionGuardFilter extends OncePerRequestFilter {
             "/billing/webhook",
             "/billing/portal",
             "/billing/status",
-            "/status"               // на скрине именно этот путь был 200
+            "/status",               // на скрине именно этот путь был 200
+            "/users/me"
     );
 
     @Override
