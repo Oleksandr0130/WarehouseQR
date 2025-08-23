@@ -106,7 +106,7 @@ public class BillingController {
                 return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
             }
 
-            // 1) Customer на уровне company (создаём один раз)
+            // 1) Customer для компании (создаём один раз)
             String customerId = company.getPaymentCustomerId();
             if (customerId == null) {
                 var cp = CustomerCreateParams.builder()
@@ -119,25 +119,46 @@ public class BillingController {
                 companyRepository.save(company);
             }
 
-            // 2) Checkout Session (SUBSCRIPTION) — SCA/3DS обработает Stripe автоматически
-            // Если хочешь возвращать в аккаунт — можно /app/account; оставляю как у тебя.
+            // 2) URL'ы возврата (оставляю твои)
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            var params = SessionCreateParams.builder()
+            // 3) Параметры Checkout:
+            //    - payment_method_collection=always — всегда собираем НОВЫЙ способ оплаты
+            //    - payment_method_options[card][request_three_d_secure]=any — просим 3DS
+            //    !!! Эти поля задаём через putExtraParam, чтобы работало на старых версиях SDK.
+
+            // payment_method_options с card[request_three_d_secure]=any
+            SessionCreateParams.PaymentMethodOptions pmOpts =
+                    SessionCreateParams.PaymentMethodOptions.builder()
+                            .putExtraParam("card[request_three_d_secure]", "any")
+                            .build();
+
+            SessionCreateParams.Builder builder = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
+                    // Разрешаем карты
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                    // Просим 3DS (через pmOpts)
+                    .setPaymentMethodOptions(pmOpts)
+                    // Всегда собираем новый метод оплаты (через extra param для совместимости)
+                    .putExtraParam("payment_method_collection", "always")
+                    // Твоя цена (обязательно price_...)
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId) // ОБЯЗАТЕЛЬНО price_..., не prod_...
+                                    .setPrice(priceId)           // ОБЯЗАТЕЛЬНО price_..., не prod_...
                                     .setQuantity(1L)
                                     .build()
-                    )
-                    .build();
+                    );
 
-            Session session = Session.create(params); // это checkout.Session
+            // (опционально) Для DE можно включить SEPA, если активирован в Dashboard:
+             builder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT);
+
+            SessionCreateParams params = builder.build();
+            Session session = Session.create(params);
+
             return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
         } catch (StripeException e) {
             return ResponseEntity.status(502).body(Map.of(
