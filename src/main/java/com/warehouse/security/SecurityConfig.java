@@ -70,31 +70,29 @@ public class SecurityConfig {
 //    }
 
     private final UserRepository userRepository;
-    private final CompanyService companyService; // оставил, если где-то ещё используется
+    private final CompanyService companyService;
     private final JwtTokenProvider jwtTokenProvider;
     private final SubscriptionService subscriptionService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
-        http.csrf(csrf -> csrf.disable()) // отключаем CSRF
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // публичные маршруты
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .requestMatchers(
                                 "/auth/**",
                                 "/billing/webhook",
                                 "/billing/checkout",
                                 "/billing/portal",
-                                "/billing/status"
+                                "/billing/status",
+                                "/status"
                         ).permitAll()
-                        // остальное оставляю как у тебя (permitAll), чтобы не менять логику доступа;
-                        // доступ по подписке ограничит SubscriptionGuardFilter
                         .anyRequest().permitAll()
                 )
-                // 1) JWT должен стоять РАНЬШЕ, чтобы положить Authentication в SecurityContext
+                // 1) JWT — ДО username/password фильтра
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
                         UsernamePasswordAuthenticationFilter.class)
-                // 2) Guard должен идти ПОСЛЕ JWT, чтобы видеть Authentication и решать по подписке
+                // 2) Guard — ПОСЛЕ JWT, чтобы видеть Authentication
                 .addFilterAfter(subscriptionGuardFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
@@ -102,7 +100,7 @@ public class SecurityConfig {
 
     @Bean
     public SubscriptionGuardFilter subscriptionGuardFilter() {
-        return new SubscriptionGuardFilter(subscriptionService);
+        return new SubscriptionGuardFilter(userRepository, companyService, subscriptionService);
     }
 
     @Bean
@@ -122,5 +120,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
 }

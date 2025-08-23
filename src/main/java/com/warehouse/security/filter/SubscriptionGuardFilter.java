@@ -67,15 +67,18 @@ public class SubscriptionGuardFilter extends OncePerRequestFilter {
 //        chain.doFilter(request, response);
 //    }
 
+    private final UserRepository userRepository;
+    private final CompanyService companyService;
     private final SubscriptionService subscriptionService;
 
-    // Пути, доступные без активной подписки (логин/регистрация/подтверждение/биллинг)
+    /** Пути, доступные без активной подписки (логин/регистрация/биллинг/статусы) */
     private static final Set<String> ALLOWLIST = Set.of(
-            "/auth",               // все auth-эндпоинты (/auth/**)
+            "/auth",                // всё под /auth/**
             "/billing/checkout",
             "/billing/webhook",
             "/billing/portal",
-            "/billing/status"
+            "/billing/status",
+            "/status"               // на скрине именно этот путь был 200
     );
 
     @Override
@@ -83,45 +86,46 @@ public class SubscriptionGuardFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        String path = request.getServletPath(); // важно: без /api
+        String path = request.getServletPath(); // без /api
 
-        // Разрешённые пути (auth, billing) — пропускаем всегда
+        // 1) Разрешённые пути (auth/billing/status/статические файлы) — пропускаем
         for (String prefix : ALLOWLIST) {
             if (path.startsWith(prefix)) {
                 chain.doFilter(request, response);
                 return;
             }
         }
-
-        // Также разрешим GET статику (если она отдается этим же приложением)
         if (HttpMethod.GET.matches(request.getMethod())) {
-            if (path.startsWith("/assets/")
-                    || path.startsWith("/static/")
-                    || path.equals("/")
-                    || path.equals("/index.html")
-                    || path.endsWith(".js")
-                    || path.endsWith(".css")
-                    || path.endsWith(".map")
-                    || path.endsWith(".png")
-                    || path.endsWith(".jpg")
-                    || path.endsWith(".svg")
-                    || path.endsWith(".ico")
-                    || path.endsWith(".woff")
-                    || path.endsWith(".woff2")) {
+            if (path.startsWith("/assets/") || path.startsWith("/static/")
+                    || path.equals("/") || path.equals("/index.html")
+                    || path.endsWith(".js") || path.endsWith(".css") || path.endsWith(".map")
+                    || path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".svg")
+                    || path.endsWith(".ico") || path.endsWith(".woff") || path.endsWith(".woff2")) {
                 chain.doFilter(request, response);
                 return;
             }
         }
 
-        // Если не авторизован — пропускаем (пусть отработает Security/контроллеры)
+        // 2) Если не авторизован — дальше разберётся Security (401/контроллер)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             chain.doFilter(request, response);
             return;
         }
 
-        // Проверка активности подписки/триала
-        boolean active = subscriptionService.hasActiveAccess(request);
+        // 3) Достаём пользователя и компанию
+        String username = auth.getName();
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null || user.getCompany() == null) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // 4) Две независимые проверки активности — достаточно ЛЮБОЙ true
+        boolean activeByCompany = companyService.isCompanyAccessAllowed(user.getCompany());
+        boolean activeByBilling  = subscriptionService.hasActiveAccess(request);
+        boolean active = activeByCompany || activeByBilling;
+
         if (!active) {
             response.setStatus(402); // Payment Required
             response.setHeader("X-Subscription-Expired", "true");
