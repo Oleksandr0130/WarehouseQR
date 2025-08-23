@@ -27,7 +27,7 @@ public class SubscriptionGuardFilter extends OncePerRequestFilter {
     /** Пути/префиксы, которые всегда доступны (логин/регистрация, биллинг, профиль, здоровье) */
     private static final Set<String> ALLOW_PREFIXES = Set.of(
             "/auth",
-            "/api/billing/",     // <-- ВСЕ биллинговые ручки через /api
+            "/billing/",     // <-- ВСЕ биллинговые ручки через /api
             "/billing/webhook",  // вебхук (если без /api)
             "/users/me",         // аккаунт должен грузиться при истёкшем доступе
             "/status"            // health
