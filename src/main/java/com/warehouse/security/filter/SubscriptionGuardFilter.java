@@ -20,101 +20,64 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SubscriptionGuardFilter extends OncePerRequestFilter {
 
-//    private final UserRepository userRepository;
-//    private final CompanyService companyService;
-//
-//    private static final Set<String> ALLOWLIST = Set.of(
-//            "/auth", "/billing/checkout", "/billing/webhook", "/billing/portal", "/billing/status"
-//    );
-//
-//    @Override
-//    protected void doFilterInternal(HttpServletRequest request,
-//                                    HttpServletResponse response,
-//                                    FilterChain chain) throws ServletException, IOException {
-//
-//        String path = request.getServletPath(); // важно: без /api
-//
-//        // Разрешённые пути (auth, billing)
-//        for (String prefix : ALLOWLIST) {
-//            if (path.startsWith(prefix)) {
-//                chain.doFilter(request, response);
-//                return;
-//            }
-//        }
-//
-//        // Если не авторизован — пропускаем (пусть отработает Security)
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//        if (auth == null || !auth.isAuthenticated()) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
-//
-//        String username = auth.getName();
-//        User user = userRepository.findByUsername(username).orElse(null);
-//        if (user == null || user.getCompany() == null) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
-//
-//        // Проверка доступа компании
-//        if (!companyService.isCompanyAccessAllowed(user.getCompany())) {
-//            response.setStatus(402); // Payment Required
-//            response.setContentType("application/json; charset=UTF-8");
-//            response.getWriter().write("{\"error\":\"payment_required\",\"message\":\"subscription_expired\"}");
-//            return;
-//        }
-//
-//        chain.doFilter(request, response);
-//    }
-
     private final UserRepository userRepository;
     private final CompanyService companyService;
     private final SubscriptionService subscriptionService;
 
-    /** Пути, доступные без активной подписки (логин/регистрация/биллинг/статусы) */
-    private static final Set<String> ALLOWLIST = Set.of(
-            "/auth",                // всё под /auth/**
-            "/api/billing/checkout",
-            "/billing/webhook",
-            "/api/billing/portal",
-            "/api/billing/status",
-            "/status",               // на скрине именно этот путь был 200
-            "/users/me"
+    /** Пути/префиксы, которые всегда доступны (логин/регистрация, биллинг, профиль, здоровье) */
+    private static final Set<String> ALLOW_PREFIXES = Set.of(
+            "/auth",
+            "/api/billing/",     // <-- ВСЕ биллинговые ручки через /api
+            "/billing/webhook",  // вебхук (если без /api)
+            "/users/me",         // аккаунт должен грузиться при истёкшем доступе
+            "/status"            // health
     );
+
+    private static boolean isStaticGet(String path, String method) {
+        if (!HttpMethod.GET.matches(method)) return false;
+        return path.startsWith("/assets/") || path.startsWith("/static/")
+                || path.equals("/") || path.equals("/index.html")
+                || path.endsWith(".js") || path.endsWith(".css") || path.endsWith(".map")
+                || path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".svg")
+                || path.endsWith(".ico") || path.endsWith(".woff") || path.endsWith(".woff2");
+    }
+
+    private static boolean isAllowedPath(String path) {
+        for (String p : ALLOW_PREFIXES) {
+            if (path.startsWith(p)) return true;
+        }
+        return false;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        String path = request.getServletPath(); // без /api
+        // NB: без contextPath
+        final String path = request.getServletPath();
+        final String method = request.getMethod();
 
-        // 1) Разрешённые пути (auth/billing/status/статические файлы) — пропускаем
-        for (String prefix : ALLOWLIST) {
-            if (path.startsWith(prefix)) {
-                chain.doFilter(request, response);
-                return;
-            }
-        }
-        if (HttpMethod.GET.matches(request.getMethod())) {
-            if (path.startsWith("/assets/") || path.startsWith("/static/")
-                    || path.equals("/") || path.equals("/index.html")
-                    || path.endsWith(".js") || path.endsWith(".css") || path.endsWith(".map")
-                    || path.endsWith(".png") || path.endsWith(".jpg") || path.endsWith(".svg")
-                    || path.endsWith(".ico") || path.endsWith(".woff") || path.endsWith(".woff2")) {
-                chain.doFilter(request, response);
-                return;
-            }
+        // 0) CORS preflight и статика — пропускаем
+        if (HttpMethod.OPTIONS.matches(method) || isStaticGet(path, method)) {
+            chain.doFilter(request, response);
+            return;
         }
 
-        // 2) Если не авторизован — дальше разберётся Security (401/контроллер)
+        // 1) Разрешённые пути (auth, /api/billing/**, /users/me, /status) — пропускаем
+        if (isAllowedPath(path)) {
+            chain.doFilter(request, response);
+            return;
+        }
+
+        // 2) Если не авторизован — пусть дальше решает Security (401/доступ)
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             chain.doFilter(request, response);
             return;
         }
 
-        // 3) Достаём пользователя и компанию
+        // 3) Пользователь/компания
         String username = auth.getName();
         User user = userRepository.findByUsername(username).orElse(null);
         if (user == null || user.getCompany() == null) {
@@ -122,9 +85,9 @@ public class SubscriptionGuardFilter extends OncePerRequestFilter {
             return;
         }
 
-        // 4) Две независимые проверки активности — достаточно ЛЮБОЙ true
+        // 4) Две независимые проверки; достаточно ЛЮБОЙ true
         boolean activeByCompany = companyService.isCompanyAccessAllowed(user.getCompany());
-        boolean activeByBilling  = subscriptionService.hasActiveAccess(request);
+        boolean activeByBilling = subscriptionService.hasActiveAccess(request);
         boolean active = activeByCompany || activeByBilling;
 
         if (!active) {

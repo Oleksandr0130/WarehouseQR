@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .requestMatchers(
                                 "/auth/**",
+                                "/api/billing/**",
                                 "/billing/webhook",
                                 "/api/billing/checkout",
                                 "/api/billing/portal",
