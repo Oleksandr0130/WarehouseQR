@@ -20,6 +20,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.stripe.model.Invoice;
+import com.stripe.model.InvoiceCollection;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.InvoiceListParams;
+
 
 import java.time.Instant;
 import java.util.LinkedHashMap;
@@ -70,18 +75,25 @@ public class BillingController {
         try {
             String customerId = c.getPaymentCustomerId();
             if (customerId != null) {
-                SessionListParams listParams = SessionListParams.builder()
+                InvoiceListParams invParams = InvoiceListParams.builder()
                         .setCustomer(customerId)
                         .setLimit(1L)
-                        // у Session.list есть фильтр по статусу, в SDK можно передать как extraParam:
+                        // хотим только открытые счета
                         .putExtraParam("status", "open")
+                        // чтобы в ответе был сразу объект PI
+                        .addExpand("data.payment_intent")
                         .build();
 
-                SessionCollection coll = Session.list(listParams);
-                if (coll != null && coll.getData() != null && !coll.getData().isEmpty()) {
-                    String url = coll.getData().get(0).getUrl();
-                    if (url != null && !url.isBlank()) {
-                        body.put("pendingCheckoutUrl", url);
+                InvoiceCollection invoices = Invoice.list(invParams);
+                if (invoices != null && invoices.getData() != null && !invoices.getData().isEmpty()) {
+                    Invoice inv = invoices.getData().get(0);
+                    PaymentIntent pi = inv.getPaymentIntentObject();
+                    // если требуется подтверждение — покажем кнопку
+                    if (pi != null && "requires_action".equals(pi.getStatus())) {
+                        String hosted = inv.getHostedInvoiceUrl();
+                        if (hosted != null && !hosted.isBlank()) {
+                            body.put("pendingInvoiceUrl", hosted);
+                        }
                     }
                 }
             }
