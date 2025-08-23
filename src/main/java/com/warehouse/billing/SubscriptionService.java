@@ -6,6 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 /**
@@ -35,39 +39,34 @@ public class SubscriptionService {
             BillingStatusResponse body = resp.getBody();
             if (body == null || body.status == null) return false;
 
-            // активные состояния
-            if (!("TRIAL".equals(body.status) || "ACTIVE".equals(body.status))) {
-                return false;
-            }
+            // Разрешены только TRIAL/ACTIVE
+            boolean isCandidate = "TRIAL".equals(body.status) || "ACTIVE".equals(body.status);
+            if (!isCandidate) return false;
 
-            // если пришли daysLeft — используем его
+            // Если бек прислал daysLeft — считаем активным при > 0
             if (body.daysLeft != null) {
                 return body.daysLeft > 0;
             }
 
-            // иначе — проверим по датам окончания
+            // Иначе — по дате окончания
             Instant now = Instant.now();
-            if ("TRIAL".equals(body.status) && body.trialEnd != null) {
-                Instant end = parseIsoInstant(body.trialEnd);
+            if ("TRIAL".equals(body.status)) {
+                Instant end = parseEndInstant(body.trialEnd);
+                return end != null && end.isAfter(now);
+            } else { // ACTIVE
+                Instant end = parseEndInstant(body.currentPeriodEnd);
                 return end != null && end.isAfter(now);
             }
-            if ("ACTIVE".equals(body.status) && body.currentPeriodEnd != null) {
-                Instant end = parseIsoInstant(body.currentPeriodEnd);
-                return end != null && end.isAfter(now);
-            }
-
-            // если ничего не пришло — считаем неактивным
-            return false;
         } catch (Exception ex) {
-            // на ошибке считаем доступ неактивным (чтобы не пускать)
+            // На ошибках (сетевых/парсинга) — считаем неактивным
             return false;
         }
     }
 
-    /** Собираем абсолютный URL до своего же /billing/status на основе текущего запроса. */
+    /** Абсолютный URL до своего же /billing/status. */
     private String buildBillingStatusUrl(HttpServletRequest req) {
         String scheme = req.getScheme();                // http/https
-        String host = req.getServerName();              // example.com / localhost
+        String host = req.getServerName();              // example.com/localhost
         int port = req.getServerPort();                 // 80/443/...
         String ctx = req.getContextPath();              // если есть
         String base = scheme + "://" + host + ((port == 80 || port == 443) ? "" : ":" + port)
@@ -75,19 +74,41 @@ public class SubscriptionService {
         return base + "/billing/status";
     }
 
-    private Instant parseIsoInstant(String iso) {
+    /**
+     * Универсальный парсер даты окончания:
+     * - пытается Instant (полный ISO с TZ),
+     * - затем OffsetDateTime (с TZ-смещением),
+     * - затем LocalDate ("YYYY-MM-DD"): в этом случае считаем активным до КОНЦА дня
+     *   → возвращаем  (date + 1 day at 00:00Z).
+     */
+    private Instant parseEndInstant(String raw) {
+        if (raw == null || raw.isBlank()) return null;
+
+        // 1) Полный Instant
         try {
-            return Instant.parse(iso);
-        } catch (DateTimeParseException e) {
-            return null;
-        }
+            return Instant.parse(raw);
+        } catch (DateTimeParseException ignored) {}
+
+        // 2) OffsetDateTime → Instant
+        try {
+            return OffsetDateTime.parse(raw).toInstant();
+        } catch (DateTimeParseException ignored) {}
+
+        // 3) Простой LocalDate "YYYY-MM-DD" → конец дня (exclusive)
+        try {
+            LocalDate d = LocalDate.parse(raw, DateTimeFormatter.ISO_LOCAL_DATE);
+            // конец дня: следующий день в 00:00Z
+            return d.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
+        } catch (DateTimeParseException ignored) {}
+
+        return null;
     }
 
-    /** DTO ответа твоего /billing/status */
+    /** DTO ответа /billing/status */
     public static class BillingStatusResponse {
         public String status;            // "TRIAL" | "ACTIVE" | "EXPIRED" | ...
-        public String trialEnd;          // ISO-строка или null
-        public String currentPeriodEnd;  // ISO-строка или null
+        public String trialEnd;          // ISO-строка или "YYYY-MM-DD" или null
+        public String currentPeriodEnd;  // ISO-строка или "YYYY-MM-DD" или null
         public Integer daysLeft;         // может быть null
         public Boolean isAdmin;          // не используется здесь
     }
