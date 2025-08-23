@@ -6,9 +6,11 @@ import com.stripe.model.Event;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;                    // <-- CHECKOUT Session
+import com.stripe.model.checkout.SessionCollection;
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;       // <-- CHECKOUT SessionCreateParams
+import com.stripe.param.checkout.SessionListParams;         // <-- LIST Sessions
 import com.warehouse.model.Company;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
@@ -56,13 +58,37 @@ public class BillingController {
 
         var c = user.getCompany();
 
-        // ВАЖНО: без Map.of(null, ...) — там нельзя null
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", c.getSubscriptionStatus()); // TRIAL / ACTIVE / EXPIRED
-        if (c.getTrialEnd() != null) body.put("trialEnd", c.getTrialEnd());
-        if (c.getCurrentPeriodEnd() != null) body.put("currentPeriodEnd", c.getCurrentPeriodEnd());
+
+        if (c.getTrialEnd() != null)          body.put("trialEnd", c.getTrialEnd().toString());
+        if (c.getCurrentPeriodEnd() != null)  body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
+
+        // === ДОБАВЛЕНО: найдём открытую Checkout Session и вернём pendingCheckoutUrl ===
+        try {
+            String customerId = c.getPaymentCustomerId();
+            if (customerId != null) {
+                SessionListParams listParams = SessionListParams.builder()
+                        .setCustomer(customerId)
+                        .setLimit(1L)
+                        // у Session.list есть фильтр по статусу, в SDK можно передать как extraParam:
+                        .putExtraParam("status", "open")
+                        .build();
+
+                SessionCollection coll = Session.list(listParams);
+                if (coll != null && coll.getData() != null && !coll.getData().isEmpty()) {
+                    String url = coll.getData().get(0).getUrl();
+                    if (url != null && !url.isBlank()) {
+                        body.put("pendingCheckoutUrl", url);
+                    }
+                }
+            }
+        } catch (Exception ignore) {
+            // молча не мешаем статусу, если Stripe временно недоступен
+        }
+
         return ResponseEntity.ok(body);
     }
 
@@ -83,7 +109,7 @@ public class BillingController {
             // 1) Customer на уровне company (создаём один раз)
             String customerId = company.getPaymentCustomerId();
             if (customerId == null) {
-                var cp = new CustomerCreateParams.Builder()
+                var cp = CustomerCreateParams.builder()
                         .setName(company.getName())
                         .putMetadata("companyId", String.valueOf(company.getId()))
                         .build();
@@ -93,17 +119,18 @@ public class BillingController {
                 companyRepository.save(company);
             }
 
-            // 2) Checkout Session (SUBSCRIPTION)
+            // 2) Checkout Session (SUBSCRIPTION) — SCA/3DS обработает Stripe автоматически
+            // Если хочешь возвращать в аккаунт — можно /app/account; оставляю как у тебя.
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            var params = new SessionCreateParams.Builder()
+            var params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .addLineItem(
-                            new SessionCreateParams.LineItem.Builder()
+                            SessionCreateParams.LineItem.builder()
                                     .setPrice(priceId) // ОБЯЗАТЕЛЬНО price_..., не prod_...
                                     .setQuantity(1L)
                                     .build()
@@ -138,7 +165,6 @@ public class BillingController {
                 return ResponseEntity.badRequest().body(Map.of("error","no_customer"));
             }
 
-            // Billing Portal — используем полные имена, чтобы не конфликтовало с checkout
             com.stripe.param.billingportal.SessionCreateParams portalParams =
                     new com.stripe.param.billingportal.SessionCreateParams.Builder()
                             .setCustomer(company.getPaymentCustomerId())
@@ -179,6 +205,29 @@ public class BillingController {
 
         try {
             switch (event.getType()) {
+                case "checkout.session.completed": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    if (obj.isPresent() && obj.get() instanceof Session s) {
+                        String subscriptionId = s.getSubscription();
+                        if (subscriptionId != null) {
+                            Subscription sub = Subscription.retrieve(subscriptionId);
+                            String customerId = sub.getCustomer();
+                            Long end = sub.getCurrentPeriodEnd();
+                            if (customerId != null && end != null) {
+                                companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+                                    c.setSubscriptionActive(true);
+                                    c.setCurrentPeriodEnd(Instant.ofEpochSecond(end));
+                                    companyRepository.save(c);
+                                });
+                            }
+                        }
+                    }
+                    break;
+                }
+                case "checkout.session.expired": {
+                    // оформление прервано — можно залогировать
+                    break;
+                }
                 case "customer.subscription.created":
                 case "customer.subscription.updated": {
                     var obj = event.getDataObjectDeserializer().getObject();
@@ -187,7 +236,7 @@ public class BillingController {
                         Optional<Company> opt = companyRepository.findByPaymentCustomerId(customerId);
                         if (opt.isPresent()) {
                             Company c = opt.get();
-                            Long end = sub.getCurrentPeriodEnd(); // epoch seconds
+                            Long end = sub.getCurrentPeriodEnd();
                             if (end != null) {
                                 c.setSubscriptionActive(true);
                                 c.setCurrentPeriodEnd(Instant.ofEpochSecond(end));
@@ -204,7 +253,6 @@ public class BillingController {
                             Optional<Company> opt = companyRepository.findByPaymentCustomerId(invoice.getCustomer());
                             if (opt.isPresent()) {
                                 Company c = opt.get();
-                                // Лучше достать subscription и взять актуальный current_period_end
                                 Subscription subscription = Subscription.retrieve(invoice.getSubscription());
                                 Long end = subscription.getCurrentPeriodEnd();
                                 if (end != null) {
@@ -230,16 +278,14 @@ public class BillingController {
                     }
                     if (customerId != null) {
                         companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                            // Можно пометить компанию как неактивную,
-                            // но даже без этого фильтр закроет доступ после currentPeriodEnd
-                            // c.setSubscriptionActive(false);
+                            // фильтр ограничит доступ по дате; при желании можно явно пометить неактивной
                             companyRepository.save(c);
                         });
                     }
                     break;
                 }
                 default:
-                    // ignore other events
+                    // ignore
             }
         } catch (StripeException e) {
             return ResponseEntity.status(502).body("stripe_error: " + e.getMessage());

@@ -5,44 +5,51 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.*;
-import java.time.format.DateTimeFormatter;
+import java.time.Instant;
 import java.time.format.DateTimeParseException;
 
-/** Проверка активности (trial/subscription) через вызов /billing/status с тем же JWT. */
+/**
+ * Проверка активности доступов (trial/subscription) через вызов твоего же /api/billing/status
+ * с тем же Authorization, что пришёл в запросе.
+ */
 @Service
 public class SubscriptionService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    /** true, если TRIAL или ACTIVE и срок не истёк. */
+    /** true, если статус TRIAL/ACTIVE и срок не истёк */
     public boolean hasActiveAccess(HttpServletRequest request) {
         try {
             String url = buildBillingStatusUrl(request);
             HttpHeaders headers = new HttpHeaders();
+
             String auth = request.getHeader("Authorization");
-            if (auth != null && !auth.isBlank()) headers.set("Authorization", auth);
+            if (auth != null && !auth.isBlank()) {
+                headers.set("Authorization", auth);
+            }
 
             ResponseEntity<BillingStatusResponse> resp =
                     restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), BillingStatusResponse.class);
 
-            BillingStatusResponse body = resp.getBody();
-            if (body == null || body.status == null) return false;
+            BillingStatusResponse b = resp.getBody();
+            if (b == null || b.status == null) return false;
 
-            boolean candidate = "TRIAL".equals(body.status) || "ACTIVE".equals(body.status);
+            boolean candidate = "TRIAL".equals(b.status) || "ACTIVE".equals(b.status);
             if (!candidate) return false;
 
-            if (body.daysLeft != null) return body.daysLeft > 0;
+            if (b.daysLeft != null) return b.daysLeft > 0;
 
             Instant now = Instant.now();
-            if ("TRIAL".equals(body.status)) {
-                Instant end = parseEndInstant(body.trialEnd);
-                return end != null && end.isAfter(now);
-            } else {
-                Instant end = parseEndInstant(body.currentPeriodEnd);
+            if ("TRIAL".equals(b.status) && b.trialEnd != null) {
+                Instant end = parseIso(b.trialEnd);
                 return end != null && end.isAfter(now);
             }
-        } catch (Exception e) {
+            if ("ACTIVE".equals(b.status) && b.currentPeriodEnd != null) {
+                Instant end = parseIso(b.currentPeriodEnd);
+                return end != null && end.isAfter(now);
+            }
+            return false;
+        } catch (Exception ex) {
             return false;
         }
     }
@@ -51,29 +58,22 @@ public class SubscriptionService {
         String scheme = req.getScheme();
         String host = req.getServerName();
         int port = req.getServerPort();
-        String ctx = req.getContextPath();
-        String base = scheme + "://" + host + ((port == 80 || port == 443) ? "" : ":" + port) + (ctx != null ? ctx : "");
-        return base + "/billing/status";
+        String ctx = req.getContextPath(); // "" или "/api"
+        String base = scheme + "://" + host + ((port == 80 || port == 443) ? "" : ":" + port)
+                + (ctx != null ? ctx : "");
+        return base + "/api/billing/status"; // важно: /api
     }
 
-    /** Понимает Instant/OffsetDateTime/LocalDate; для LocalDate — до конца дня (exclusive). */
-    private Instant parseEndInstant(String raw) {
-        if (raw == null || raw.isBlank()) return null;
-        try { return Instant.parse(raw); } catch (DateTimeParseException ignored) {}
-        try { return OffsetDateTime.parse(raw).toInstant(); } catch (DateTimeParseException ignored) {}
-        try {
-            LocalDate d = LocalDate.parse(raw, DateTimeFormatter.ISO_LOCAL_DATE);
-            return d.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-        } catch (DateTimeParseException ignored) {}
-        return null;
+    private Instant parseIso(String raw) {
+        try { return Instant.parse(raw); } catch (DateTimeParseException e) { return null; }
     }
 
-    /** DTO ответа /billing/status */
+    /** DTO ответа твоего /api/billing/status */
     public static class BillingStatusResponse {
         public String status;            // TRIAL | ACTIVE | EXPIRED | ...
-        public String trialEnd;          // ISO или YYYY-MM-DD
-        public String currentPeriodEnd;  // ISO или YYYY-MM-DD
-        public Integer daysLeft;         // опционально
-        public Boolean isAdmin;          // не используется
+        public String trialEnd;
+        public String currentPeriodEnd;
+        public Integer daysLeft;
+        public Boolean isAdmin;
     }
 }
