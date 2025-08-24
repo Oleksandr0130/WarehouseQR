@@ -24,7 +24,6 @@ import com.stripe.model.PaymentIntent;
 import com.stripe.param.InvoiceListParams;
 
 import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -74,7 +73,7 @@ public class BillingController {
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
 
-        // === ДОБАВЛЕНО: если есть открытый счёт, требующий 3DS/SCA — отдадим ссылку на hosted_invoice_url
+        // === Если есть открытый счёт, требующий 3DS/SCA — отдадим ссылку на hosted_invoice_url
         try {
             String customerId = c.getPaymentCustomerId();
             if (customerId != null) {
@@ -108,12 +107,11 @@ public class BillingController {
     private String computeStatus(Company c) {
         Instant now = Instant.now();
 
-        // если в БД есть явный флаг активности — учитываем его
+        // boolean-поле => используем isSubscriptionActive()
         boolean activeFlag = false;
         try {
-            // у многих проектов поле называется isSubscriptionActive()/getSubscriptionActive()
-            activeFlag = Boolean.TRUE.equals(c.getSubscriptionActive());
-        } catch (Throwable ignore) { /* нет поля — пропустим */ }
+            activeFlag = c.isSubscriptionActive();
+        } catch (Throwable ignore) { /* на всякий случай */ }
 
         Instant currentEnd = c.getCurrentPeriodEnd();
         Instant trialEnd   = c.getTrialEnd();
@@ -199,7 +197,7 @@ public class BillingController {
         }
     }
 
-    // ------------------- BILLING PORTАЛ -------------------
+    // ------------------- BILLING ПОРТАЛ -------------------
     @GetMapping("/portal")
     public ResponseEntity<?> portal(Authentication auth) {
         try {
@@ -346,13 +344,13 @@ public class BillingController {
         return ResponseEntity.ok("ok");
     }
 
-    /** Безопасно поставить активную подписку и дату окончания — под разные модели Company */
+    /** Безопасно поставить активную подписку и дату окончания — под твою модель Company */
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
-        // если у тебя хранится строковый статус — тоже выставим
-        try { c.setSubscriptionStatus("ACTIVE"); } catch (Throwable ignore) {}
-        // триал больше не важен — по желанию можно обнулить:
+        // ВАЖНО: setSubscriptionStatus(...) удалён — у Company статус вычисляемый (@Transient)
+        // try { c.setSubscriptionStatus("ACTIVE"); } catch (Throwable ignore) {}
+        // По желанию можно обнулить триал:
         // try { c.setTrialEnd(null); } catch (Throwable ignore) {}
     }
 }
