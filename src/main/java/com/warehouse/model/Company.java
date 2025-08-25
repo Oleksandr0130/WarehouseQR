@@ -14,27 +14,21 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /** Название компании */
     private String name;
 
-    /** Флаг включения/отключения компании */
     private boolean enabled;
 
-    /** Флаг активности подписки, обновляется вебхуками Stripe */
     private boolean subscriptionActive;
 
-    /** Дата старта и конца пробного периода */
     private Instant trialStart;
     private Instant trialEnd;
 
-    /** Дата конца оплаченного периода (current_period_end из Stripe) */
     private Instant currentPeriodEnd;
 
-    /** Привязанный к компании Stripe Customer ID (customer_...) */
     @Column(name = "payment_customer_id")
     private String paymentCustomerId;
 
-    /** Уникальный идентификатор компании в нашей системе */
+    // >>> НОВОЕ ПОЛЕ <<<
     @Column(name = "identifier", unique = true, length = 64, nullable = false)
     private String identifier;
 
@@ -43,10 +37,10 @@ public class Company {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public String getName() { return name; }
+    public String getName() {return name;}
     public void setName(String name) { this.name = name; }
 
-    public boolean isEnabled() { return enabled; }
+    public boolean isEnabled() {return enabled;}
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
     public boolean isSubscriptionActive() { return subscriptionActive; }
@@ -64,13 +58,10 @@ public class Company {
     public String getPaymentCustomerId() { return paymentCustomerId; }
     public void setPaymentCustomerId(String paymentCustomerId) { this.paymentCustomerId = paymentCustomerId; }
 
+    // >>> НОВЫЕ ГЕТТЕР/СЕТТЕР <<<
     public String getIdentifier() { return identifier; }
     public void setIdentifier(String identifier) { this.identifier = identifier; }
 
-    /**
-     * Вычисляемый статус подписки для фронта.
-     * Возвращает: "ACTIVE", "TRIAL" или "EXPIRED"
-     */
     @Transient
     public String getSubscriptionStatus() {
         Instant now = Instant.now();
