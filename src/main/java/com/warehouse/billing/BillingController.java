@@ -1,5 +1,7 @@
 package com.warehouse.billing;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
@@ -30,6 +32,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class BillingController {
 
+    private static final Logger log = LoggerFactory.getLogger(BillingController.class);
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
@@ -320,9 +323,8 @@ public class BillingController {
                         String customerId = s.getCustomer();  // cus_...
                         String piId = s.getPaymentIntent();   // pi_... для one-time
 
-                        System.out.println("[WH] checkout.session.completed mode=" + mode +
-                                " customer=" + customerId + " pi=" + piId +
-                                " payStatus=" + s.getPaymentStatus());
+                        log.info("[WH] checkout.session.completed mode={} customer={} payment_status={} pi={}",
+                                mode, customerId, s.getPaymentStatus(), piId);
 
                         // --- дозаполним Customer email/имя ---
                         try {
@@ -335,14 +337,16 @@ public class BillingController {
                                 Customer.retrieve(customerId).update(up);
                             }
                         } catch (Exception updEx) {
-                            System.out.println("[WH] Cannot update customer details: " + updEx.getMessage());
+                            log.warn("[WH] update customer details failed: {}", updEx.getMessage());
                         }
 
                         if ("subscription".equals(mode)) {
                             String subscriptionId = s.getSubscription();
+                            log.info("[WH] subscription flow, sub={}", subscriptionId);
                             if (subscriptionId != null) {
                                 Subscription sub = Subscription.retrieve(subscriptionId);
                                 Long end = sub.getCurrentPeriodEnd();
+                                log.info("[WH] sub current_period_end={}", end);
                                 if (customerId != null && end != null) {
                                     companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
                                         safeSetActive(c, Instant.ofEpochSecond(end));
@@ -351,12 +355,14 @@ public class BillingController {
                                 }
                             }
                         } else if ("payment".equals(mode)) {
+                            log.info("[WH] one-time flow via checkout.session.completed");
                             if (piId != null) {
                                 PaymentIntent pi = PaymentIntent.retrieve(piId);
+                                log.info("[WH] related PI status={}", pi.getStatus());
                                 if ("succeeded".equals(pi.getStatus())) {
                                     grantOneTimeAccess(customerId);
                                 } else {
-                                    System.out.println("[WH] PI not succeeded yet: " + pi.getStatus());
+                                    log.info("[WH] PI not succeeded yet ({}). Will wait for payment_intent.succeeded", pi.getStatus());
                                 }
                             } else if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
                                 grantOneTimeAccess(customerId);
@@ -371,7 +377,7 @@ public class BillingController {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
                         String customerId = s.getCustomer();
-                        System.out.println("[WH] async_payment_succeeded customer=" + customerId);
+                        log.info("[WH] async one-time succeeded, customer={}", customerId);
                         grantOneTimeAccess(customerId);
                     }
                     break;
@@ -382,7 +388,7 @@ public class BillingController {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof PaymentIntent pi) {
                         String customerId = pi.getCustomer();
-                        System.out.println("[WH] payment_intent.succeeded customer=" + customerId + " pi=" + pi.getId());
+                        log.info("[WH] PI succeeded, customer={} pi={}", customerId, pi.getId());
                         grantOneTimeAccess(customerId);
                     }
                     break;
@@ -473,13 +479,30 @@ public class BillingController {
     }
 
     /** Выдаёт доступ после разовой оплаты */
-    private void grantOneTimeAccess(String customerId) {
-        if (customerId == null) return;
-        companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-            Instant end = Instant.now().plus(oneTimeDays, ChronoUnit.DAYS);
-            safeSetActive(c, end);
+    private void activateCompanyTill(String customerId, Instant end) {
+        if (customerId == null) {
+            log.warn("[WH] activateCompanyTill: customerId is null");
+            return;
+        }
+        companyRepository.findByPaymentCustomerId(customerId).ifPresentOrElse(c -> {
+            Instant oldEnd = c.getCurrentPeriodEnd();
+            boolean oldActive = false;
+            try { oldActive = c.isSubscriptionActive(); } catch (Throwable ignored) {}
+            try { c.setSubscriptionActive(true); } catch (Throwable ignored) {}
+            try { c.setCurrentPeriodEnd(end); } catch (Throwable ignored) {}
+            try { c.setTrialEnd(null); } catch (Throwable ignored) {}
+
             companyRepository.save(c);
-            System.out.println("[WH] One-time access granted till " + end + " for customer " + customerId);
+            log.info("[WH] Company#{} activated: oldEnd={}, oldActive={}, newEnd={}, trial cleared",
+                    c.getId(), oldEnd, oldActive, end);
+        }, () -> {
+            log.warn("[WH] No company found by customerId={}", customerId);
         });
+    }
+
+    private void grantOneTimeAccess(String customerId) {
+        Instant end = Instant.now().plus(oneTimeDays, ChronoUnit.DAYS);
+        log.info("[WH] grantOneTimeAccess: +{} days -> {}", oneTimeDays, end);
+        activateCompanyTill(customerId, end);
     }
 }
