@@ -221,8 +221,7 @@ public class BillingController {
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)     // Google Pay внутри
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SOFORT)   // при необходимости
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GIROPAY)  // при необходимости
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)   // при необходимости
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setPrice(oneTimePriceId) // ONE-TIME price_...
