@@ -1,5 +1,6 @@
 package com.warehouse.billing;
 
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.stripe.exception.SignatureVerificationException;
@@ -298,6 +299,7 @@ public class BillingController {
     }
 
     // ----------------------- WEBHOOK ----------------------
+    @Transactional
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(
             @RequestHeader("Stripe-Signature") String signature,
@@ -350,7 +352,7 @@ public class BillingController {
                                 if (customerId != null && end != null) {
                                     companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
                                         safeSetActive(c, Instant.ofEpochSecond(end));
-                                        companyRepository.save(c);
+                                        companyRepository.saveAndFlush(c);
                                     });
                                 }
                             }
