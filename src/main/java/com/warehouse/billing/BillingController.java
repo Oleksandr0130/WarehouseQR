@@ -215,7 +215,6 @@ public class BillingController {
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SOFORT)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GIROPAY)
-                    .putExtraParam("payment_method_collection", "always")
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setPrice(oneTimePriceId) // здесь ДОЛЖНА быть one-time price_...
