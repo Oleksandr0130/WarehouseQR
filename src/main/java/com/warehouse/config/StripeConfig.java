@@ -8,14 +8,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class StripeConfig {
 
-    // Храни ключ в переменной окружения/секрете DO App Platform
-    @Value("${app.stripe.secret-key}")
-    private String secretKey;
+    @Value("${app.stripe.api-key}")
+    private String apiKey;
 
     @PostConstruct
-    public void initStripe() {
-        // API key
-        Stripe.apiKey = secretKey;
+    public void init() {
+        Stripe.apiKey = apiKey;
 
         // --- ВАЖНО: сетевые таймауты и ретраи, чтобы не ловить 504 от DO ---
         // таймаут на установление TCP-соединения
