@@ -210,7 +210,7 @@ public class BillingController {
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)  // Google Pay внутри
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)  // при условии включения в Dashboard
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)  // если включён в Dashboard
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setPrice(oneTimePriceId) // one-time price_...
@@ -297,7 +297,7 @@ public class BillingController {
         try {
             switch (event.getType()) {
 
-                // Checkout завершён
+                // Checkout завершён (подписка или разовая)
                 case "checkout.session.completed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
@@ -321,7 +321,7 @@ public class BillingController {
                                 }
                             }
                         } else if ("payment".equals(mode)) {
-                            // для one-time уточним сам PaymentIntent (иногда completed приходит до succeeded)
+                            // уточним сам PaymentIntent (иногда completed приходит до succeeded)
                             if (piId != null) {
                                 PaymentIntent pi = PaymentIntent.retrieve(piId);
                                 if ("succeeded".equals(pi.getStatus())) {
@@ -340,7 +340,18 @@ public class BillingController {
                     break;
                 }
 
-                // Финальное подтверждение для one-time (APM/BLIK и т.п.)
+                // Асинхронное успешное завершение APM (BLIK/банковские переводы и т.д.)
+                case "checkout.session.async_payment_succeeded": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    if (obj.isPresent() && obj.get() instanceof Session s) {
+                        String customerId = s.getCustomer();
+                        System.out.println("[WH] checkout.session.async_payment_succeeded customer=" + customerId);
+                        grantOneTimeAccess(customerId);
+                    }
+                    break;
+                }
+
+                // Универсальный финал one-time
                 case "payment_intent.succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof PaymentIntent pi) {
