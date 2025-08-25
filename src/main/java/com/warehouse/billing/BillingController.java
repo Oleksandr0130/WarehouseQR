@@ -193,49 +193,50 @@ public class BillingController {
             if (!"ROLE_ADMIN".equals(user.getRole())) {
                 return ResponseEntity.status(403).body(Map.of("error", "admin_only"));
             }
-
             Company company = user.getCompany();
             if (company == null) {
                 return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
             }
 
-            // 1) Customer
-            String customerId = ensureCustomer(company);
+            // customer для связи
+            String customerId = company.getPaymentCustomerId();
+            if (customerId == null) {
+                var cp = CustomerCreateParams.builder()
+                        .setName(company.getName())
+                        .putMetadata("companyId", String.valueOf(company.getId()))
+                        .build();
+                var customer = com.stripe.model.Customer.create(cp);
+                customerId = customer.getId();
+                company.setPaymentCustomerId(customerId);
+                companyRepository.save(company);
+            }
 
-            // 2) URL'ы возврата
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // 3) Checkout Session — one-time price (mode=payment)
-            SessionCreateParams.Builder b = SessionCreateParams.builder()
+            // ВАЖНО: НИКАКОГО payment_method_collection здесь
+            SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SOFORT)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GIROPAY)
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)     // Google Pay внутри
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SOFORT)   // при необходимости
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GIROPAY)  // при необходимости
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(oneTimePriceId) // здесь ДОЛЖНА быть one-time price_...
+                                    .setPrice(oneTimePriceId) // ONE-TIME price_...
                                     .setQuantity(1L)
                                     .build()
-                    );
+                    )
+                    .build();
 
-            SessionCreateParams params = b.build();
             Session session = Session.create(params);
-
             return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
         } catch (StripeException e) {
-            return ResponseEntity.status(502).body(Map.of(
-                    "error", "stripe_error",
-                    "message", e.getMessage()
-            ));
+            return ResponseEntity.status(502).body(Map.of("error", "stripe_error", "message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of(
-                    "error", "server_error",
-                    "message", e.getMessage()
-            ));
+            return ResponseEntity.internalServerError().body(Map.of("error", "server_error", "message", e.getMessage()));
         }
     }
 
