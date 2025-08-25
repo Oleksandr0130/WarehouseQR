@@ -61,8 +61,7 @@ public class BillingController {
 
         var c = user.getCompany();
 
-        // === ВАЖНО: статус вычисляем надёжно по датам и флагу,
-        //     чтобы фронт сразу получил "ACTIVE" после обновления записи из вебхука.
+        // === вычисляемый статус
         String computedStatus = computeStatus(c);
 
         Map<String, Object> body = new LinkedHashMap<>();
@@ -73,7 +72,7 @@ public class BillingController {
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
 
-        // === Если есть открытый счёт, требующий 3DS/SCA — отдадим ссылку на hosted_invoice_url
+        // pendingInvoiceUrl для SCA/3DS по открытым инвойсам
         try {
             String customerId = c.getPaymentCustomerId();
             if (customerId != null) {
@@ -97,7 +96,7 @@ public class BillingController {
                 }
             }
         } catch (Exception ignore) {
-            // молча не мешаем статусу, если Stripe временно недоступен
+            // молча не мешаем статусу
         }
 
         return ResponseEntity.ok(body);
@@ -107,11 +106,8 @@ public class BillingController {
     private String computeStatus(Company c) {
         Instant now = Instant.now();
 
-        // boolean-поле => используем isSubscriptionActive()
         boolean activeFlag = false;
-        try {
-            activeFlag = c.isSubscriptionActive();
-        } catch (Throwable ignore) { /* на всякий случай */ }
+        try { activeFlag = c.isSubscriptionActive(); } catch (Throwable ignore) {}
 
         Instant currentEnd = c.getCurrentPeriodEnd();
         Instant trialEnd   = c.getTrialEnd();
@@ -122,7 +118,6 @@ public class BillingController {
         if (activeFlag && activeByDate) return "ACTIVE";
         if (activeByDate)               return "ACTIVE";
         if (trialByDate)                return "TRIAL";
-        // если ничего не подходит, считаем истёкшим
         return "EXPIRED";
     }
 
@@ -157,7 +152,8 @@ public class BillingController {
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // 3) Checkout Session
+            // 3) Checkout Session — ВАРИАНТ A через extra param (для старых SDK)
+            // Включаем Automatic Payment Methods: Stripe сам покажет все доступные способы
             SessionCreateParams.PaymentMethodOptions pmOpts =
                     SessionCreateParams.PaymentMethodOptions.builder()
                             .putExtraParam("card[request_three_d_secure]", "any")
@@ -168,17 +164,20 @@ public class BillingController {
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+
+                    // <<< ключ: включаем APM через extra param >>>
+                    .putExtraParam("automatic_payment_methods[enabled]", true)
+
+                    // оставим опции карт и сбор нового метода оплаты
                     .setPaymentMethodOptions(pmOpts)
                     .putExtraParam("payment_method_collection", "always")
+
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setPrice(priceId) // ОБЯЗАТЕЛЬНО price_...
                                     .setQuantity(1L)
                                     .build()
                     )
-                    // опционально, если включён SEPA в Dashboard:
-                    // .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT)
                     .build();
 
             Session session = Session.create(params);
@@ -196,6 +195,7 @@ public class BillingController {
             ));
         }
     }
+
 
     // ------------------- BILLING ПОРТАЛ -------------------
     @GetMapping("/portal")
@@ -260,7 +260,6 @@ public class BillingController {
                             Long end = sub.getCurrentPeriodEnd();
                             if (customerId != null && end != null) {
                                 companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                                    // Ставим активность и сохраняем период
                                     safeSetActive(c, Instant.ofEpochSecond(end));
                                     companyRepository.save(c);
                                 });
@@ -270,7 +269,6 @@ public class BillingController {
                     break;
                 }
                 case "checkout.session.expired": {
-                    // оформление прервано — можно залогировать
                     break;
                 }
                 case "customer.subscription.created":
@@ -321,7 +319,6 @@ public class BillingController {
                     }
                     if (customerId != null) {
                         companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                            // Явно завершаем период — сдвигаем на «сейчас», оставляем триал как есть
                             try {
                                 if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
                                     c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
@@ -348,7 +345,7 @@ public class BillingController {
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
-        // ВАЖНО: setSubscriptionStatus(...) удалён — у Company статус вычисляемый (@Transient)
+        // статус у тебя вычисляемый (@Transient), setter не нужен
         // try { c.setSubscriptionStatus("ACTIVE"); } catch (Throwable ignore) {}
         // По желанию можно обнулить триал:
         // try { c.setTrialEnd(null); } catch (Throwable ignore) {}
