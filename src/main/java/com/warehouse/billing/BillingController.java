@@ -5,10 +5,10 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;
-import com.stripe.model.checkout.Session;                    // <-- CHECKOUT Session
+import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.checkout.SessionCreateParams;       // <-- CHECKOUT SessionCreateParams
+import com.stripe.param.checkout.SessionCreateParams;
 import com.warehouse.model.Company;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
@@ -39,7 +39,7 @@ public class BillingController {
     private final CompanyService companyService;
 
     @Value("${app.stripe.price-id}")
-    private String priceId; // ДОЛЖЕН быть вида price_..., не prod_...
+    private String priceId; // ОБЯЗАТЕЛЬНО вида price_...
 
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
@@ -61,14 +61,12 @@ public class BillingController {
 
         var c = user.getCompany();
 
-        // === вычисляемый статус
         String computedStatus = computeStatus(c);
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("status", computedStatus); // TRIAL / ACTIVE / EXPIRED / ...
-
-        if (c.getTrialEnd() != null)          body.put("trialEnd", c.getTrialEnd().toString());
-        if (c.getCurrentPeriodEnd() != null)  body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
+        body.put("status", computedStatus);
+        if (c.getTrialEnd() != null)         body.put("trialEnd", c.getTrialEnd().toString());
+        if (c.getCurrentPeriodEnd() != null) body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
 
@@ -96,13 +94,12 @@ public class BillingController {
                 }
             }
         } catch (Exception ignore) {
-            // молча не мешаем статусу
+            // не мешаем статусу, если Stripe недоступен
         }
 
         return ResponseEntity.ok(body);
     }
 
-    /** Аккуратное вычисление статуса по твоей модели Company */
     private String computeStatus(Company c) {
         Instant now = Instant.now();
 
@@ -152,12 +149,10 @@ public class BillingController {
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // 3) Checkout Session — ВАРИАНТ A через extra param (для старых SDK)
-            // Включаем Automatic Payment Methods: Stripe сам покажет все доступные способы
-            SessionCreateParams.PaymentMethodOptions pmOpts =
-                    SessionCreateParams.PaymentMethodOptions.builder()
-                            .putExtraParam("card[request_three_d_secure]", "any")
-                            .build();
+            // 3) Checkout Session — APM через extra param (SDK без метода .setAutomaticPaymentMethods)
+            var pmOpts = SessionCreateParams.PaymentMethodOptions.builder()
+                    .putExtraParam("card[request_three_d_secure]", "any")
+                    .build();
 
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
@@ -165,25 +160,30 @@ public class BillingController {
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
 
-                    // <<< ключ: включаем APM через extra param >>>
+                    // Включаем Automatic Payment Methods в старом SDK
                     .putExtraParam("automatic_payment_methods[enabled]", true)
 
-                    // оставим опции карт и сбор нового метода оплаты
-                    .setPaymentMethodOptions(pmOpts)
+                    // всегда собираем новый метод оплаты
                     .putExtraParam("payment_method_collection", "always")
 
+                    .setPaymentMethodOptions(pmOpts)
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId) // ОБЯЗАТЕЛЬНО price_...
+                                    .setPrice(priceId)
                                     .setQuantity(1L)
                                     .build()
                     )
                     .build();
 
+            // ЛОГИРУЕМ ДЛИТЕЛЬНОСТЬ ВЫЗОВА К STRIPE
+            long t0 = System.currentTimeMillis();
             Session session = Session.create(params);
+            long took = System.currentTimeMillis() - t0;
+            System.out.println("[BillingController] Stripe Session.create() took " + took + " ms");
 
             return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
         } catch (StripeException e) {
+            // Быстро вернём 502, чтобы не упасть в 504 у DO
             return ResponseEntity.status(502).body(Map.of(
                     "error", "stripe_error",
                     "message", e.getMessage()
@@ -195,7 +195,6 @@ public class BillingController {
             ));
         }
     }
-
 
     // ------------------- BILLING ПОРТАЛ -------------------
     @GetMapping("/portal")
@@ -341,13 +340,9 @@ public class BillingController {
         return ResponseEntity.ok("ok");
     }
 
-    /** Безопасно поставить активную подписку и дату окончания — под твою модель Company */
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
-        // статус у тебя вычисляемый (@Transient), setter не нужен
-        // try { c.setSubscriptionStatus("ACTIVE"); } catch (Throwable ignore) {}
-        // По желанию можно обнулить триал:
-        // try { c.setTrialEnd(null); } catch (Throwable ignore) {}
+        // статус у вас вычисляемый (@Transient)
     }
 }
