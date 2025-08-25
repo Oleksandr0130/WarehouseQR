@@ -169,6 +169,7 @@ public class BillingController {
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT)
                     .setPaymentMethodOptions(pmOpts)
                     .putExtraParam("payment_method_collection", "always")
                     .addLineItem(
@@ -178,7 +179,6 @@ public class BillingController {
                                     .build()
                     )
                     // опционально, если включён SEPA в Dashboard:
-                    // .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT)
                     .build();
 
             Session session = Session.create(params);
