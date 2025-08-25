@@ -2,14 +2,11 @@ package com.warehouse.billing;
 
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import com.stripe.model.Event;
-import com.stripe.model.Invoice;
-import com.stripe.model.InvoiceCollection;
-import com.stripe.model.PaymentIntent;
-import com.stripe.model.Subscription;
+import com.stripe.model.*;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.CustomerUpdateParams;
 import com.stripe.param.InvoiceListParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.warehouse.model.Company;
@@ -140,7 +137,7 @@ public class BillingController {
             }
 
             // 1) Customer
-            String customerId = ensureCustomer(company);
+            String customerId = ensureCustomer(company, user.getCompany().getName(), user.getEmail());
 
             // 2) URL'ы возврата
             String successUrl = frontendBase + "/?billing=success";
@@ -198,7 +195,7 @@ public class BillingController {
                 return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
             }
 
-            String customerId = ensureCustomer(company);
+            String customerId = ensureCustomer(company, user.getCompany().getName(), user.getEmail());
 
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
@@ -228,21 +225,38 @@ public class BillingController {
         }
     }
 
-    private String ensureCustomer(Company company) throws StripeException {
+    private String ensureCustomer(Company company, String name, String email) throws StripeException {
         String customerId = company.getPaymentCustomerId();
         if (customerId == null) {
             var cp = CustomerCreateParams.builder()
-                    .setName(company.getName())
+                    .setName(name)          // имя из твоей модели
+                    .setEmail(email)        // ВАЖНО: e-mail
                     .putMetadata("companyId", String.valueOf(company.getId()))
                     .build();
-            var customer = com.stripe.model.Customer.create(cp);
+            var customer = Customer.create(cp);
             customerId = customer.getId();
             company.setPaymentCustomerId(customerId);
             companyRepository.save(company);
+        } else {
+            // если ранее создали без email — аккуратно дозаполним
+            if (email != null && !email.isBlank()) {
+                Customer cust = Customer.retrieve(customerId);
+                if (cust.getEmail() == null || cust.getEmail().isBlank()) {
+                    var up = CustomerUpdateParams.builder()
+                            .setEmail(email)
+                            .build();
+                    cust.update(up);
+                }
+                if (name != null && !name.isBlank() && (cust.getName() == null || cust.getName().isBlank())) {
+                    var up = CustomerUpdateParams.builder()
+                            .setName(name)
+                            .build();
+                    cust.update(up);
+                }
+            }
         }
         return customerId;
     }
-
     // ------------------- BILLING ПОРТАЛ -------------------
     @GetMapping("/portal")
     public ResponseEntity<?> portal(Authentication auth) {
@@ -297,16 +311,31 @@ public class BillingController {
         try {
             switch (event.getType()) {
 
-                // Checkout завершён (подписка или разовая)
+                // ------------------ Checkout завершён ------------------
                 case "checkout.session.completed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
-                        String mode = s.getMode();                   // "subscription" | "payment"
-                        String customerId = s.getCustomer();         // cus_...
-                        String piId = s.getPaymentIntent();          // pi_... (для mode=payment)
+                        String mode = s.getMode();            // subscription | payment
+                        String customerId = s.getCustomer();  // cus_...
+                        String piId = s.getPaymentIntent();   // pi_... для one-time
 
                         System.out.println("[WH] checkout.session.completed mode=" + mode +
-                                " customer=" + customerId + " pi=" + piId + " payStatus=" + s.getPaymentStatus());
+                                " customer=" + customerId + " pi=" + piId +
+                                " payStatus=" + s.getPaymentStatus());
+
+                        // --- дозаполним Customer email/имя ---
+                        try {
+                            if (customerId != null && s.getCustomerDetails() != null) {
+                                var cd = s.getCustomerDetails();
+                                var up = CustomerUpdateParams.builder()
+                                        .setEmail(cd.getEmail())
+                                        .setName(cd.getName())
+                                        .build();
+                                Customer.retrieve(customerId).update(up);
+                            }
+                        } catch (Exception updEx) {
+                            System.out.println("[WH] Cannot update customer details: " + updEx.getMessage());
+                        }
 
                         if ("subscription".equals(mode)) {
                             String subscriptionId = s.getSubscription();
@@ -321,7 +350,6 @@ public class BillingController {
                                 }
                             }
                         } else if ("payment".equals(mode)) {
-                            // уточним сам PaymentIntent (иногда completed приходит до succeeded)
                             if (piId != null) {
                                 PaymentIntent pi = PaymentIntent.retrieve(piId);
                                 if ("succeeded".equals(pi.getStatus())) {
@@ -329,29 +357,26 @@ public class BillingController {
                                 } else {
                                     System.out.println("[WH] PI not succeeded yet: " + pi.getStatus());
                                 }
-                            } else {
-                                // fallback по статусу сессии
-                                if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
-                                    grantOneTimeAccess(customerId);
-                                }
+                            } else if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
+                                grantOneTimeAccess(customerId);
                             }
                         }
                     }
                     break;
                 }
 
-                // Асинхронное успешное завершение APM (BLIK/банковские переводы и т.д.)
+                // ------------------ Async APM (BLIK и др.) ------------------
                 case "checkout.session.async_payment_succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
                         String customerId = s.getCustomer();
-                        System.out.println("[WH] checkout.session.async_payment_succeeded customer=" + customerId);
+                        System.out.println("[WH] async_payment_succeeded customer=" + customerId);
                         grantOneTimeAccess(customerId);
                     }
                     break;
                 }
 
-                // Универсальный финал one-time
+                // ------------------ PaymentIntent финальный ------------------
                 case "payment_intent.succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof PaymentIntent pi) {
@@ -362,7 +387,7 @@ public class BillingController {
                     break;
                 }
 
-                // Подписка обновлена / создана
+                // ------------------ Подписка создана/обновлена ------------------
                 case "customer.subscription.created":
                 case "customer.subscription.updated": {
                     var obj = event.getDataObjectDeserializer().getObject();
@@ -381,7 +406,7 @@ public class BillingController {
                     break;
                 }
 
-                // Очередной инвойс по подписке оплачен
+                // ------------------ Оплачен очередной инвойс ------------------
                 case "invoice.payment_succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Invoice invoice) {
@@ -401,7 +426,7 @@ public class BillingController {
                     break;
                 }
 
-                // Подписка отменена / оплата не прошла
+                // ------------------ Подписка отменена или оплата не прошла ------------------
                 case "invoice.payment_failed":
                 case "customer.subscription.deleted": {
                     var obj = event.getDataObjectDeserializer().getObject();
@@ -437,6 +462,7 @@ public class BillingController {
 
         return ResponseEntity.ok("ok");
     }
+
 
     /** Безопасно выставляем активность и конец периода */
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
