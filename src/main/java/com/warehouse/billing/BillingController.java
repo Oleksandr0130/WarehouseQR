@@ -4,6 +4,7 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
+import com.stripe.model.PaymentIntent;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
@@ -20,7 +21,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.stripe.model.InvoiceCollection;
-import com.stripe.model.PaymentIntent;
 import com.stripe.param.InvoiceListParams;
 
 import java.time.Instant;
@@ -38,15 +38,15 @@ public class BillingController {
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
 
-    /** ДОЛЖНА быть recurring цена (Monthly/Yearly) вида price_... */
+    /** Recurring (подписка) price_... */
     @Value("${app.stripe.price-id}")
     private String priceId;
 
-    /** ONE-TIME цена (единоразовая) вида price_... — для /checkout-onetime */
+    /** One-time (разовая) price_... */
     @Value("${app.stripe.one-time-price-id}")
     private String oneTimePriceId;
 
-    /** Сколько дней доступа дать после one-time оплаты */
+    /** Сколько дней доступа выдать после разовой оплаты */
     @Value("${app.billing.one-time-days:30}")
     private int oneTimeDays;
 
@@ -79,7 +79,7 @@ public class BillingController {
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
 
-        // Если есть открытый счет, требующий SCA — вернем hosted_invoice_url
+        // Если есть открытый счёт, требующий SCA — вернём hosted_invoice_url
         try {
             String customerId = c.getPaymentCustomerId();
             if (customerId != null) {
@@ -93,7 +93,7 @@ public class BillingController {
                 InvoiceCollection invoices = Invoice.list(invParams);
                 if (invoices != null && invoices.getData() != null && !invoices.getData().isEmpty()) {
                     Invoice inv = invoices.getData().get(0);
-                    PaymentIntent pi = inv.getPaymentIntentObject();
+                    var pi = inv.getPaymentIntentObject();
                     if (pi != null && "requires_action".equals(pi.getStatus())) {
                         String hosted = inv.getHostedInvoiceUrl();
                         if (hosted != null && !hosted.isBlank()) {
@@ -107,6 +107,7 @@ public class BillingController {
         return ResponseEntity.ok(body);
     }
 
+    /** Аккуратное вычисление статуса по модели Company */
     private String computeStatus(Company c) {
         Instant now = Instant.now();
 
@@ -146,7 +147,7 @@ public class BillingController {
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // 3) Checkout Session — ТОЛЬКО recurring priceId!
+            // 3) Checkout Session — ТОЛЬКО recurring priceId
             SessionCreateParams.PaymentMethodOptions pmOpts =
                     SessionCreateParams.PaymentMethodOptions.builder()
                             .putExtraParam("card[request_three_d_secure]", "any")
@@ -163,7 +164,7 @@ public class BillingController {
                     .putExtraParam("payment_method_collection", "always")
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId) // здесь ДОЛЖНА быть recurring price_...
+                                    .setPrice(priceId) // recurring price_...
                                     .setQuantity(1L)
                                     .build()
                     )
@@ -199,32 +200,22 @@ public class BillingController {
             }
 
             // customer для связи
-            String customerId = company.getPaymentCustomerId();
-            if (customerId == null) {
-                var cp = CustomerCreateParams.builder()
-                        .setName(company.getName())
-                        .putMetadata("companyId", String.valueOf(company.getId()))
-                        .build();
-                var customer = com.stripe.model.Customer.create(cp);
-                customerId = customer.getId();
-                company.setPaymentCustomerId(customerId);
-                companyRepository.save(company);
-            }
+            String customerId = ensureCustomer(company);
 
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // ВАЖНО: НИКАКОГО payment_method_collection здесь
+            // ВАЖНО: для Mode.PAYMENT не ставим payment_method_collection
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)     // Google Pay внутри
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)   // при необходимости
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)  // Google Pay внутри
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)  // если включён в Dashboard
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(oneTimePriceId) // ONE-TIME price_...
+                                    .setPrice(oneTimePriceId) // one-time price_...
                                     .setQuantity(1L)
                                     .build()
                     )
@@ -307,15 +298,23 @@ public class BillingController {
 
         try {
             switch (event.getType()) {
+
+                // Checkout завершён
                 case "checkout.session.completed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
-                        if ("subscription".equals(s.getMode())) {
-                            // Подписка: активируем по subscription.current_period_end
+                        String mode = s.getMode();                   // "subscription" | "payment"
+                        String customerId = s.getCustomer();         // cus_...
+                        String piId = s.getPaymentIntent();          // pi_... (для mode=payment)
+
+                        // Лёгкий лог для диагностики
+                        System.out.println("[WH] checkout.session.completed mode=" + mode +
+                                " customer=" + customerId + " pi=" + piId + " payStatus=" + s.getPaymentStatus());
+
+                        if ("subscription".equals(mode)) {
                             String subscriptionId = s.getSubscription();
                             if (subscriptionId != null) {
                                 Subscription sub = Subscription.retrieve(subscriptionId);
-                                String customerId = sub.getCustomer();
                                 Long end = sub.getCurrentPeriodEnd();
                                 if (customerId != null && end != null) {
                                     companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
@@ -324,21 +323,38 @@ public class BillingController {
                                     });
                                 }
                             }
-                        } else if ("payment".equals(s.getMode())) {
-                            // Разовая оплата: если статус paid — даём доступ на oneTimeDays
-                            if ("paid".equals(s.getPaymentStatus())) {
-                                String customerId = s.getCustomer();
-                                if (customerId != null) {
-                                    companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                                        safeSetActive(c, Instant.now().plus(oneTimeDays, ChronoUnit.DAYS));
-                                        companyRepository.save(c);
-                                    });
+                        } else if ("payment".equals(mode)) {
+                            // для one-time проверим сам PaymentIntent (иногда completed приходит раньше, чем succeeded)
+                            if (piId != null) {
+                                PaymentIntent pi = PaymentIntent.retrieve(piId);
+                                if ("succeeded".equals(pi.getStatus())) {
+                                    grantOneTimeAccess(customerId);
+                                } else {
+                                    System.out.println("[WH] PI not succeeded yet: " + pi.getStatus());
+                                }
+                            } else {
+                                // fallback по статусу сессии
+                                if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
+                                    grantOneTimeAccess(customerId);
                                 }
                             }
                         }
                     }
                     break;
                 }
+
+                // Финальное подтверждение для one-time
+                case "payment_intent.succeeded": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    if (obj.isPresent() && obj.get() instanceof PaymentIntent pi) {
+                        String customerId = pi.getCustomer();
+                        System.out.println("[WH] payment_intent.succeeded customer=" + customerId + " pi=" + pi.getId());
+                        grantOneTimeAccess(customerId);
+                    }
+                    break;
+                }
+
+                // Подписка обновлена / создана
                 case "customer.subscription.created":
                 case "customer.subscription.updated": {
                     var obj = event.getDataObjectDeserializer().getObject();
@@ -356,6 +372,8 @@ public class BillingController {
                     }
                     break;
                 }
+
+                // Очередной инвойс по подписке оплачен
                 case "invoice.payment_succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Invoice invoice) {
@@ -374,6 +392,8 @@ public class BillingController {
                     }
                     break;
                 }
+
+                // Подписка отменена / оплата не прошла
                 case "invoice.payment_failed":
                 case "customer.subscription.deleted": {
                     var obj = event.getDataObjectDeserializer().getObject();
@@ -397,6 +417,7 @@ public class BillingController {
                     }
                     break;
                 }
+
                 default:
                     // ignore
             }
@@ -413,5 +434,17 @@ public class BillingController {
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
+    }
+
+    /** Выдаёт доступ после разовой оплаты */
+    private void grantOneTimeAccess(String customerId) {
+        if (customerId == null) return;
+        companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+            Instant end = Instant.now().plus(oneTimeDays, ChronoUnit.DAYS);
+            safeSetActive(c, end);
+            try { c.setTrialEnd(null); } catch (Throwable ignore) {}
+            companyRepository.save(c);
+            System.out.println("[WH] One-time access granted till " + end + " for customer " + customerId);
+        });
     }
 }
