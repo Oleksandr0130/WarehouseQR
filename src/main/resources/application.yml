@@ -37,11 +37,9 @@ app:
   reservation-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/reservation/
   billing:
     frontend-base-url: ${FRONTEND_BASE_URL}
-    one-time-days: 30    # например: 30 дней доступа после разовой оплаты
   stripe:
     api-key: ${STRIPE_API_KEY}
     price-id: ${STRIPE_PRICE_ID}
-    one-time-price-id: ${STRIPE_ONE_TIME_PRICE_ID}  # одноразовая цена
     webhook-secret: ${STRIPE_WEBHOOK_SECRET}
 server:
   servlet:

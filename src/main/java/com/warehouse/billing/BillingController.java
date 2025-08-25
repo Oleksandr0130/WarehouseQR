@@ -1,17 +1,14 @@
 package com.warehouse.billing;
 
-import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import com.stripe.model.*;
-import com.stripe.model.checkout.Session;
+import com.stripe.model.Event;
+import com.stripe.model.Invoice;
+import com.stripe.model.Subscription;
+import com.stripe.model.checkout.Session;                    // <-- CHECKOUT Session
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.CustomerUpdateParams;
-import com.stripe.param.InvoiceListParams;
-import com.stripe.param.checkout.SessionCreateParams;
+import com.stripe.param.checkout.SessionCreateParams;       // <-- CHECKOUT SessionCreateParams
 import com.warehouse.model.Company;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
@@ -22,6 +19,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import com.stripe.model.InvoiceCollection;
+import com.stripe.model.PaymentIntent;
+import com.stripe.param.InvoiceListParams;
+
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
@@ -29,32 +30,22 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/billing") // снаружи будет /api/billing/**
+@RequestMapping("/billing") // снаружи будет /api/billing/** (context-path=/api)
 @RequiredArgsConstructor
 public class BillingController {
 
-    private static final Logger log = LoggerFactory.getLogger(BillingController.class);
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
 
-    /** Recurring (подписка) price_... */
     @Value("${app.stripe.price-id}")
-    private String priceId;
-
-    /** One-time (разовая) price_... */
-    @Value("${app.stripe.one-time-price-id}")
-    private String oneTimePriceId;
-
-    /** Сколько дней доступа выдать после разовой оплаты */
-    @Value("${app.billing.one-time-days:30}")
-    private int oneTimeDays;
+    private String priceId; // ДОЛЖЕН быть вида price_..., не prod_...
 
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
 
     @Value("${app.billing.frontend-base-url}")
-    private String frontendBase; // напр., https://warehouse-qr-app-8adwv.ondigitalocean.app
+    private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
 
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
@@ -70,16 +61,19 @@ public class BillingController {
 
         var c = user.getCompany();
 
+        // === ВАЖНО: статус вычисляем надёжно по датам и флагу,
+        //     чтобы фронт сразу получил "ACTIVE" после обновления записи из вебхука.
         String computedStatus = computeStatus(c);
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", computedStatus); // TRIAL / ACTIVE / EXPIRED / ...
-        if (c.getTrialEnd() != null)         body.put("trialEnd", c.getTrialEnd().toString());
-        if (c.getCurrentPeriodEnd() != null) body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
+
+        if (c.getTrialEnd() != null)          body.put("trialEnd", c.getTrialEnd().toString());
+        if (c.getCurrentPeriodEnd() != null)  body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
 
-        // Если есть открытый счёт, требующий SCA — вернём hosted_invoice_url
+        // === Если есть открытый счёт, требующий 3DS/SCA — отдадим ссылку на hosted_invoice_url
         try {
             String customerId = c.getPaymentCustomerId();
             if (customerId != null) {
@@ -93,7 +87,7 @@ public class BillingController {
                 InvoiceCollection invoices = Invoice.list(invParams);
                 if (invoices != null && invoices.getData() != null && !invoices.getData().isEmpty()) {
                     Invoice inv = invoices.getData().get(0);
-                    var pi = inv.getPaymentIntentObject();
+                    PaymentIntent pi = inv.getPaymentIntentObject();
                     if (pi != null && "requires_action".equals(pi.getStatus())) {
                         String hosted = inv.getHostedInvoiceUrl();
                         if (hosted != null && !hosted.isBlank()) {
@@ -102,17 +96,22 @@ public class BillingController {
                     }
                 }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+            // молча не мешаем статусу, если Stripe временно недоступен
+        }
 
         return ResponseEntity.ok(body);
     }
 
-    /** Аккуратное вычисление статуса по модели Company */
+    /** Аккуратное вычисление статуса по твоей модели Company */
     private String computeStatus(Company c) {
         Instant now = Instant.now();
 
+        // boolean-поле => используем isSubscriptionActive()
         boolean activeFlag = false;
-        try { activeFlag = c.isSubscriptionActive(); } catch (Throwable ignore) {}
+        try {
+            activeFlag = c.isSubscriptionActive();
+        } catch (Throwable ignore) { /* на всякий случай */ }
 
         Instant currentEnd = c.getCurrentPeriodEnd();
         Instant trialEnd   = c.getTrialEnd();
@@ -123,10 +122,11 @@ public class BillingController {
         if (activeFlag && activeByDate) return "ACTIVE";
         if (activeByDate)               return "ACTIVE";
         if (trialByDate)                return "TRIAL";
+        // если ничего не подходит, считаем истёкшим
         return "EXPIRED";
     }
 
-    // ---------------------- CHECKOUT (подписка) ----------------------
+    // ---------------------- CHECKOUT ----------------------
     @PostMapping("/checkout")
     public ResponseEntity<?> createCheckout(Authentication auth) {
         try {
@@ -140,14 +140,24 @@ public class BillingController {
                 return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
             }
 
-            // 1) Customer
-            String customerId = ensureCustomer(company, user.getCompany().getName(), user.getEmail());
+            // 1) Customer для компании (создаём один раз)
+            String customerId = company.getPaymentCustomerId();
+            if (customerId == null) {
+                var cp = CustomerCreateParams.builder()
+                        .setName(company.getName())
+                        .putMetadata("companyId", String.valueOf(company.getId()))
+                        .build();
+                var customer = com.stripe.model.Customer.create(cp);
+                customerId = customer.getId();
+                company.setPaymentCustomerId(customerId);
+                companyRepository.save(company);
+            }
 
             // 2) URL'ы возврата
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // 3) Checkout Session — ТОЛЬКО recurring priceId
+            // 3) Checkout Session
             SessionCreateParams.PaymentMethodOptions pmOpts =
                     SessionCreateParams.PaymentMethodOptions.builder()
                             .putExtraParam("card[request_three_d_secure]", "any")
@@ -158,16 +168,17 @@ public class BillingController {
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)        // включает Google Pay
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT)  // SEPA автосписание
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                     .setPaymentMethodOptions(pmOpts)
                     .putExtraParam("payment_method_collection", "always")
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId) // recurring price_...
+                                    .setPrice(priceId) // ОБЯЗАТЕЛЬНО price_...
                                     .setQuantity(1L)
                                     .build()
                     )
+                    // опционально, если включён SEPA в Dashboard:
+                    // .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT)
                     .build();
 
             Session session = Session.create(params);
@@ -184,82 +195,6 @@ public class BillingController {
                     "message", e.getMessage()
             ));
         }
-    }
-
-    // ---------------------- CHECKOUT (разовая оплата) ----------------------
-    @PostMapping("/checkout-onetime")
-    public ResponseEntity<?> createCheckoutOneTime(Authentication auth) {
-        try {
-            var user = userRepository.findByUsername(auth.getName()).orElseThrow();
-            if (!"ROLE_ADMIN".equals(user.getRole())) {
-                return ResponseEntity.status(403).body(Map.of("error", "admin_only"));
-            }
-            Company company = user.getCompany();
-            if (company == null) {
-                return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
-            }
-
-            String customerId = ensureCustomer(company, user.getCompany().getName(), user.getEmail());
-
-            String successUrl = frontendBase + "/?billing=success";
-            String cancelUrl  = frontendBase + "/?billing=cancel";
-
-            // Для Mode.PAYMENT не ставим payment_method_collection
-            SessionCreateParams params = SessionCreateParams.builder()
-                    .setMode(SessionCreateParams.Mode.PAYMENT)
-                    .setCustomer(customerId)
-                    .setSuccessUrl(successUrl)
-                    .setCancelUrl(cancelUrl)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)  // Google Pay внутри
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)  // если включён в Dashboard
-                    .addLineItem(
-                            SessionCreateParams.LineItem.builder()
-                                    .setPrice(oneTimePriceId) // one-time price_...
-                                    .setQuantity(1L)
-                                    .build()
-                    )
-                    .build();
-
-            Session session = Session.create(params);
-            return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
-        } catch (StripeException e) {
-            return ResponseEntity.status(502).body(Map.of("error", "stripe_error", "message", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body(Map.of("error", "server_error", "message", e.getMessage()));
-        }
-    }
-
-    private String ensureCustomer(Company company, String name, String email) throws StripeException {
-        String customerId = company.getPaymentCustomerId();
-        if (customerId == null) {
-            var cp = CustomerCreateParams.builder()
-                    .setName(name)          // имя из твоей модели
-                    .setEmail(email)        // ВАЖНО: e-mail
-                    .putMetadata("companyId", String.valueOf(company.getId()))
-                    .build();
-            var customer = Customer.create(cp);
-            customerId = customer.getId();
-            company.setPaymentCustomerId(customerId);
-            companyRepository.save(company);
-        } else {
-            // если ранее создали без email — аккуратно дозаполним
-            if (email != null && !email.isBlank()) {
-                Customer cust = Customer.retrieve(customerId);
-                if (cust.getEmail() == null || cust.getEmail().isBlank()) {
-                    var up = CustomerUpdateParams.builder()
-                            .setEmail(email)
-                            .build();
-                    cust.update(up);
-                }
-                if (name != null && !name.isBlank() && (cust.getName() == null || cust.getName().isBlank())) {
-                    var up = CustomerUpdateParams.builder()
-                            .setName(name)
-                            .build();
-                    cust.update(up);
-                }
-            }
-        }
-        return customerId;
     }
 
     // ------------------- BILLING ПОРТАЛ -------------------
@@ -299,7 +234,6 @@ public class BillingController {
     }
 
     // ----------------------- WEBHOOK ----------------------
-    @Transactional
     @PostMapping("/webhook")
     public ResponseEntity<String> webhook(
             @RequestHeader("Stripe-Signature") String signature,
@@ -316,87 +250,29 @@ public class BillingController {
 
         try {
             switch (event.getType()) {
-
-                // ------------------ Checkout завершён ------------------
                 case "checkout.session.completed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
-                        String mode = s.getMode();            // subscription | payment
-                        String customerId = s.getCustomer();  // cus_...
-                        String piId = s.getPaymentIntent();   // pi_... для one-time
-
-                        log.info("[WH] checkout.session.completed mode={} customer={} payment_status={} pi={}",
-                                mode, customerId, s.getPaymentStatus(), piId);
-
-                        // --- дозаполним Customer email/имя ---
-                        try {
-                            if (customerId != null && s.getCustomerDetails() != null) {
-                                var cd = s.getCustomerDetails();
-                                var up = CustomerUpdateParams.builder()
-                                        .setEmail(cd.getEmail())
-                                        .setName(cd.getName())
-                                        .build();
-                                Customer.retrieve(customerId).update(up);
-                            }
-                        } catch (Exception updEx) {
-                            log.warn("[WH] update customer details failed: {}", updEx.getMessage());
-                        }
-
-                        if ("subscription".equals(mode)) {
-                            String subscriptionId = s.getSubscription();
-                            log.info("[WH] subscription flow, sub={}", subscriptionId);
-                            if (subscriptionId != null) {
-                                Subscription sub = Subscription.retrieve(subscriptionId);
-                                Long end = sub.getCurrentPeriodEnd();
-                                log.info("[WH] sub current_period_end={}", end);
-                                if (customerId != null && end != null) {
-                                    companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                                        safeSetActive(c, Instant.ofEpochSecond(end));
-                                        companyRepository.saveAndFlush(c);
-                                    });
-                                }
-                            }
-                        } else if ("payment".equals(mode)) {
-                            log.info("[WH] one-time flow via checkout.session.completed");
-                            if (piId != null) {
-                                PaymentIntent pi = PaymentIntent.retrieve(piId);
-                                log.info("[WH] related PI status={}", pi.getStatus());
-                                if ("succeeded".equals(pi.getStatus())) {
-                                    grantOneTimeAccess(customerId);
-                                } else {
-                                    log.info("[WH] PI not succeeded yet ({}). Will wait for payment_intent.succeeded", pi.getStatus());
-                                }
-                            } else if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
-                                grantOneTimeAccess(customerId);
+                        String subscriptionId = s.getSubscription();
+                        if (subscriptionId != null) {
+                            Subscription sub = Subscription.retrieve(subscriptionId);
+                            String customerId = sub.getCustomer();
+                            Long end = sub.getCurrentPeriodEnd();
+                            if (customerId != null && end != null) {
+                                companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+                                    // Ставим активность и сохраняем период
+                                    safeSetActive(c, Instant.ofEpochSecond(end));
+                                    companyRepository.save(c);
+                                });
                             }
                         }
                     }
                     break;
                 }
-
-                // ------------------ Async APM (BLIK и др.) ------------------
-                case "checkout.session.async_payment_succeeded": {
-                    var obj = event.getDataObjectDeserializer().getObject();
-                    if (obj.isPresent() && obj.get() instanceof Session s) {
-                        String customerId = s.getCustomer();
-                        log.info("[WH] async one-time succeeded, customer={}", customerId);
-                        grantOneTimeAccess(customerId);
-                    }
+                case "checkout.session.expired": {
+                    // оформление прервано — можно залогировать
                     break;
                 }
-
-                // ------------------ PaymentIntent финальный ------------------
-                case "payment_intent.succeeded": {
-                    var obj = event.getDataObjectDeserializer().getObject();
-                    if (obj.isPresent() && obj.get() instanceof PaymentIntent pi) {
-                        String customerId = pi.getCustomer();
-                        log.info("[WH] PI succeeded, customer={} pi={}", customerId, pi.getId());
-                        grantOneTimeAccess(customerId);
-                    }
-                    break;
-                }
-
-                // ------------------ Подписка создана/обновлена ------------------
                 case "customer.subscription.created":
                 case "customer.subscription.updated": {
                     var obj = event.getDataObjectDeserializer().getObject();
@@ -414,8 +290,6 @@ public class BillingController {
                     }
                     break;
                 }
-
-                // ------------------ Оплачен очередной инвойс ------------------
                 case "invoice.payment_succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Invoice invoice) {
@@ -434,8 +308,6 @@ public class BillingController {
                     }
                     break;
                 }
-
-                // ------------------ Подписка отменена или оплата не прошла ------------------
                 case "invoice.payment_failed":
                 case "customer.subscription.deleted": {
                     var obj = event.getDataObjectDeserializer().getObject();
@@ -449,18 +321,17 @@ public class BillingController {
                     }
                     if (customerId != null) {
                         companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+                            // Явно завершаем период — сдвигаем на «сейчас», оставляем триал как есть
                             try {
                                 if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
                                     c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
                                 }
-                                c.setSubscriptionActive(false);
                             } catch (Throwable ignore) {}
                             companyRepository.save(c);
                         });
                     }
                     break;
                 }
-
                 default:
                     // ignore
             }
@@ -473,38 +344,13 @@ public class BillingController {
         return ResponseEntity.ok("ok");
     }
 
-    /** Безопасно выставляем активность и конец периода */
+    /** Безопасно поставить активную подписку и дату окончания — под твою модель Company */
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
-        try { c.setTrialEnd(null); } catch (Throwable ignore) {} // <-- сбрасываем trial
-    }
-
-    /** Выдаёт доступ после разовой оплаты */
-    private void activateCompanyTill(String customerId, Instant end) {
-        if (customerId == null) {
-            log.warn("[WH] activateCompanyTill: customerId is null");
-            return;
-        }
-        companyRepository.findByPaymentCustomerId(customerId).ifPresentOrElse(c -> {
-            Instant oldEnd = c.getCurrentPeriodEnd();
-            boolean oldActive = false;
-            try { oldActive = c.isSubscriptionActive(); } catch (Throwable ignored) {}
-            try { c.setSubscriptionActive(true); } catch (Throwable ignored) {}
-            try { c.setCurrentPeriodEnd(end); } catch (Throwable ignored) {}
-            try { c.setTrialEnd(null); } catch (Throwable ignored) {}
-
-            companyRepository.save(c);
-            log.info("[WH] Company#{} activated: oldEnd={}, oldActive={}, newEnd={}, trial cleared",
-                    c.getId(), oldEnd, oldActive, end);
-        }, () -> {
-            log.warn("[WH] No company found by customerId={}", customerId);
-        });
-    }
-
-    private void grantOneTimeAccess(String customerId) {
-        Instant end = Instant.now().plus(oneTimeDays, ChronoUnit.DAYS);
-        log.info("[WH] grantOneTimeAccess: +{} days -> {}", oneTimeDays, end);
-        activateCompanyTill(customerId, end);
+        // ВАЖНО: setSubscriptionStatus(...) удалён — у Company статус вычисляемый (@Transient)
+        // try { c.setSubscriptionStatus("ACTIVE"); } catch (Throwable ignore) {}
+        // По желанию можно обнулить триал:
+        // try { c.setTrialEnd(null); } catch (Throwable ignore) {}
     }
 }
