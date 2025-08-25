@@ -5,10 +5,10 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
 import com.stripe.model.Subscription;
-import com.stripe.model.checkout.Session;                    // <-- CHECKOUT Session
+import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.checkout.SessionCreateParams;       // <-- CHECKOUT SessionCreateParams
+import com.stripe.param.checkout.SessionCreateParams;
 import com.warehouse.model.Company;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
@@ -38,14 +38,23 @@ public class BillingController {
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
 
+    /** ДОЛЖНА быть recurring цена (Monthly/Yearly) вида price_... */
     @Value("${app.stripe.price-id}")
-    private String priceId; // ДОЛЖЕН быть вида price_..., не prod_...
+    private String priceId;
+
+    /** ONE-TIME цена (единоразовая) вида price_... — для /checkout-onetime */
+    @Value("${app.stripe.one-time-price-id}")
+    private String oneTimePriceId;
+
+    /** Сколько дней доступа дать после one-time оплаты */
+    @Value("${app.billing.one-time-days:30}")
+    private int oneTimeDays;
 
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
 
     @Value("${app.billing.frontend-base-url}")
-    private String frontendBase; // например, https://warehouse-qr-app-8adwv.ondigitalocean.app
+    private String frontendBase; // напр., https://warehouse-qr-app-8adwv.ondigitalocean.app
 
     // ----------------------- STATUS -----------------------
     @GetMapping("/status")
@@ -61,19 +70,16 @@ public class BillingController {
 
         var c = user.getCompany();
 
-        // === ВАЖНО: статус вычисляем надёжно по датам и флагу,
-        //     чтобы фронт сразу получил "ACTIVE" после обновления записи из вебхука.
         String computedStatus = computeStatus(c);
 
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", computedStatus); // TRIAL / ACTIVE / EXPIRED / ...
-
-        if (c.getTrialEnd() != null)          body.put("trialEnd", c.getTrialEnd().toString());
-        if (c.getCurrentPeriodEnd() != null)  body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
+        if (c.getTrialEnd() != null)         body.put("trialEnd", c.getTrialEnd().toString());
+        if (c.getCurrentPeriodEnd() != null) body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
 
-        // === Если есть открытый счёт, требующий 3DS/SCA — отдадим ссылку на hosted_invoice_url
+        // Если есть открытый счет, требующий SCA — вернем hosted_invoice_url
         try {
             String customerId = c.getPaymentCustomerId();
             if (customerId != null) {
@@ -96,22 +102,16 @@ public class BillingController {
                     }
                 }
             }
-        } catch (Exception ignore) {
-            // молча не мешаем статусу, если Stripe временно недоступен
-        }
+        } catch (Exception ignore) {}
 
         return ResponseEntity.ok(body);
     }
 
-    /** Аккуратное вычисление статуса по твоей модели Company */
     private String computeStatus(Company c) {
         Instant now = Instant.now();
 
-        // boolean-поле => используем isSubscriptionActive()
         boolean activeFlag = false;
-        try {
-            activeFlag = c.isSubscriptionActive();
-        } catch (Throwable ignore) { /* на всякий случай */ }
+        try { activeFlag = c.isSubscriptionActive(); } catch (Throwable ignore) {}
 
         Instant currentEnd = c.getCurrentPeriodEnd();
         Instant trialEnd   = c.getTrialEnd();
@@ -122,11 +122,10 @@ public class BillingController {
         if (activeFlag && activeByDate) return "ACTIVE";
         if (activeByDate)               return "ACTIVE";
         if (trialByDate)                return "TRIAL";
-        // если ничего не подходит, считаем истёкшим
         return "EXPIRED";
     }
 
-    // ---------------------- CHECKOUT ----------------------
+    // ---------------------- CHECKOUT (подписка) ----------------------
     @PostMapping("/checkout")
     public ResponseEntity<?> createCheckout(Authentication auth) {
         try {
@@ -140,24 +139,14 @@ public class BillingController {
                 return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
             }
 
-            // 1) Customer для компании (создаём один раз)
-            String customerId = company.getPaymentCustomerId();
-            if (customerId == null) {
-                var cp = CustomerCreateParams.builder()
-                        .setName(company.getName())
-                        .putMetadata("companyId", String.valueOf(company.getId()))
-                        .build();
-                var customer = com.stripe.model.Customer.create(cp);
-                customerId = customer.getId();
-                company.setPaymentCustomerId(customerId);
-                companyRepository.save(company);
-            }
+            // 1) Customer
+            String customerId = ensureCustomer(company);
 
             // 2) URL'ы возврата
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // 3) Checkout Session
+            // 3) Checkout Session — ТОЛЬКО recurring priceId!
             SessionCreateParams.PaymentMethodOptions pmOpts =
                     SessionCreateParams.PaymentMethodOptions.builder()
                             .putExtraParam("card[request_three_d_secure]", "any")
@@ -168,17 +157,16 @@ public class BillingController {
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT)
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)        // включает Google Pay
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SEPA_DEBIT)  // SEPA автосписание
                     .setPaymentMethodOptions(pmOpts)
                     .putExtraParam("payment_method_collection", "always")
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId) // ОБЯЗАТЕЛЬНО price_...
+                                    .setPrice(priceId) // здесь ДОЛЖНА быть recurring price_...
                                     .setQuantity(1L)
                                     .build()
                     )
-                    // опционально, если включён SEPA в Dashboard:
                     .build();
 
             Session session = Session.create(params);
@@ -195,6 +183,76 @@ public class BillingController {
                     "message", e.getMessage()
             ));
         }
+    }
+
+    // ---------------------- CHECKOUT (разовая оплата) ----------------------
+    @PostMapping("/checkout-onetime")
+    public ResponseEntity<?> createCheckoutOneTime(Authentication auth) {
+        try {
+            var user = userRepository.findByUsername(auth.getName()).orElseThrow();
+            if (!"ROLE_ADMIN".equals(user.getRole())) {
+                return ResponseEntity.status(403).body(Map.of("error", "admin_only"));
+            }
+
+            Company company = user.getCompany();
+            if (company == null) {
+                return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
+            }
+
+            // 1) Customer
+            String customerId = ensureCustomer(company);
+
+            // 2) URL'ы возврата
+            String successUrl = frontendBase + "/?billing=success";
+            String cancelUrl  = frontendBase + "/?billing=cancel";
+
+            // 3) Checkout Session — one-time price (mode=payment)
+            SessionCreateParams.Builder b = SessionCreateParams.builder()
+                    .setMode(SessionCreateParams.Mode.PAYMENT)
+                    .setCustomer(customerId)
+                    .setSuccessUrl(successUrl)
+                    .setCancelUrl(cancelUrl)
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.SOFORT)
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.GIROPAY)
+                    .putExtraParam("payment_method_collection", "always")
+                    .addLineItem(
+                            SessionCreateParams.LineItem.builder()
+                                    .setPrice(oneTimePriceId) // здесь ДОЛЖНА быть one-time price_...
+                                    .setQuantity(1L)
+                                    .build()
+                    );
+
+            SessionCreateParams params = b.build();
+            Session session = Session.create(params);
+
+            return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
+        } catch (StripeException e) {
+            return ResponseEntity.status(502).body(Map.of(
+                    "error", "stripe_error",
+                    "message", e.getMessage()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body(Map.of(
+                    "error", "server_error",
+                    "message", e.getMessage()
+            ));
+        }
+    }
+
+    private String ensureCustomer(Company company) throws StripeException {
+        String customerId = company.getPaymentCustomerId();
+        if (customerId == null) {
+            var cp = CustomerCreateParams.builder()
+                    .setName(company.getName())
+                    .putMetadata("companyId", String.valueOf(company.getId()))
+                    .build();
+            var customer = com.stripe.model.Customer.create(cp);
+            customerId = customer.getId();
+            company.setPaymentCustomerId(customerId);
+            companyRepository.save(company);
+        }
+        return customerId;
     }
 
     // ------------------- BILLING ПОРТАЛ -------------------
@@ -253,24 +311,33 @@ public class BillingController {
                 case "checkout.session.completed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
-                        String subscriptionId = s.getSubscription();
-                        if (subscriptionId != null) {
-                            Subscription sub = Subscription.retrieve(subscriptionId);
-                            String customerId = sub.getCustomer();
-                            Long end = sub.getCurrentPeriodEnd();
-                            if (customerId != null && end != null) {
-                                companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                                    // Ставим активность и сохраняем период
-                                    safeSetActive(c, Instant.ofEpochSecond(end));
-                                    companyRepository.save(c);
-                                });
+                        if ("subscription".equals(s.getMode())) {
+                            // Подписка: активируем по subscription.current_period_end
+                            String subscriptionId = s.getSubscription();
+                            if (subscriptionId != null) {
+                                Subscription sub = Subscription.retrieve(subscriptionId);
+                                String customerId = sub.getCustomer();
+                                Long end = sub.getCurrentPeriodEnd();
+                                if (customerId != null && end != null) {
+                                    companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+                                        safeSetActive(c, Instant.ofEpochSecond(end));
+                                        companyRepository.save(c);
+                                    });
+                                }
+                            }
+                        } else if ("payment".equals(s.getMode())) {
+                            // Разовая оплата: если статус paid — даём доступ на oneTimeDays
+                            if ("paid".equals(s.getPaymentStatus())) {
+                                String customerId = s.getCustomer();
+                                if (customerId != null) {
+                                    companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+                                        safeSetActive(c, Instant.now().plus(oneTimeDays, ChronoUnit.DAYS));
+                                        companyRepository.save(c);
+                                    });
+                                }
                             }
                         }
                     }
-                    break;
-                }
-                case "checkout.session.expired": {
-                    // оформление прервано — можно залогировать
                     break;
                 }
                 case "customer.subscription.created":
@@ -321,7 +388,6 @@ public class BillingController {
                     }
                     if (customerId != null) {
                         companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                            // Явно завершаем период — сдвигаем на «сейчас», оставляем триал как есть
                             try {
                                 if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
                                     c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
@@ -344,13 +410,9 @@ public class BillingController {
         return ResponseEntity.ok("ok");
     }
 
-    /** Безопасно поставить активную подписку и дату окончания — под твою модель Company */
+    /** Безопасно выставляем активность и конец периода */
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
-        // ВАЖНО: setSubscriptionStatus(...) удалён — у Company статус вычисляемый (@Transient)
-        // try { c.setSubscriptionStatus("ACTIVE"); } catch (Throwable ignore) {}
-        // По желанию можно обнулить триал:
-        // try { c.setTrialEnd(null); } catch (Throwable ignore) {}
     }
 }
