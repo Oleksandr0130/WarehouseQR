@@ -257,6 +257,7 @@ public class BillingController {
         }
         return customerId;
     }
+
     // ------------------- BILLING ПОРТАЛ -------------------
     @GetMapping("/portal")
     public ResponseEntity<?> portal(Authentication auth) {
@@ -444,6 +445,7 @@ public class BillingController {
                                 if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
                                     c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
                                 }
+                                c.setSubscriptionActive(false);
                             } catch (Throwable ignore) {}
                             companyRepository.save(c);
                         });
@@ -462,7 +464,6 @@ public class BillingController {
 
         return ResponseEntity.ok("ok");
     }
-
 
     /** Безопасно выставляем активность и конец периода */
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
