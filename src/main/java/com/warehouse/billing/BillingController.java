@@ -4,11 +4,13 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.Invoice;
+import com.stripe.model.InvoiceCollection;
 import com.stripe.model.PaymentIntent;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
+import com.stripe.param.InvoiceListParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.warehouse.model.Company;
 import com.warehouse.repository.CompanyRepository;
@@ -20,9 +22,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import com.stripe.model.InvoiceCollection;
-import com.stripe.param.InvoiceListParams;
-
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
@@ -30,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/billing") // снаружи будет /api/billing/** (context-path=/api)
+@RequestMapping("/billing") // снаружи будет /api/billing/**
 @RequiredArgsConstructor
 public class BillingController {
 
@@ -199,20 +198,19 @@ public class BillingController {
                 return ResponseEntity.badRequest().body(Map.of("error", "no_company"));
             }
 
-            // customer для связи
             String customerId = ensureCustomer(company);
 
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // ВАЖНО: для Mode.PAYMENT не ставим payment_method_collection
+            // Для Mode.PAYMENT не ставим payment_method_collection
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)  // Google Pay внутри
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)  // если включён в Dashboard
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)  // при условии включения в Dashboard
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setPrice(oneTimePriceId) // one-time price_...
@@ -307,7 +305,6 @@ public class BillingController {
                         String customerId = s.getCustomer();         // cus_...
                         String piId = s.getPaymentIntent();          // pi_... (для mode=payment)
 
-                        // Лёгкий лог для диагностики
                         System.out.println("[WH] checkout.session.completed mode=" + mode +
                                 " customer=" + customerId + " pi=" + piId + " payStatus=" + s.getPaymentStatus());
 
@@ -324,7 +321,7 @@ public class BillingController {
                                 }
                             }
                         } else if ("payment".equals(mode)) {
-                            // для one-time проверим сам PaymentIntent (иногда completed приходит раньше, чем succeeded)
+                            // для one-time уточним сам PaymentIntent (иногда completed приходит до succeeded)
                             if (piId != null) {
                                 PaymentIntent pi = PaymentIntent.retrieve(piId);
                                 if ("succeeded".equals(pi.getStatus())) {
@@ -343,7 +340,7 @@ public class BillingController {
                     break;
                 }
 
-                // Финальное подтверждение для one-time
+                // Финальное подтверждение для one-time (APM/BLIK и т.п.)
                 case "payment_intent.succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof PaymentIntent pi) {
