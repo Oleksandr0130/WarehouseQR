@@ -468,6 +468,7 @@ public class BillingController {
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
+        try { c.setTrialEnd(null); } catch (Throwable ignore) {} // <-- сбрасываем trial
     }
 
     /** Выдаёт доступ после разовой оплаты */
@@ -476,7 +477,6 @@ public class BillingController {
         companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
             Instant end = Instant.now().plus(oneTimeDays, ChronoUnit.DAYS);
             safeSetActive(c, end);
-            try { c.setTrialEnd(null); } catch (Throwable ignore) {}
             companyRepository.save(c);
             System.out.println("[WH] One-time access granted till " + end + " for customer " + customerId);
         });
