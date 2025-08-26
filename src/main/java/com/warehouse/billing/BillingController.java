@@ -228,7 +228,6 @@ public class BillingController {
                     .putMetadata("companyId", String.valueOf(company.getId()))
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK) // BLIK
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.P24)  // Przelewy24
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setQuantity(1L)
