@@ -91,6 +91,22 @@ public class BillingController {
                         }
                     }
                 }
+                InvoiceListParams p = InvoiceListParams.builder()
+                        .setCustomer(customerId)
+                        .setLimit(1L)
+                        .putExtraParam("status", "open")
+                        .build();
+
+                InvoiceCollection coll = Invoice.list(p);
+                if (coll != null && !coll.getData().isEmpty()) {
+                    Invoice inv = coll.getData().get(0);
+                    if ("open".equals(inv.getStatus()) && inv.getAmountRemaining() != null && inv.getAmountRemaining() > 0) {
+                        String hosted = inv.getHostedInvoiceUrl();
+                        if (hosted != null && !hosted.isBlank()) {
+                            body.put("pendingInvoiceUrl", hosted); // фронт уже умеет показать «Complete authentication»
+                        }
+                    }
+                }
             }
         } catch (Exception ignore) { /* не мешаем статусу */ }
 
