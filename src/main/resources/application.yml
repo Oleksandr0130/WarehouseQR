@@ -37,6 +37,9 @@ app:
   reservation-base-url: https://warehouse-qr-app-8adwv.ondigitalocean.app/api/reservation/
   billing:
     frontend-base-url: ${FRONTEND_BASE_URL}
+    oneoff:
+      amount-pln: 9900       # 99.00 PLN
+      extend-days: 30        # на сколько дней продлеваем по one-off
   stripe:
     api-key: ${STRIPE_API_KEY}
     price-id: ${STRIPE_PRICE_ID}
