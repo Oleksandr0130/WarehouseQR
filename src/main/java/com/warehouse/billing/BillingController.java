@@ -1,5 +1,6 @@
 package com.warehouse.billing;
 
+import com.stripe.exception.InvalidRequestException;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.*;
@@ -69,7 +70,7 @@ public class BillingController {
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
 
-        // если есть инвойс, требующий 3DS/SCA — отдадим ссылку
+        // Pending SCA (requires_action) -> hosted invoice link
         try {
             String customerId = c.getPaymentCustomerId();
             if (customerId != null) {
@@ -91,6 +92,8 @@ public class BillingController {
                         }
                     }
                 }
+
+                // Любой открытый инвойс с долгом -> тоже отдаём ссылку
                 InvoiceListParams p = InvoiceListParams.builder()
                         .setCustomer(customerId)
                         .setLimit(1L)
@@ -103,7 +106,7 @@ public class BillingController {
                     if ("open".equals(inv.getStatus()) && inv.getAmountRemaining() != null && inv.getAmountRemaining() > 0) {
                         String hosted = inv.getHostedInvoiceUrl();
                         if (hosted != null && !hosted.isBlank()) {
-                            body.put("pendingInvoiceUrl", hosted); // фронт уже умеет показать «Complete authentication»
+                            body.put("pendingInvoiceUrl", hosted);
                         }
                     }
                 }
@@ -208,6 +211,7 @@ public class BillingController {
             if (customerId == null) {
                 var cp = CustomerCreateParams.builder()
                         .setName(company.getName())
+                        .setEmail(user.getEmail())
                         .putMetadata("companyId", String.valueOf(company.getId()))
                         .build();
                 var customer = Customer.create(cp);
@@ -228,6 +232,7 @@ public class BillingController {
                     .putMetadata("companyId", String.valueOf(company.getId()))
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK) // BLIK
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.P24)  // Przelewy24 (резерв для PL)
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setQuantity(1L)
@@ -245,6 +250,64 @@ public class BillingController {
             Session session = Session.create(params);
             return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
         } catch (StripeException e) {
+            // Фолбэк на "No such customer: 'cus_...'"
+            if (e instanceof InvalidRequestException ire) {
+                final String code  = ire.getCode();
+                final String param = ire.getParam();
+                final String msg   = ire.getMessage() != null ? ire.getMessage() : "";
+                final boolean missingCustomer =
+                        ("resource_missing".equals(code) && "customer".equals(param))
+                                || msg.contains("No such customer");
+
+                if (missingCustomer) {
+                    try {
+                        // 1) создаём Customer в текущем аккаунте (по текущему sk_live)
+                        var cp = CustomerCreateParams.builder()
+                                .setName(company.getName())
+                                .setEmail(userOpt.get().getEmail())
+                                .putMetadata("companyId", String.valueOf(company.getId()))
+                                .build();
+                        var newCustomer = Customer.create(cp);
+
+                        // 2) прошиваем связь
+                        company.setPaymentCustomerId(newCustomer.getId());
+                        companyRepository.save(company);
+
+                        // 3) повторяем создание Session
+                        String successUrl = frontendBase + "/?billing=success";
+                        String cancelUrl  = frontendBase + "/?billing=cancel";
+
+                        SessionCreateParams retry = SessionCreateParams.builder()
+                                .setMode(SessionCreateParams.Mode.PAYMENT)
+                                .setCustomer(newCustomer.getId())
+                                .setSuccessUrl(successUrl)
+                                .setCancelUrl(cancelUrl)
+                                .setClientReferenceId(String.valueOf(company.getId()))
+                                .putMetadata("companyId", String.valueOf(company.getId()))
+                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)
+                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.P24)
+                                .addLineItem(
+                                        SessionCreateParams.LineItem.builder()
+                                                .setQuantity(1L)
+                                                .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
+                                                        .setCurrency("pln")
+                                                        .setUnitAmount(oneOffAmountPln)
+                                                        .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                                                .setName("Manual extension (one-off, PLN)")
+                                                                .build())
+                                                        .build())
+                                                .build()
+                                )
+                                .build();
+
+                        Session session2 = Session.create(retry);
+                        return ResponseEntity.ok(Map.of("checkoutUrl", session2.getUrl()));
+                    } catch (StripeException inner) {
+                        return ResponseEntity.status(502).body(Map.of("error","stripe_error","message", inner.getMessage()));
+                    }
+                }
+            }
             return ResponseEntity.status(502).body(Map.of("error","stripe_error","message", e.getMessage()));
         }
     }
@@ -285,7 +348,7 @@ public class BillingController {
                                 }
                             }
                         }
-                        // ONE-OFF (например, BLIK/Przelewy24)
+                        // ONE-OFF (например, BLIK/P24)
                         else if ("payment".equalsIgnoreCase(s.getMode())) {
                             if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
                                 String customerId = s.getCustomer();
