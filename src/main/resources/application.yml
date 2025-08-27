@@ -47,7 +47,7 @@ app:
 server:
   servlet:
     context-path: /api
-
+  forward-headers-strategy: framework
 key:
   access: ${KEY_ACCESS}
   refresh: ${KEY_REFRESH}
@@ -57,6 +57,8 @@ logging:
     name: logs/log.log
   level:
     root: info
+    com.stripe: info
+    com.warehouse.billing.BillingController: info
 
 messages:
   hello: Hello from DigitalOcean!
