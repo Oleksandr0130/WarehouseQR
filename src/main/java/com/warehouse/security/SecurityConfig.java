@@ -21,54 +21,80 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
+//    private final UserRepository userRepository;
+//    private final CompanyService companyService;
+//    private final JwtTokenProvider jwtTokenProvider;
+//
+//
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
+//        http.csrf(csrf -> csrf.disable()) // отключаем CSRF
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/auth/register", "/auth/confirm").permitAll()
+//                        .requestMatchers(
+//                                "/auth/**",
+//                                "/billing/webhook",
+//                                "/billing/checkout",
+//                                "/billing/portal",
+//                                "/billing/status").permitAll()
+//                        .anyRequest().permitAll()
+//                )
+//                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
+//                        org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(subscriptionGuardFilter(), JwtAuthenticationFilter.class);
+//
+//        return http.build();
+//    }
+//
+//    @Bean
+//    public SubscriptionGuardFilter subscriptionGuardFilter() {
+//        return new SubscriptionGuardFilter(userRepository, companyService);
+//    }
+//
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        return username -> {
+//            var user = userRepository.findByUsername(username).orElseThrow();
+//            if (!user.isEnabled()) throw new RuntimeException("Пожалуйста, подтвердите email");
+//            return org.springframework.security.core.userdetails.User
+//                    .withUsername(user.getUsername())
+//                    .password(user.getPassword())
+//                    .roles(user.getRole().replace("ROLE_", ""))
+//                    .build();
+//        };
+//    }
+//
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+
     private final UserRepository userRepository;
     private final CompanyService companyService;
     private final JwtTokenProvider jwtTokenProvider;
     private final SubscriptionService subscriptionService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                // Игнорируем CSRF для вебхука Stripe.
-                // Указываем оба варианта: с /api и без — чтобы не упереться в особенности матчинга.
-                .csrf(csrf -> csrf.disable())
-
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
+        http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Stripe webhook — публично (оба варианта путей)
-                        .requestMatchers("/stripe/webhook", "/api/stripe/webhook").permitAll()
-
-                        // аутентификация/регистрация — публично
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/login","/register").permitAll()
-
-                        // статика/фронт (подправь под свой билд, если нужно)
+                        .requestMatchers("/auth/register", "/auth/confirm").permitAll()
                         .requestMatchers(
-                                "/",
-                                "/index.html",
-                                "/assets/**",
-                                "/static/**",
-                                "/favicon.ico",
-                                "/manifest.json"
+                                "/auth/**",
+                                "/billing/**",
+                                "/billing/webhook",
+                                "/billing/checkout",
+                                "/billing/portal",
+                                "/billing/status",
+                                "/status"
                         ).permitAll()
-
-                        // health/status (если нужен публично)
-                        .requestMatchers("/status").permitAll()
-
-                        // всё по биллингу (кроме вебхука) — только для аутентифицированных
-                        // ВНИМАНИЕ: Контроллер объявлен как @RequestMapping("/billing"),
-                        // а общий context-path=/api, так что фактически это /api/billing/**
-                        .requestMatchers("/billing/**", "/api/billing/**").authenticated()
-
-                        // остальные запросы — по умолчанию требуем аутентификацию
-                        .anyRequest().authenticated()
-                );
-
-        // 1) JWT — ДО стандартного Username/Password фильтра
-        http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
-                UsernamePasswordAuthenticationFilter.class);
-
-        // 2) Guard — ПОСЛЕ JWT, чтобы видеть уже установленный Authentication
-        http.addFilterAfter(subscriptionGuardFilter(), JwtAuthenticationFilter.class);
+                        .anyRequest().permitAll()
+                )
+                // 1) JWT — ДО username/password фильтра
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
+                        UsernamePasswordAuthenticationFilter.class)
+                // 2) Guard — ПОСЛЕ JWT, чтобы видеть Authentication
+                .addFilterAfter(subscriptionGuardFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
     }
