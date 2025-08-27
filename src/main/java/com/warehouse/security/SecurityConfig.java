@@ -39,6 +39,7 @@ public class SecurityConfig {
 
                         // аутентификация/регистрация — публично
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/login","/register").permitAll()
 
                         // статика/фронт (подправь под свой билд, если нужно)
                         .requestMatchers(
