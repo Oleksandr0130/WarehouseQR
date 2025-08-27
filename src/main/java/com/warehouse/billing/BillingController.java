@@ -27,7 +27,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/billing") // ← ВАЖНО: контекст-путь /api добавится из application.yml
+@RequestMapping("/billing") // контекст-путь /api добавится из application.yml
 @RequiredArgsConstructor
 public class BillingController {
 
@@ -164,18 +164,13 @@ public class BillingController {
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            SessionCreateParams.PaymentMethodOptions pmOpts =
-                    SessionCreateParams.PaymentMethodOptions.builder()
-                            .putExtraParam("card[request_three_d_secure]", "any")
-                            .build();
-
+            // ВАЖНО: НЕ форсим 3DS — даём Stripe решать автоматически
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                    .setPaymentMethodOptions(pmOpts)
                     .putExtraParam("payment_method_collection", "always")
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
@@ -395,16 +390,11 @@ public class BillingController {
                     break;
                 }
 
-                case "invoice.payment_failed":
-                case "customer.subscription.deleted": {
+                case "invoice.payment_failed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     String customerId = null;
-                    if (obj.isPresent()) {
-                        if (obj.get() instanceof Invoice invoice) {
-                            customerId = invoice.getCustomer();
-                        } else if (obj.get() instanceof Subscription sub) {
-                            customerId = sub.getCustomer();
-                        }
+                    if (obj.isPresent() && obj.get() instanceof Invoice invoice) {
+                        customerId = invoice.getCustomer();
                     }
                     if (customerId != null) {
                         companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
@@ -412,6 +402,48 @@ public class BillingController {
                                 if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
                                     c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
                                 }
+                            } catch (Throwable ignore) {}
+                            companyRepository.save(c);
+                        });
+                    }
+                    break;
+                }
+
+                case "customer.subscription.updated": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    if (obj.isPresent() && obj.get() instanceof Subscription sub) {
+                        String customerId = sub.getCustomer();
+                        Company c = resolveCompanyByCustomer(customerId);
+                        if (c != null) {
+                            boolean active = !"canceled".equalsIgnoreCase(sub.getStatus())
+                                    && !"unpaid".equalsIgnoreCase(sub.getStatus())
+                                    && !"incomplete_expired".equalsIgnoreCase(sub.getStatus())
+                                    && !"paused".equalsIgnoreCase(sub.getStatus());
+                            if (active) {
+                                Instant end = Instant.ofEpochSecond(sub.getCurrentPeriodEnd());
+                                safeSetActive(c, end);
+                            } else {
+                                try {
+                                    c.setSubscriptionActive(false);
+                                    if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
+                                        c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
+                                    }
+                                } catch (Throwable ignore) {}
+                            }
+                            companyRepository.save(c);
+                        }
+                    }
+                    break;
+                }
+
+                case "customer.subscription.deleted": {
+                    var obj = event.getDataObjectDeserializer().getObject();
+                    if (obj.isPresent() && obj.get() instanceof Subscription sub) {
+                        String customerId = sub.getCustomer();
+                        companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
+                            try {
+                                c.setSubscriptionActive(false);
+                                c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
                             } catch (Throwable ignore) {}
                             companyRepository.save(c);
                         });
@@ -483,7 +515,6 @@ public class BillingController {
         return c;
     }
 
-    // внутри BillingController (тот же класс)
     @PostMapping("/portal")
     public ResponseEntity<?> openPortal(Authentication auth, @RequestBody Map<String, String> body) {
         var userOpt = Optional.ofNullable(auth)
@@ -514,7 +545,6 @@ public class BillingController {
             return ResponseEntity.status(502).body(Map.of("error", "stripe_error", "message", e.getMessage()));
         }
     }
-
 
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}

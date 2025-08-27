@@ -31,7 +31,7 @@ public class SecurityConfig {
         http
                 // Игнорируем CSRF для вебхука Stripe.
                 // Указываем оба варианта: с /api и без — чтобы не упереться в особенности матчинга.
-                .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/stripe/webhook", "/api/stripe/webhook"))
 
                 .authorizeHttpRequests(auth -> auth
                         // Stripe webhook — публично (оба варианта путей)
