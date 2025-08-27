@@ -1,4 +1,3 @@
-// src/main/java/com/warehouse/billing/BillingController.java
 package com.warehouse.billing;
 
 import com.stripe.exception.InvalidRequestException;
@@ -27,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/billing") // контекст-путь /api добавится из application.yml
+@RequestMapping("/billing")
 @RequiredArgsConstructor
 public class BillingController {
 
@@ -36,7 +35,7 @@ public class BillingController {
     private final CompanyService companyService;
 
     @Value("${app.stripe.price-id}")
-    private String priceId; // recurring price for subscription
+    private String priceId;
 
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
@@ -152,7 +151,6 @@ public class BillingController {
             if (customerId == null) {
                 var cp = CustomerCreateParams.builder()
                         .setName(company.getName())
-                        .setEmail(user.getEmail())
                         .putMetadata("companyId", String.valueOf(company.getId()))
                         .build();
                 var customer = Customer.create(cp);
@@ -164,17 +162,22 @@ public class BillingController {
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            // ВАЖНО: НЕ форсим 3DS — даём Stripe решать автоматически
+            SessionCreateParams.PaymentMethodOptions pmOpts =
+                    SessionCreateParams.PaymentMethodOptions.builder()
+                            .putExtraParam("card[request_three_d_secure]", "any")
+                            .build();
+
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
+                    .setPaymentMethodOptions(pmOpts)
                     .putExtraParam("payment_method_collection", "always")
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId) // recurring price
+                                    .setPrice(priceId)
                                     .setQuantity(1L)
                                     .build()
                     )
@@ -189,8 +192,8 @@ public class BillingController {
         }
     }
 
-    // -------------- CHECKOUT (ONE-OFF: BLIK/CARD, PLN) --------------
-    @PostMapping("/oneoff")
+    // -------------- CHECKOUT (ONE-OFF: BLIK/P24/CARD, PLN) --------------
+    @PostMapping("/checkout-oneoff")
     public ResponseEntity<?> createOneOffCheckout(Authentication auth) {
         var userOpt = Optional.ofNullable(auth)
                 .filter(Authentication::isAuthenticated)
@@ -228,7 +231,7 @@ public class BillingController {
                     .setClientReferenceId(String.valueOf(company.getId()))
                     .putMetadata("companyId", String.valueOf(company.getId()))
                     .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK) // BLIK (PLN)
+                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK) // BLIK
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
                                     .setQuantity(1L)
@@ -257,15 +260,19 @@ public class BillingController {
 
                 if (missingCustomer) {
                     try {
+                        // 1) создаём Customer в текущем аккаунте (по текущему sk_live)
                         var cp = CustomerCreateParams.builder()
                                 .setName(company.getName())
-                                .setEmail(user.getEmail())
+                                .setEmail(userOpt.get().getEmail())
                                 .putMetadata("companyId", String.valueOf(company.getId()))
                                 .build();
                         var newCustomer = Customer.create(cp);
+
+                        // 2) прошиваем связь
                         company.setPaymentCustomerId(newCustomer.getId());
                         companyRepository.save(company);
 
+                        // 3) повторяем создание Session
                         String successUrl = frontendBase + "/?billing=success";
                         String cancelUrl  = frontendBase + "/?billing=cancel";
 
@@ -304,8 +311,7 @@ public class BillingController {
     }
 
     // -------------- WEBHOOK --------------
-    // Итоговый путь: /api/stripe/webhook (context-path=/api, класс=/billing, метод="/../stripe/webhook")
-    @PostMapping("/../stripe/webhook")
+    @PostMapping("/webhook")
     public ResponseEntity<?> webhook(@RequestHeader("Stripe-Signature") String signature,
                                      @RequestBody String payload) {
 
@@ -340,7 +346,7 @@ public class BillingController {
                                 }
                             }
                         }
-                        // ONE-OFF (например, BLIK)
+                        // ONE-OFF (например, BLIK/P24)
                         else if ("payment".equalsIgnoreCase(s.getMode())) {
                             if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
                                 String customerId = s.getCustomer();
@@ -356,7 +362,7 @@ public class BillingController {
                                             ? c.getCurrentPeriodEnd()
                                             : now;
                                     Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
-                                    safeSetActive(c, newEnd);
+                                    safeSetActive(c, newEnd); // обнуляет trial внутри
                                     companyRepository.save(c);
                                 }
                             }
@@ -390,11 +396,16 @@ public class BillingController {
                     break;
                 }
 
-                case "invoice.payment_failed": {
+                case "invoice.payment_failed":
+                case "customer.subscription.deleted": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     String customerId = null;
-                    if (obj.isPresent() && obj.get() instanceof Invoice invoice) {
-                        customerId = invoice.getCustomer();
+                    if (obj.isPresent()) {
+                        if (obj.get() instanceof Invoice invoice) {
+                            customerId = invoice.getCustomer();
+                        } else if (obj.get() instanceof Subscription sub) {
+                            customerId = sub.getCustomer();
+                        }
                     }
                     if (customerId != null) {
                         companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
@@ -409,54 +420,12 @@ public class BillingController {
                     break;
                 }
 
-                case "customer.subscription.updated": {
-                    var obj = event.getDataObjectDeserializer().getObject();
-                    if (obj.isPresent() && obj.get() instanceof Subscription sub) {
-                        String customerId = sub.getCustomer();
-                        Company c = resolveCompanyByCustomer(customerId);
-                        if (c != null) {
-                            boolean active = !"canceled".equalsIgnoreCase(sub.getStatus())
-                                    && !"unpaid".equalsIgnoreCase(sub.getStatus())
-                                    && !"incomplete_expired".equalsIgnoreCase(sub.getStatus())
-                                    && !"paused".equalsIgnoreCase(sub.getStatus());
-                            if (active) {
-                                Instant end = Instant.ofEpochSecond(sub.getCurrentPeriodEnd());
-                                safeSetActive(c, end);
-                            } else {
-                                try {
-                                    c.setSubscriptionActive(false);
-                                    if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
-                                        c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
-                                    }
-                                } catch (Throwable ignore) {}
-                            }
-                            companyRepository.save(c);
-                        }
-                    }
-                    break;
-                }
-
-                case "customer.subscription.deleted": {
-                    var obj = event.getDataObjectDeserializer().getObject();
-                    if (obj.isPresent() && obj.get() instanceof Subscription sub) {
-                        String customerId = sub.getCustomer();
-                        companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                            try {
-                                c.setSubscriptionActive(false);
-                                c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
-                            } catch (Throwable ignore) {}
-                            companyRepository.save(c);
-                        });
-                    }
-                    break;
-                }
-
                 default:
                     // игнорируем прочие
                     break;
             }
         } catch (Exception e) {
-            // при желании — логируй
+            // залогируйте если нужно
         }
 
         return ResponseEntity.ok("ok");
@@ -513,37 +482,6 @@ public class BillingController {
             }
         }
         return c;
-    }
-
-    @PostMapping("/portal")
-    public ResponseEntity<?> openPortal(Authentication auth, @RequestBody Map<String, String> body) {
-        var userOpt = Optional.ofNullable(auth)
-                .filter(Authentication::isAuthenticated)
-                .flatMap(a -> userRepository.findByUsername(a.getName()));
-        if (userOpt.isEmpty() || userOpt.get().getCompany() == null) {
-            return ResponseEntity.status(403).body(Map.of("error", "forbidden"));
-        }
-        var company = userOpt.get().getCompany();
-        String customerId = company.getPaymentCustomerId();
-        if (customerId == null || customerId.isBlank()) {
-            return ResponseEntity.badRequest().body(Map.of("error", "no_stripe_customer"));
-        }
-
-        String returnUrl = body != null && body.get("return_url") != null
-                ? body.get("return_url")
-                : (frontendBase + "/app/account");
-
-        try {
-            com.stripe.param.billingportal.SessionCreateParams p =
-                    com.stripe.param.billingportal.SessionCreateParams.builder()
-                            .setCustomer(customerId)
-                            .setReturnUrl(returnUrl)
-                            .build();
-            com.stripe.model.billingportal.Session s = com.stripe.model.billingportal.Session.create(p);
-            return ResponseEntity.ok(Map.of("portalUrl", s.getUrl()));
-        } catch (Exception e) {
-            return ResponseEntity.status(502).body(Map.of("error", "stripe_error", "message", e.getMessage()));
-        }
     }
 
     private void safeSetActive(Company c, Instant currentPeriodEnd) {
