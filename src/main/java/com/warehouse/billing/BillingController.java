@@ -9,10 +9,6 @@ import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.InvoiceListParams;
 import com.stripe.param.checkout.SessionCreateParams;
-import com.stripe.param.InvoiceRetrieveParams;
-import com.stripe.param.CustomerUpdateParams;
-import com.stripe.param.SubscriptionRetrieveParams;
-import com.stripe.param.SubscriptionUpdateParams;
 import com.warehouse.model.Company;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
@@ -165,7 +161,6 @@ public class BillingController {
 
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
-
 
             SessionCreateParams params = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
@@ -328,54 +323,12 @@ public class BillingController {
                 case "checkout.session.completed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
-
-                        // === SUBSCRIPTION checkout ===
+                        // SUBSCRIPTION checkout
                         if ("subscription".equalsIgnoreCase(s.getMode())) {
-                            // Надёжно достаём подписку с expand latest_invoice.payment_intent
                             String subscriptionId = s.getSubscription();
                             if (subscriptionId != null) {
-                                SubscriptionRetrieveParams subParams = SubscriptionRetrieveParams.builder()
-                                        .addExpand("latest_invoice.payment_intent")
-                                        .build();
-                                Subscription sub = Subscription.retrieve(subscriptionId, subParams, null);
-
+                                Subscription sub = Subscription.retrieve(subscriptionId);
                                 String customerId = sub.getCustomer();
-
-                                // 1) Пытаемся взять invoice из Session (если есть), иначе - latest_invoice из подписки
-                                String invoiceId = s.getInvoice();
-                                String pmId = null;
-                                if (invoiceId != null) {
-                                    InvoiceRetrieveParams invParams = InvoiceRetrieveParams.builder()
-                                            .addExpand("payment_intent")
-                                            .build();
-                                    Invoice inv = Invoice.retrieve(invoiceId, invParams, null);
-                                    PaymentIntent pi = inv.getPaymentIntentObject();
-                                    if (pi != null) pmId = pi.getPaymentMethod();
-                                } else if (sub.getLatestInvoiceObject() != null) {
-                                    Invoice inv = (Invoice) sub.getLatestInvoiceObject();
-                                    PaymentIntent pi = inv.getPaymentIntentObject();
-                                    if (pi != null) pmId = pi.getPaymentMethod();
-                                }
-
-                                // 2) Если нашли payment_method — выставляем его дефолтным у Customer и у Subscription
-                                if (pmId != null && customerId != null) {
-                                    CustomerUpdateParams cup = CustomerUpdateParams.builder()
-                                            .setInvoiceSettings(CustomerUpdateParams.InvoiceSettings.builder()
-                                                    .setDefaultPaymentMethod(pmId)
-                                                    .build()
-                                            )
-                                            .build();
-                                    Customer customer = Customer.retrieve(customerId);
-                                    customer.update(cup);
-
-// обновляем Subscription через уже полученный экземпляр `sub`
-                                    SubscriptionUpdateParams sup = SubscriptionUpdateParams.builder()
-                                            .setDefaultPaymentMethod(pmId)
-                                            .build();
-                                    sub.update(sup);
-                                }
-
-                                // 3) Обновляем компанию (как у вас было)
                                 Long end = sub.getCurrentPeriodEnd();
                                 if (customerId != null && end != null) {
                                     Company c = resolveCompanyByCustomerOrRef(customerId, s);
@@ -387,15 +340,13 @@ public class BillingController {
                                 }
                             }
                         }
-
-                        // === ONE-OFF (например, BLIK/P24) — ОСТАВЛЯЕМ, если вам нужны разовые продления ===
+                        // ONE-OFF (например, BLIK/P24)
                         else if ("payment".equalsIgnoreCase(s.getMode())) {
                             if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
                                 String customerId = s.getCustomer();
                                 Company c = (customerId != null)
                                         ? resolveCompanyByCustomerOrRef(customerId, s)
                                         : resolveCompanyByCustomerOrRef(null, s);
-
                                 if (c != null) {
                                     if (c.getPaymentCustomerId() == null && s.getCustomer() != null) {
                                         c.setPaymentCustomerId(s.getCustomer());
@@ -413,7 +364,6 @@ public class BillingController {
                     }
                     break;
                 }
-
 
                 case "invoice.payment_succeeded": {
                     var obj = event.getDataObjectDeserializer().getObject();

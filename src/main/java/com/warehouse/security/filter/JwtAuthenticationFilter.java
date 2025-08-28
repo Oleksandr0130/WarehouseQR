@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Можно сбросить текущий контекст, чтобы явно показать, что авторизация не прошла
             SecurityContextHolder.clearContext();
             // Можно также отправить ошибку в ответ, например, 401 Unauthorized
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Пожалуйста, авторизуйтесь");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Пожалуйста, авторизуйтесь");
             return; // важен, чтобы не продолжать цепочку фильтров
         }
 
@@ -60,30 +60,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        String ctx = request.getContextPath(); // у вас context-path = /api
-        if (ctx != null && !ctx.isEmpty() && uri.startsWith(ctx)) {
-            uri = uri.substring(ctx.length()); // нормализуем
-        }
-        return uri.startsWith("/billing/webhook")   // Stripe вебхук
-                || uri.startsWith("/auth/")             // аутентификация
-                || uri.startsWith("/billing/status")    // статус биллинга
-                || uri.equals("/") || uri.startsWith("/assets/") || uri.startsWith("/static/");
-    }
+//    private String resolveToken(HttpServletRequest request) {
+//        String bearer = request.getHeader("Authorization");
+//        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
+//            return bearer.substring(7);
+//        }
+//        return null;
+//    }
 
     private String resolveToken(HttpServletRequest request) {
-        // 1) cookie
-        String cookie = getCookieValue(request, "AccessToken");
-        if (cookie != null && !cookie.isBlank()) return cookie;
-
-        // 2) Authorization: Bearer ...
-        String bearer = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
-        }
-        return null;
+        return getCookieValue(request, "AccessToken"); // Определяем токен только из cookies
     }
 
     private String getCookieValue(HttpServletRequest request, String cookieName) {

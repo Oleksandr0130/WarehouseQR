@@ -61,7 +61,7 @@ public class SubscriptionService {
         String ctx = req.getContextPath(); // "" или "/api"
         String base = scheme + "://" + host + ((port == 80 || port == 443) ? "" : ":" + port)
                 + (ctx != null ? ctx : "");
-        return base + "/billing/status"; // важно: /api
+        return base + "/api/billing/status"; // важно: /api
     }
 
     private Instant parseIso(String raw) {
