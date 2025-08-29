@@ -38,11 +38,11 @@ app:
   billing:
     frontend-base-url: ${FRONTEND_BASE_URL}
     oneoff:
-      amount-pln: 9900       # 99.00 PLN
       extend-days: 30        # на сколько дней продлеваем по one-off
   stripe:
     api-key: ${STRIPE_API_KEY}
-    price-id: ${STRIPE_PRICE_ID}
+    price-id-pln: ${STRIPE_PRICE_ID_PLN}
+    price-id-eur: ${STRIPE_PRICE_ID_EUR}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET}
 server:
   servlet:

@@ -28,6 +28,10 @@ public class Company {
     @Column(name = "payment_customer_id")
     private String paymentCustomerId;
 
+    // ФИКСИРУЕМ валюту биллинга за компанией (PLN | EUR)
+    @Column(name = "billing_currency", length = 3)
+    private String billingCurrency;
+
     // >>> НОВОЕ ПОЛЕ <<<
     @Column(name = "identifier", unique = true, length = 64, nullable = false)
     private String identifier;
@@ -57,6 +61,9 @@ public class Company {
 
     public String getPaymentCustomerId() { return paymentCustomerId; }
     public void setPaymentCustomerId(String paymentCustomerId) { this.paymentCustomerId = paymentCustomerId; }
+
+    public String getBillingCurrency() { return billingCurrency; }
+    public void setBillingCurrency(String billingCurrency) { this.billingCurrency = billingCurrency; }
 
     // >>> НОВЫЕ ГЕТТЕР/СЕТТЕР <<<
     public String getIdentifier() { return identifier; }

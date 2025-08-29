@@ -3,14 +3,18 @@ package com.warehouse.billing;
 import com.stripe.exception.InvalidRequestException;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
-import com.stripe.model.*;
+import com.stripe.model.Customer;
+import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
+import com.stripe.model.PaymentMethod;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.CustomerCreateParams;
-import com.stripe.param.InvoiceListParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.warehouse.model.Company;
+import com.warehouse.model.Payment;
 import com.warehouse.repository.CompanyRepository;
+import com.warehouse.repository.PaymentRepository;
 import com.warehouse.repository.UserRepository;
 import com.warehouse.service.CompanyService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpServletRequest;
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
@@ -33,9 +39,14 @@ public class BillingController {
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
+    private final PaymentRepository paymentRepository; // <-- добавили
 
-    @Value("${app.stripe.price-id}")
-    private String priceId;
+    // ДВА one_time Price в Stripe: PLN и EUR
+    @Value("${app.stripe.price-id-pln}")
+    private String priceIdPln;
+
+    @Value("${app.stripe.price-id-eur}")
+    private String priceIdEur;
 
     @Value("${app.stripe.webhook-secret}")
     private String webhookSecret;
@@ -43,9 +54,7 @@ public class BillingController {
     @Value("${app.billing.frontend-base-url}")
     private String frontendBase;
 
-    @Value("${app.billing.oneoff.amount-pln:9900}")
-    private Long oneOffAmountPln; // 99.00 PLN
-
+    // сколько дней продлеваем доступ за один платёж
     @Value("${app.billing.oneoff.extend-days:30}")
     private int oneOffExtendDays;
 
@@ -69,50 +78,6 @@ public class BillingController {
         if (c.getCurrentPeriodEnd() != null) body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
-
-        // Pending SCA (requires_action) -> hosted invoice link
-        try {
-            String customerId = c.getPaymentCustomerId();
-            if (customerId != null) {
-                InvoiceListParams invParams = InvoiceListParams.builder()
-                        .setCustomer(customerId)
-                        .setLimit(1L)
-                        .putExtraParam("status", "open")
-                        .addExpand("data.payment_intent")
-                        .build();
-
-                InvoiceCollection invoices = Invoice.list(invParams);
-                if (invoices != null && invoices.getData() != null && !invoices.getData().isEmpty()) {
-                    Invoice inv = invoices.getData().get(0);
-                    PaymentIntent pi = inv.getPaymentIntentObject();
-                    if (pi != null && "requires_action".equals(pi.getStatus())) {
-                        String hosted = inv.getHostedInvoiceUrl();
-                        if (hosted != null && !hosted.isBlank()) {
-                            body.put("pendingInvoiceUrl", hosted);
-                        }
-                    }
-                }
-
-                // Любой открытый инвойс с долгом -> тоже отдаём ссылку
-                InvoiceListParams p = InvoiceListParams.builder()
-                        .setCustomer(customerId)
-                        .setLimit(1L)
-                        .putExtraParam("status", "open")
-                        .build();
-
-                InvoiceCollection coll = Invoice.list(p);
-                if (coll != null && !coll.getData().isEmpty()) {
-                    Invoice inv = coll.getData().get(0);
-                    if ("open".equals(inv.getStatus()) && inv.getAmountRemaining() != null && inv.getAmountRemaining() > 0) {
-                        String hosted = inv.getHostedInvoiceUrl();
-                        if (hosted != null && !hosted.isBlank()) {
-                            body.put("pendingInvoiceUrl", hosted);
-                        }
-                    }
-                }
-            }
-        } catch (Exception ignore) { /* не мешаем статусу */ }
-
         return ResponseEntity.ok(body);
     }
 
@@ -132,63 +97,14 @@ public class BillingController {
         return "EXPIRED";
     }
 
-    // -------------- CHECKOUT (SUBSCRIPTION) --------------
-    @PostMapping("/checkout")
-    public ResponseEntity<?> createCheckout(Authentication auth) {
-        var userOpt = Optional.ofNullable(auth)
-                .filter(Authentication::isAuthenticated)
-                .flatMap(a -> userRepository.findByUsername(a.getName()));
-
-        if (userOpt.isEmpty() || userOpt.get().getCompany() == null) {
-            return ResponseEntity.status(403).body(Map.of("error", "forbidden"));
-        }
-
-        var user = userOpt.get();
-        var company = user.getCompany();
-
-        try {
-            String customerId = company.getPaymentCustomerId();
-            if (customerId == null) {
-                var cp = CustomerCreateParams.builder()
-                        .setName(company.getName())
-                        .putMetadata("companyId", String.valueOf(company.getId()))
-                        .build();
-                var customer = Customer.create(cp);
-                customerId = customer.getId();
-                company.setPaymentCustomerId(customerId);
-                companyRepository.save(company);
-            }
-
-            String successUrl = frontendBase + "/?billing=success";
-            String cancelUrl  = frontendBase + "/?billing=cancel";
-
-            SessionCreateParams params = SessionCreateParams.builder()
-                    .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
-                    .setCustomer(customerId)
-                    .setSuccessUrl(successUrl)
-                    .setCancelUrl(cancelUrl)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                    .putExtraParam("payment_method_collection", "always")
-                    .addLineItem(
-                            SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId)
-                                    .setQuantity(1L)
-                                    .build()
-                    )
-                    .setClientReferenceId(String.valueOf(company.getId()))
-                    .putMetadata("companyId", String.valueOf(company.getId()))
-                    .build();
-
-            Session session = Session.create(params);
-            return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
-        } catch (StripeException e) {
-            return ResponseEntity.status(502).body(Map.of("error", "stripe_error", "message", e.getMessage()));
-        }
-    }
-
-    // -------------- CHECKOUT (ONE-OFF: BLIK/P24/CARD, PLN) --------------
+    // -------------- CHECKOUT (ONE-OFF) --------------
+    // Валюта: ?currency=PLN|EUR -> billingCurrency компании -> Accept-Language -> EUR (по умолчанию)
     @PostMapping("/checkout-oneoff")
-    public ResponseEntity<?> createOneOffCheckout(Authentication auth) {
+    public ResponseEntity<?> createOneOffCheckout(
+            Authentication auth,
+            HttpServletRequest req,
+            @RequestParam(value = "currency", required = false) String currencyParam
+    ) {
         var userOpt = Optional.ofNullable(auth)
                 .filter(Authentication::isAuthenticated)
                 .flatMap(a -> userRepository.findByUsername(a.getName()));
@@ -214,36 +130,38 @@ public class BillingController {
                 companyRepository.save(company);
             }
 
+            String currency = resolveCurrency(req, company, currencyParam); // "PLN" | "EUR"
+            String priceId = priceIdFor(currency);
+
             String successUrl = frontendBase + "/?billing=success";
             String cancelUrl  = frontendBase + "/?billing=cancel";
 
-            SessionCreateParams params = SessionCreateParams.builder()
+            SessionCreateParams.Builder builder = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setCustomer(customerId)
                     .setSuccessUrl(successUrl)
                     .setCancelUrl(cancelUrl)
                     .setClientReferenceId(String.valueOf(company.getId()))
                     .putMetadata("companyId", String.valueOf(company.getId()))
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                    .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK) // BLIK
+                    .putMetadata("currency", currency)
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
+                                    .setPrice(priceId) // берём сумму/валюту из Price
                                     .setQuantity(1L)
-                                    .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
-                                            .setCurrency("pln")
-                                            .setUnitAmount(oneOffAmountPln)
-                                            .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                    .setName("Manual extension (one-off, PLN)")
-                                                    .build())
-                                            .build())
                                     .build()
-                    )
-                    .build();
+                    );
 
-            Session session = Session.create(params);
+            // Способы оплаты: карта всегда, BLIK только для PLN; PayPal — при необходимости
+            builder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD);
+            if ("PLN".equals(currency)) {
+                builder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK);
+            }
+            // builder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.PAYPAL);
+
+            Session session = Session.create(builder.build());
             return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
         } catch (StripeException e) {
-            // Фолбэк на "No such customer: 'cus_...'"
+            // Фолбэк на случай "No such customer"
             if (e instanceof InvalidRequestException ire) {
                 final String code  = ire.getCode();
                 final String param = ire.getParam();
@@ -254,7 +172,6 @@ public class BillingController {
 
                 if (missingCustomer) {
                     try {
-                        // 1) создаём Customer в текущем аккаунте (по текущему sk_live)
                         var cp = CustomerCreateParams.builder()
                                 .setName(company.getName())
                                 .setEmail(userOpt.get().getEmail())
@@ -262,38 +179,36 @@ public class BillingController {
                                 .build();
                         var newCustomer = Customer.create(cp);
 
-                        // 2) прошиваем связь
                         company.setPaymentCustomerId(newCustomer.getId());
                         companyRepository.save(company);
 
-                        // 3) повторяем создание Session
+                        String currency = resolveCurrency(req, company, currencyParam);
+                        String priceId = priceIdFor(currency);
+
                         String successUrl = frontendBase + "/?billing=success";
                         String cancelUrl  = frontendBase + "/?billing=cancel";
 
-                        SessionCreateParams retry = SessionCreateParams.builder()
+                        SessionCreateParams.Builder retry = SessionCreateParams.builder()
                                 .setMode(SessionCreateParams.Mode.PAYMENT)
                                 .setCustomer(newCustomer.getId())
                                 .setSuccessUrl(successUrl)
                                 .setCancelUrl(cancelUrl)
                                 .setClientReferenceId(String.valueOf(company.getId()))
                                 .putMetadata("companyId", String.valueOf(company.getId()))
-                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD)
-                                .addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK)
+                                .putMetadata("currency", currency)
                                 .addLineItem(
                                         SessionCreateParams.LineItem.builder()
+                                                .setPrice(priceId)
                                                 .setQuantity(1L)
-                                                .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
-                                                        .setCurrency("pln")
-                                                        .setUnitAmount(oneOffAmountPln)
-                                                        .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                                .setName("Manual extension (one-off, PLN)")
-                                                                .build())
-                                                        .build())
                                                 .build()
-                                )
-                                .build();
+                                );
+                        retry.addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD);
+                        if ("PLN".equals(currency)) {
+                            retry.addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK);
+                        }
+                        // retry.addPaymentMethodType(SessionCreateParams.PaymentMethodType.PAYPAL);
 
-                        Session session2 = Session.create(retry);
+                        Session session2 = Session.create(retry.build());
                         return ResponseEntity.ok(Map.of("checkoutUrl", session2.getUrl()));
                     } catch (StripeException inner) {
                         return ResponseEntity.status(502).body(Map.of("error","stripe_error","message", inner.getMessage()));
@@ -304,7 +219,7 @@ public class BillingController {
         }
     }
 
-    // -------------- WEBHOOK --------------
+    // -------------- WEBHOOK (фиксируем оплату, активируем доступ) --------------
     @PostMapping("/webhook")
     public ResponseEntity<?> webhook(@RequestHeader("Stripe-Signature") String signature,
                                      @RequestBody String payload) {
@@ -323,103 +238,78 @@ public class BillingController {
                 case "checkout.session.completed": {
                     var obj = event.getDataObjectDeserializer().getObject();
                     if (obj.isPresent() && obj.get() instanceof Session s) {
-                        // SUBSCRIPTION checkout
-                        if ("subscription".equalsIgnoreCase(s.getMode())) {
-                            String subscriptionId = s.getSubscription();
-                            if (subscriptionId != null) {
-                                Subscription sub = Subscription.retrieve(subscriptionId);
-                                String customerId = sub.getCustomer();
-                                Long end = sub.getCurrentPeriodEnd();
-                                if (customerId != null && end != null) {
-                                    Company c = resolveCompanyByCustomerOrRef(customerId, s);
-                                    if (c != null) {
-                                        if (c.getPaymentCustomerId() == null) c.setPaymentCustomerId(customerId);
-                                        safeSetActive(c, Instant.ofEpochSecond(end));
-                                        companyRepository.save(c);
-                                    }
-                                }
-                            }
-                        }
-                        // ONE-OFF (например, BLIK/P24)
-                        else if ("payment".equalsIgnoreCase(s.getMode())) {
-                            if ("paid".equalsIgnoreCase(s.getPaymentStatus())) {
-                                String customerId = s.getCustomer();
-                                Company c = (customerId != null)
-                                        ? resolveCompanyByCustomerOrRef(customerId, s)
-                                        : resolveCompanyByCustomerOrRef(null, s);
-                                if (c != null) {
-                                    if (c.getPaymentCustomerId() == null && s.getCustomer() != null) {
-                                        c.setPaymentCustomerId(s.getCustomer());
-                                    }
-                                    Instant now = Instant.now();
-                                    Instant base = (c.getCurrentPeriodEnd() != null && c.getCurrentPeriodEnd().isAfter(now))
-                                            ? c.getCurrentPeriodEnd()
-                                            : now;
-                                    Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
-                                    safeSetActive(c, newEnd); // обнуляет trial внутри
-                                    companyRepository.save(c);
-                                }
-                            }
-                        }
-                    }
-                    break;
-                }
+                        if ("payment".equalsIgnoreCase(s.getMode()) && "paid".equalsIgnoreCase(s.getPaymentStatus())) {
+                            String customerId = s.getCustomer();
+                            Company c = (customerId != null)
+                                    ? resolveCompanyByCustomerOrRef(customerId, s)
+                                    : resolveCompanyByCustomerOrRef(null, s);
 
-                case "invoice.payment_succeeded": {
-                    var obj = event.getDataObjectDeserializer().getObject();
-                    if (obj.isPresent() && obj.get() instanceof Invoice invoice) {
-                        String customerId = invoice.getCustomer();
-                        Long end = null;
-                        if (invoice.getSubscription() != null) {
-                            Subscription sub = Subscription.retrieve(invoice.getSubscription());
-                            end = sub.getCurrentPeriodEnd();
-                        } else if (invoice.getPeriodEnd() != null) {
-                            end = invoice.getPeriodEnd();
-                        }
-                        if (customerId != null && end != null) {
-                            Company c = resolveCompanyByCustomer(customerId);
-                            if (c == null) {
-                                c = resolveCompanyByCustomerOrRef(customerId, null);
-                            }
                             if (c != null) {
-                                safeSetActive(c, Instant.ofEpochSecond(end));
+                                if (c.getPaymentCustomerId() == null && s.getCustomer() != null) {
+                                    c.setPaymentCustomerId(s.getCustomer());
+                                }
+
+                                // --- достаём факт оплаты из PaymentIntent ---
+                                String paymentIntentId = s.getPaymentIntent();
+                                PaymentIntent pi = (paymentIntentId != null) ? PaymentIntent.retrieve(paymentIntentId) : null;
+
+                                String method = "unknown";
+                                String currency = "PLN";
+                                BigDecimal amount = BigDecimal.ZERO;
+                                Instant paidAt = Instant.now();
+
+                                if (pi != null) {
+                                    if (pi.getCurrency() != null) currency = pi.getCurrency().toUpperCase();
+                                    if (pi.getAmountReceived() != null) {
+                                        amount = BigDecimal.valueOf(pi.getAmountReceived()).movePointLeft(2);
+                                    }
+                                    if (pi.getCreated() != null) paidAt = Instant.ofEpochSecond(pi.getCreated());
+                                    if (pi.getPaymentMethod() != null) {
+                                        PaymentMethod pm = PaymentMethod.retrieve(pi.getPaymentMethod());
+                                        if (pm != null && pm.getType() != null) method = pm.getType(); // "card", "blik", ...
+                                    }
+                                }
+
+                                // Зафиксировать валюту компании при первой оплате (убрали лишнюю проверку currency != null)
+                                if (c.getBillingCurrency() == null) {
+                                    c.setBillingCurrency(currency);
+                                }
+
+                                // --- продлеваем доступ и снимаем TRIAL ---
+                                Instant now = Instant.now();
+                                Instant base = (c.getCurrentPeriodEnd() != null && c.getCurrentPeriodEnd().isAfter(now))
+                                        ? c.getCurrentPeriodEnd()
+                                        : now;
+                                Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
+                                safeSetActive(c, newEnd);
                                 companyRepository.save(c);
+
+                                // --- сохраняем платёж в БД (теперь method/amount/paidAt используются) ---
+                                Payment payment = Payment.builder()
+                                        .company(c)
+                                        .provider("stripe")
+                                        .method(method)
+                                        .currency(currency)
+                                        .amount(amount)
+                                        .status("paid")
+                                        .transactionId(paymentIntentId != null ? paymentIntentId : s.getId())
+                                        .paidAt(paidAt)
+                                        .periodStart(now)
+                                        .periodEnd(newEnd)
+                                        .rawPayload(s.toJson())
+                                        .build();
+                                paymentRepository.save(payment);
                             }
                         }
                     }
                     break;
                 }
-
-                case "invoice.payment_failed":
-                case "customer.subscription.deleted": {
-                    var obj = event.getDataObjectDeserializer().getObject();
-                    String customerId = null;
-                    if (obj.isPresent()) {
-                        if (obj.get() instanceof Invoice invoice) {
-                            customerId = invoice.getCustomer();
-                        } else if (obj.get() instanceof Subscription sub) {
-                            customerId = sub.getCustomer();
-                        }
-                    }
-                    if (customerId != null) {
-                        companyRepository.findByPaymentCustomerId(customerId).ifPresent(c -> {
-                            try {
-                                if (c.getCurrentPeriodEnd() == null || c.getCurrentPeriodEnd().isAfter(Instant.now())) {
-                                    c.setCurrentPeriodEnd(Instant.now().minus(1, ChronoUnit.MINUTES));
-                                }
-                            } catch (Throwable ignore) {}
-                            companyRepository.save(c);
-                        });
-                    }
-                    break;
-                }
-
                 default:
-                    // игнорируем прочие
+                    // Остальные события игнорируем (инвойсы/подписки нам не нужны)
                     break;
             }
         } catch (Exception e) {
-            // залогируйте если нужно
+            // залогировать при необходимости
         }
 
         return ResponseEntity.ok("ok");
@@ -482,5 +372,27 @@ public class BillingController {
         try { c.setSubscriptionActive(true); } catch (Throwable ignore) {}
         try { c.setCurrentPeriodEnd(currentPeriodEnd); } catch (Throwable ignore) {}
         try { c.setTrialEnd(null); } catch (Throwable ignore) {}
+    }
+
+    // --- выбор валюты и прайса ---
+    private String resolveCurrency(HttpServletRequest req, Company company, String requested) {
+        // 1) явный параметр
+        if ("PLN".equalsIgnoreCase(requested) || "EUR".equalsIgnoreCase(requested)) {
+            return requested.toUpperCase();
+        }
+        // 2) валюта, закреплённая за компанией
+        if (company.getBillingCurrency() != null && !company.getBillingCurrency().isBlank()) {
+            return company.getBillingCurrency().toUpperCase();
+        }
+        // 3) Accept-Language подсказывает польский
+        String lang = req.getHeader("Accept-Language");
+        if (lang != null && lang.toLowerCase().startsWith("pl")) return "PLN";
+
+        // 4) по умолчанию
+        return "EUR";
+    }
+
+    private String priceIdFor(String currency) {
+        return "PLN".equalsIgnoreCase(currency) ? priceIdPln : priceIdEur;
     }
 }
