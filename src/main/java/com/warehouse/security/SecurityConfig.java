@@ -88,7 +88,7 @@ public class SecurityConfig {
                                 "/billing/status",
                                 "/status"
                         ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 // 1) JWT — ДО username/password фильтра
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
