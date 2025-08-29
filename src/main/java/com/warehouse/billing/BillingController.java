@@ -252,14 +252,17 @@ public class BillingController {
                 if (obj.isPresent() && obj.get() instanceof Session s) {
                     // интересует только one-off
                     if ("payment".equalsIgnoreCase(s.getMode()) && "paid".equalsIgnoreCase(s.getPaymentStatus())) {
+                        log.info("Billing webhook: session={}, mode={}, payment_status={}, customer={}",
+                                s.getId(), s.getMode(), s.getPaymentStatus(), s.getCustomer());
                         String customerId = s.getCustomer();
                         Company c = (customerId != null)
                                 ? resolveCompanyByCustomerOrRef(customerId, s)
                                 : resolveCompanyByCustomerOrRef(null, s);
                         if (c == null) {
+                            log.error("Billing webhook: company NOT resolved for session={}", s.getId());
                             throw new IllegalStateException("Company not resolved for session " + s.getId());
                         }
-
+                        log.info("Billing webhook: resolved company id={}", c.getId());
                         if (c.getPaymentCustomerId() == null && s.getCustomer() != null) {
                             c.setPaymentCustomerId(s.getCustomer());
                         }
@@ -306,7 +309,9 @@ public class BillingController {
                                 : now;
                         Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
                         safeSetActive(c, newEnd);
+                        log.info("Billing webhook: activate company id={} newEnd={}", c.getId(), newEnd);
                         companyRepository.save(c);
+                        log.info("Billing webhook: company id={} saved", c.getId());
 
                         // --- опционально сохраняем платёж ---
                         try {
