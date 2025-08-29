@@ -239,109 +239,146 @@ public class BillingController {
         try {
             event = Webhook.constructEvent(payload, signature, webhookSecret);
         } catch (SignatureVerificationException e) {
-            // неверный whsec — это 400, Stripe не ретраит
             return ResponseEntity.badRequest().body("invalid signature");
         } catch (Exception e) {
-            // payload не распарсился как событие — тоже 400
             return ResponseEntity.badRequest().body("bad request");
         }
 
         try {
-            if ("checkout.session.completed".equals(event.getType())) {
-                var obj = event.getDataObjectDeserializer().getObject();
-                if (obj.isPresent() && obj.get() instanceof Session s) {
-                    // интересует только one-off
-                    if ("payment".equalsIgnoreCase(s.getMode()) && "paid".equalsIgnoreCase(s.getPaymentStatus())) {
-                        log.info("Billing webhook: session={}, mode={}, payment_status={}, customer={}",
-                                s.getId(), s.getMode(), s.getPaymentStatus(), s.getCustomer());
-                        String customerId = s.getCustomer();
-                        Company c = (customerId != null)
-                                ? resolveCompanyByCustomerOrRef(customerId, s)
-                                : resolveCompanyByCustomerOrRef(null, s);
-                        if (c == null) {
-                            log.error("Billing webhook: company NOT resolved for session={}", s.getId());
-                            throw new IllegalStateException("Company not resolved for session " + s.getId());
-                        }
-                        log.info("Billing webhook: resolved company id={}", c.getId());
-                        if (c.getPaymentCustomerId() == null && s.getCustomer() != null) {
-                            c.setPaymentCustomerId(s.getCustomer());
-                        }
+            final var type = event.getType();
+            log.info("Billing webhook received: type={}", type);
 
-                        // --- детали оплаты ---
-                        String paymentIntentId = s.getPaymentIntent();
-                        String method = "unknown";
-                        String currency = (s.getCurrency() != null) ? s.getCurrency().toUpperCase() : "EUR";
-                        BigDecimal amount = (s.getAmountTotal() != null)
-                                ? BigDecimal.valueOf(s.getAmountTotal()).movePointLeft(2)
-                                : BigDecimal.ZERO;
-                        Instant paidAt = Instant.now();
+            // --- 1) checkout.session.completed ---
+            if ("checkout.session.completed".equals(type)) {
+                // не полагаемся на instanceof — делаем надёжный фолбэк
+                Session s = event.getDataObjectDeserializer().getObject()
+                        .filter(o -> o instanceof Session)
+                        .map(o -> (Session) o)
+                        .orElseGet(() -> com.stripe.net.ApiResource.GSON.fromJson(
+                                event.getData().getObject().toJson(), Session.class));
 
-                        try {
-                            if (paymentIntentId != null) {
-                                PaymentIntent pi = PaymentIntent.retrieve(paymentIntentId);
-                                if (pi.getCurrency() != null) currency = pi.getCurrency().toUpperCase();
-                                if (pi.getAmountReceived() != null) {
-                                    amount = BigDecimal.valueOf(pi.getAmountReceived()).movePointLeft(2);
-                                } else if (pi.getAmount() != null) {
-                                    amount = BigDecimal.valueOf(pi.getAmount()).movePointLeft(2);
-                                }
-                                if (pi.getCreated() != null) paidAt = Instant.ofEpochSecond(pi.getCreated());
-                                if (pi.getPaymentMethod() != null) {
-                                    try {
-                                        PaymentMethod pm = PaymentMethod.retrieve(pi.getPaymentMethod());
-                                        if (pm != null && pm.getType() != null) method = pm.getType(); // "card", "blik", ...
-                                    } catch (Exception ignore) { /* не критично */ }
-                                }
-                            }
-                        } catch (Exception piErr) {
-                            log.warn("Failed to enrich from PaymentIntent, fallback to Session values", piErr);
-                        }
-
-                        // зафиксировать валюту за компанией при первой оплате
-                        if (c.getBillingCurrency() == null || c.getBillingCurrency().isBlank()) {
-                            c.setBillingCurrency(currency);
-                        }
-
-                        // --- продлеваем доступ и снимаем TRIAL ---
-                        Instant now = Instant.now();
-                        Instant base = (c.getCurrentPeriodEnd() != null && c.getCurrentPeriodEnd().isAfter(now))
-                                ? c.getCurrentPeriodEnd()
-                                : now;
-                        Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
-                        safeSetActive(c, newEnd);
-                        log.info("Billing webhook: activate company id={} newEnd={}", c.getId(), newEnd);
-                        companyRepository.save(c);
-                        log.info("Billing webhook: company id={} saved", c.getId());
-
-                        // --- опционально сохраняем платёж ---
-                        try {
-                            Payment payment = Payment.builder()
-                                    .company(c)
-                                    .provider("stripe")
-                                    .method(method)
-                                    .currency(currency)
-                                    .amount(amount)
-                                    .status("paid")
-                                    .transactionId(paymentIntentId != null ? paymentIntentId : s.getId())
-                                    .paidAt(paidAt)
-                                    .periodStart(now)
-                                    .periodEnd(newEnd)
-                                    .rawPayload(s.toJson())
-                                    .build();
-                            paymentRepository.save(payment);
-                        } catch (Exception saveErr) {
-                            log.warn("Payment save failed (access already extended): {}", saveErr.getMessage());
-                        }
-                    }
-                }
+                handleCheckoutCompleted(s);   // см. метод ниже
+                return ResponseEntity.ok("ok");
             }
+
+            // --- 2) payment_intent.succeeded (подстраховка) ---
+            if ("payment_intent.succeeded".equals(type)) {
+                PaymentIntent pi = event.getDataObjectDeserializer().getObject()
+                        .filter(o -> o instanceof PaymentIntent)
+                        .map(o -> (PaymentIntent) o)
+                        .orElseGet(() -> com.stripe.net.ApiResource.GSON.fromJson(
+                                event.getData().getObject().toJson(), PaymentIntent.class));
+
+                // company по customerId; client_reference_id тут нет — ок
+                Company c = resolveCompanyByCustomerOrRef(pi.getCustomer(), null);
+                if (c == null) {
+                    log.error("Billing webhook: company NOT resolved for payment_intent {}", pi.getId());
+                    throw new IllegalStateException("Company not resolved for payment_intent " + pi.getId());
+                }
+
+                // Валюта / сумма
+                String currency = (pi.getCurrency() != null) ? pi.getCurrency().toUpperCase() : "EUR";
+                BigDecimal amount = (pi.getAmountReceived() != null)
+                        ? BigDecimal.valueOf(pi.getAmountReceived()).movePointLeft(2)
+                        : (pi.getAmount() != null ? BigDecimal.valueOf(pi.getAmount()).movePointLeft(2) : BigDecimal.ZERO);
+                Instant paidAt = (pi.getCreated() != null) ? Instant.ofEpochSecond(pi.getCreated()) : Instant.now();
+
+                // Фиксируем валюту компании, продлеваем доступ, сохраняем платёж
+                activateAndSave(c, currency, amount, paidAt, pi.getId(), "card", null);
+                return ResponseEntity.ok("ok");
+            }
+
+            // остальные события не интересны
             return ResponseEntity.ok("ok");
         } catch (Exception e) {
-            // ВАЖНО: внутренняя ошибка → 500, чтобы Stripe ретраил и мы не потеряли событие
             log.error("Webhook handling error", e);
             return ResponseEntity.internalServerError().body("webhook error");
         }
     }
+
+    private void handleCheckoutCompleted(Session s) throws Exception {
+        if (!"payment".equalsIgnoreCase(s.getMode()) || !"paid".equalsIgnoreCase(s.getPaymentStatus())) {
+            log.info("Checkout completed not a paid one-off. mode={}, status={}", s.getMode(), s.getPaymentStatus());
+            return;
+        }
+
+        log.info("Billing webhook: session={}, customer={}, client_ref={}", s.getId(), s.getCustomer(), s.getClientReferenceId());
+
+        Company c = (s.getCustomer() != null)
+                ? resolveCompanyByCustomerOrRef(s.getCustomer(), s)
+                : resolveCompanyByCustomerOrRef(null, s);
+
+        if (c == null) {
+            log.error("Billing webhook: company NOT resolved for session={}", s.getId());
+            throw new IllegalStateException("Company not resolved for session " + s.getId());
+        }
+
+        String currency = (s.getCurrency() != null) ? s.getCurrency().toUpperCase() : "EUR";
+        BigDecimal amount = (s.getAmountTotal() != null)
+                ? BigDecimal.valueOf(s.getAmountTotal()).movePointLeft(2)
+                : BigDecimal.ZERO;
+        Instant paidAt = Instant.now();
+        String method = "unknown";
+
+        // попробуем обогатиться через PI, но это не критично
+        try {
+            if (s.getPaymentIntent() != null) {
+                PaymentIntent pi = PaymentIntent.retrieve(s.getPaymentIntent());
+                if (pi.getCurrency() != null) currency = pi.getCurrency().toUpperCase();
+                if (pi.getAmountReceived() != null) amount = BigDecimal.valueOf(pi.getAmountReceived()).movePointLeft(2);
+                if (pi.getCreated() != null) paidAt = Instant.ofEpochSecond(pi.getCreated());
+                if (pi.getPaymentMethod() != null) {
+                    try {
+                        PaymentMethod pm = PaymentMethod.retrieve(pi.getPaymentMethod());
+                        if (pm != null && pm.getType() != null) method = pm.getType();
+                    } catch (Exception ignore) {}
+                }
+            }
+        } catch (Exception enrichErr) {
+            log.warn("Failed to enrich from PaymentIntent for session {}", s.getId(), enrichErr);
+        }
+
+        activateAndSave(c, currency, amount, paidAt, (s.getPaymentIntent() != null ? s.getPaymentIntent() : s.getId()), method, s);
+    }
+
+    private void activateAndSave(Company c, String currency, BigDecimal amount, Instant paidAt,
+                                 String txnId, String method, Session sessionOrNull) {
+        // зафиксировать валюту
+        if (c.getBillingCurrency() == null || c.getBillingCurrency().isBlank()) {
+            c.setBillingCurrency(currency);
+        }
+
+        // продлить доступ
+        Instant now = Instant.now();
+        Instant base = (c.getCurrentPeriodEnd() != null && c.getCurrentPeriodEnd().isAfter(now))
+                ? c.getCurrentPeriodEnd()
+                : now;
+        Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
+        safeSetActive(c, newEnd);
+        companyRepository.save(c);
+        log.info("Billing webhook: activated company id={} until {}", c.getId(), newEnd);
+
+        // запись о платеже (если таблица включена)
+        try {
+            Payment payment = Payment.builder()
+                    .company(c)
+                    .provider("stripe")
+                    .method(method)
+                    .currency(currency)
+                    .amount(amount)
+                    .status("paid")
+                    .transactionId(txnId)
+                    .paidAt(paidAt)
+                    .periodStart(now)
+                    .periodEnd(newEnd)
+                    .rawPayload(sessionOrNull != null ? sessionOrNull.toJson() : null)
+                    .build();
+            paymentRepository.save(payment);
+        } catch (Exception saveErr) {
+            log.warn("Payment save failed: {}", saveErr.getMessage());
+        }
+    }
+
 
     // ---------- helpers ----------
     private Company resolveCompanyByCustomer(String customerId) {
