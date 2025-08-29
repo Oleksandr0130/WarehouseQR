@@ -17,13 +17,14 @@ import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.PaymentRepository;
 import com.warehouse.repository.UserRepository;
 import com.warehouse.service.CompanyService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -31,17 +32,18 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @RestController
-@RequestMapping("/billing")
+@RequestMapping("/billing") // с учетом server.servlet.context-path=/api финальные пути будут /api/billing/**
 @RequiredArgsConstructor
 public class BillingController {
 
     private final UserRepository userRepository;
     private final CompanyRepository companyRepository;
     private final CompanyService companyService;
-    private final PaymentRepository paymentRepository; // <-- добавили
+    private final PaymentRepository paymentRepository;
 
-    // ДВА one_time Price в Stripe: PLN и EUR
+    // два one_time Price в Stripe: PLN и EUR
     @Value("${app.stripe.price-id-pln}")
     private String priceIdPln;
 
@@ -54,7 +56,7 @@ public class BillingController {
     @Value("${app.billing.frontend-base-url}")
     private String frontendBase;
 
-    // сколько дней продлеваем доступ за один платёж
+    // на сколько дней продлеваем доступ за один платёж
     @Value("${app.billing.oneoff.extend-days:30}")
     private int oneOffExtendDays;
 
@@ -78,6 +80,12 @@ public class BillingController {
         if (c.getCurrentPeriodEnd() != null) body.put("currentPeriodEnd", c.getCurrentPeriodEnd().toString());
         body.put("daysLeft", companyService.daysLeft(c));
         body.put("isAdmin", "ROLE_ADMIN".equals(user.getRole()));
+        // чтобы фронт мог «запомнить» валюту
+        try {
+            if (c.getBillingCurrency() != null && !c.getBillingCurrency().isBlank()) {
+                body.put("billingCurrency", c.getBillingCurrency().toUpperCase());
+            }
+        } catch (Throwable ignore) {}
         return ResponseEntity.ok(body);
     }
 
@@ -98,7 +106,7 @@ public class BillingController {
     }
 
     // -------------- CHECKOUT (ONE-OFF) --------------
-    // Валюта: ?currency=PLN|EUR -> billingCurrency компании -> Accept-Language -> EUR (по умолчанию)
+    // Валюта берется в приоритете: ?currency=PLN|EUR -> billingCurrency компании -> Accept-Language -> EUR (по умолчанию)
     @PostMapping("/checkout-oneoff")
     public ResponseEntity<?> createOneOffCheckout(
             Authentication auth,
@@ -146,22 +154,23 @@ public class BillingController {
                     .putMetadata("currency", currency)
                     .addLineItem(
                             SessionCreateParams.LineItem.builder()
-                                    .setPrice(priceId) // берём сумму/валюту из Price
+                                    .setPrice(priceId) // сумму/валюту берём из Price
                                     .setQuantity(1L)
                                     .build()
                     );
 
-            // Способы оплаты: карта всегда, BLIK только для PLN; PayPal — при необходимости
+            // способы оплаты
             builder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.CARD);
             if ("PLN".equals(currency)) {
                 builder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.BLIK);
             }
+            // если нужен PayPal, раскомментируй:
             // builder.addPaymentMethodType(SessionCreateParams.PaymentMethodType.PAYPAL);
 
             Session session = Session.create(builder.build());
             return ResponseEntity.ok(Map.of("checkoutUrl", session.getUrl()));
         } catch (StripeException e) {
-            // Фолбэк на случай "No such customer"
+            // фолбэк на case "No such customer"
             if (e instanceof InvalidRequestException ire) {
                 final String code  = ire.getCode();
                 final String param = ire.getParam();
@@ -211,10 +220,12 @@ public class BillingController {
                         Session session2 = Session.create(retry.build());
                         return ResponseEntity.ok(Map.of("checkoutUrl", session2.getUrl()));
                     } catch (StripeException inner) {
+                        log.error("Stripe create customer retry failed", inner);
                         return ResponseEntity.status(502).body(Map.of("error","stripe_error","message", inner.getMessage()));
                     }
                 }
             }
+            log.error("Stripe error on checkout-oneoff", e);
             return ResponseEntity.status(502).body(Map.of("error","stripe_error","message", e.getMessage()));
         }
     }
@@ -223,96 +234,107 @@ public class BillingController {
     @PostMapping("/webhook")
     public ResponseEntity<?> webhook(@RequestHeader("Stripe-Signature") String signature,
                                      @RequestBody String payload) {
-
         final Event event;
         try {
             event = Webhook.constructEvent(payload, signature, webhookSecret);
         } catch (SignatureVerificationException e) {
+            // неверный whsec — это 400, Stripe не ретраит
             return ResponseEntity.badRequest().body("invalid signature");
         } catch (Exception e) {
+            // payload не распарсился как событие — тоже 400
             return ResponseEntity.badRequest().body("bad request");
         }
 
         try {
-            switch (event.getType()) {
-                case "checkout.session.completed": {
-                    var obj = event.getDataObjectDeserializer().getObject();
-                    if (obj.isPresent() && obj.get() instanceof Session s) {
-                        if ("payment".equalsIgnoreCase(s.getMode()) && "paid".equalsIgnoreCase(s.getPaymentStatus())) {
-                            String customerId = s.getCustomer();
-                            Company c = (customerId != null)
-                                    ? resolveCompanyByCustomerOrRef(customerId, s)
-                                    : resolveCompanyByCustomerOrRef(null, s);
+            if ("checkout.session.completed".equals(event.getType())) {
+                var obj = event.getDataObjectDeserializer().getObject();
+                if (obj.isPresent() && obj.get() instanceof Session s) {
+                    // интересует только one-off
+                    if ("payment".equalsIgnoreCase(s.getMode()) && "paid".equalsIgnoreCase(s.getPaymentStatus())) {
+                        String customerId = s.getCustomer();
+                        Company c = (customerId != null)
+                                ? resolveCompanyByCustomerOrRef(customerId, s)
+                                : resolveCompanyByCustomerOrRef(null, s);
+                        if (c == null) {
+                            throw new IllegalStateException("Company not resolved for session " + s.getId());
+                        }
 
-                            if (c != null) {
-                                if (c.getPaymentCustomerId() == null && s.getCustomer() != null) {
-                                    c.setPaymentCustomerId(s.getCustomer());
+                        if (c.getPaymentCustomerId() == null && s.getCustomer() != null) {
+                            c.setPaymentCustomerId(s.getCustomer());
+                        }
+
+                        // --- детали оплаты ---
+                        String paymentIntentId = s.getPaymentIntent();
+                        String method = "unknown";
+                        String currency = (s.getCurrency() != null) ? s.getCurrency().toUpperCase() : "EUR";
+                        BigDecimal amount = (s.getAmountTotal() != null)
+                                ? BigDecimal.valueOf(s.getAmountTotal()).movePointLeft(2)
+                                : BigDecimal.ZERO;
+                        Instant paidAt = Instant.now();
+
+                        try {
+                            if (paymentIntentId != null) {
+                                PaymentIntent pi = PaymentIntent.retrieve(paymentIntentId);
+                                if (pi.getCurrency() != null) currency = pi.getCurrency().toUpperCase();
+                                if (pi.getAmountReceived() != null) {
+                                    amount = BigDecimal.valueOf(pi.getAmountReceived()).movePointLeft(2);
+                                } else if (pi.getAmount() != null) {
+                                    amount = BigDecimal.valueOf(pi.getAmount()).movePointLeft(2);
                                 }
-
-                                // --- достаём факт оплаты из PaymentIntent ---
-                                String paymentIntentId = s.getPaymentIntent();
-                                PaymentIntent pi = (paymentIntentId != null) ? PaymentIntent.retrieve(paymentIntentId) : null;
-
-                                String method = "unknown";
-                                String currency = "PLN";
-                                BigDecimal amount = BigDecimal.ZERO;
-                                Instant paidAt = Instant.now();
-
-                                if (pi != null) {
-                                    if (pi.getCurrency() != null) currency = pi.getCurrency().toUpperCase();
-                                    if (pi.getAmountReceived() != null) {
-                                        amount = BigDecimal.valueOf(pi.getAmountReceived()).movePointLeft(2);
-                                    }
-                                    if (pi.getCreated() != null) paidAt = Instant.ofEpochSecond(pi.getCreated());
-                                    if (pi.getPaymentMethod() != null) {
+                                if (pi.getCreated() != null) paidAt = Instant.ofEpochSecond(pi.getCreated());
+                                if (pi.getPaymentMethod() != null) {
+                                    try {
                                         PaymentMethod pm = PaymentMethod.retrieve(pi.getPaymentMethod());
                                         if (pm != null && pm.getType() != null) method = pm.getType(); // "card", "blik", ...
-                                    }
+                                    } catch (Exception ignore) { /* не критично */ }
                                 }
-
-                                // Зафиксировать валюту компании при первой оплате (убрали лишнюю проверку currency != null)
-                                if (c.getBillingCurrency() == null) {
-                                    c.setBillingCurrency(currency);
-                                }
-
-                                // --- продлеваем доступ и снимаем TRIAL ---
-                                Instant now = Instant.now();
-                                Instant base = (c.getCurrentPeriodEnd() != null && c.getCurrentPeriodEnd().isAfter(now))
-                                        ? c.getCurrentPeriodEnd()
-                                        : now;
-                                Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
-                                safeSetActive(c, newEnd);
-                                companyRepository.save(c);
-
-                                // --- сохраняем платёж в БД (теперь method/amount/paidAt используются) ---
-                                Payment payment = Payment.builder()
-                                        .company(c)
-                                        .provider("stripe")
-                                        .method(method)
-                                        .currency(currency)
-                                        .amount(amount)
-                                        .status("paid")
-                                        .transactionId(paymentIntentId != null ? paymentIntentId : s.getId())
-                                        .paidAt(paidAt)
-                                        .periodStart(now)
-                                        .periodEnd(newEnd)
-                                        .rawPayload(s.toJson())
-                                        .build();
-                                paymentRepository.save(payment);
                             }
+                        } catch (Exception piErr) {
+                            log.warn("Failed to enrich from PaymentIntent, fallback to Session values", piErr);
+                        }
+
+                        // зафиксировать валюту за компанией при первой оплате
+                        if (c.getBillingCurrency() == null || c.getBillingCurrency().isBlank()) {
+                            c.setBillingCurrency(currency);
+                        }
+
+                        // --- продлеваем доступ и снимаем TRIAL ---
+                        Instant now = Instant.now();
+                        Instant base = (c.getCurrentPeriodEnd() != null && c.getCurrentPeriodEnd().isAfter(now))
+                                ? c.getCurrentPeriodEnd()
+                                : now;
+                        Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
+                        safeSetActive(c, newEnd);
+                        companyRepository.save(c);
+
+                        // --- опционально сохраняем платёж ---
+                        try {
+                            Payment payment = Payment.builder()
+                                    .company(c)
+                                    .provider("stripe")
+                                    .method(method)
+                                    .currency(currency)
+                                    .amount(amount)
+                                    .status("paid")
+                                    .transactionId(paymentIntentId != null ? paymentIntentId : s.getId())
+                                    .paidAt(paidAt)
+                                    .periodStart(now)
+                                    .periodEnd(newEnd)
+                                    .rawPayload(s.toJson())
+                                    .build();
+                            paymentRepository.save(payment);
+                        } catch (Exception saveErr) {
+                            log.warn("Payment save failed (access already extended): {}", saveErr.getMessage());
                         }
                     }
-                    break;
                 }
-                default:
-                    // Остальные события игнорируем (инвойсы/подписки нам не нужны)
-                    break;
             }
+            return ResponseEntity.ok("ok");
         } catch (Exception e) {
-            // залогировать при необходимости
+            // ВАЖНО: внутренняя ошибка → 500, чтобы Stripe ретраил и мы не потеряли событие
+            log.error("Webhook handling error", e);
+            return ResponseEntity.internalServerError().body("webhook error");
         }
-
-        return ResponseEntity.ok("ok");
     }
 
     // ---------- helpers ----------
@@ -376,19 +398,14 @@ public class BillingController {
 
     // --- выбор валюты и прайса ---
     private String resolveCurrency(HttpServletRequest req, Company company, String requested) {
-        // 1) явный параметр
         if ("PLN".equalsIgnoreCase(requested) || "EUR".equalsIgnoreCase(requested)) {
             return requested.toUpperCase();
         }
-        // 2) валюта, закреплённая за компанией
         if (company.getBillingCurrency() != null && !company.getBillingCurrency().isBlank()) {
             return company.getBillingCurrency().toUpperCase();
         }
-        // 3) Accept-Language подсказывает польский
         String lang = req.getHeader("Accept-Language");
         if (lang != null && lang.toLowerCase().startsWith("pl")) return "PLN";
-
-        // 4) по умолчанию
         return "EUR";
     }
 

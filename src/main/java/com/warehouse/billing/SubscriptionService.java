@@ -9,8 +9,9 @@ import java.time.Instant;
 import java.time.format.DateTimeParseException;
 
 /**
- * Проверка активности доступов (trial/subscription) через вызов твоего же /api/billing/status
+ * Проверка активности доступа (trial/active) через вызов твоего же /billing/status
  * с тем же Authorization, что пришёл в запросе.
+ * Работает одинаково при context-path "" и "/api".
  */
 @Service
 public class SubscriptionService {
@@ -61,14 +62,15 @@ public class SubscriptionService {
         String ctx = req.getContextPath(); // "" или "/api"
         String base = scheme + "://" + host + ((port == 80 || port == 443) ? "" : ":" + port)
                 + (ctx != null ? ctx : "");
-        return base + "/billing/status"; // важно: /api
+        // ВАЖНО: тут НЕ добавляем ещё раз /api — context-path уже учтен в ctx
+        return base + "/billing/status";
     }
 
     private Instant parseIso(String raw) {
         try { return Instant.parse(raw); } catch (DateTimeParseException e) { return null; }
     }
 
-    /** DTO ответа твоего /api/billing/status */
+    /** DTO ответа /billing/status */
     public static class BillingStatusResponse {
         public String status;            // TRIAL | ACTIVE | EXPIRED | ...
         public String trialEnd;
