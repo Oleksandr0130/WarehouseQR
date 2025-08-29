@@ -32,7 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RestController
-@RequestMapping({"/billing","/api/billing"})
+@RequestMapping("/billing")
 @RequiredArgsConstructor
 public class BillingController {
 
