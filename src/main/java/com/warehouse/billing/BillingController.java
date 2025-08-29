@@ -418,31 +418,4 @@ public class BillingController {
     private String priceIdFor(String currency) {
         return "PLN".equalsIgnoreCase(currency) ? priceIdPln : priceIdEur;
     }
-
-    @PostMapping("/debug/force-activate")
-    @PreAuthorize("hasRole('ADMIN')") // защита только админом
-    public ResponseEntity<?> forceActivate(Authentication auth) {
-        var userOpt = Optional.ofNullable(auth)
-                .filter(Authentication::isAuthenticated)
-                .flatMap(a -> userRepository.findByUsername(a.getName()));
-        if (userOpt.isEmpty() || userOpt.get().getCompany() == null) {
-            return ResponseEntity.status(403).body(Map.of("error","forbidden"));
-        }
-
-        var c = userOpt.get().getCompany();
-        Instant now = Instant.now();
-        Instant base = (c.getCurrentPeriodEnd() != null && c.getCurrentPeriodEnd().isAfter(now))
-                ? c.getCurrentPeriodEnd()
-                : now;
-        Instant newEnd = base.plus(oneOffExtendDays, ChronoUnit.DAYS);
-        safeSetActive(c, newEnd);
-        companyRepository.save(c);
-
-        Map<String, Object> out = new LinkedHashMap<>();
-        out.put("companyId", c.getId());
-        out.put("subscriptionActive", c.isSubscriptionActive());
-        out.put("trialEnd", c.getTrialEnd());
-        out.put("currentPeriodEnd", c.getCurrentPeriodEnd());
-        return ResponseEntity.ok(out);
-    }
 }

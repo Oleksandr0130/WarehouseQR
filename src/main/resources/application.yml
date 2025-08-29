@@ -57,7 +57,6 @@ logging:
 #    name: logs/log.log
   level:
     root: info
-    com.warehouse.billing: debug
 
 messages:
   hello: Hello from DigitalOcean!
