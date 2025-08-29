@@ -53,8 +53,8 @@ key:
   refresh: ${KEY_REFRESH}
 
 logging:
-  file:
-    name: logs/log.log
+#  file:
+#    name: logs/log.log
   level:
     root: info
     com.warehouse.billing: debug
