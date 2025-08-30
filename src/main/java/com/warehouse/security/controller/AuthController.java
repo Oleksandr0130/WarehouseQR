@@ -6,10 +6,12 @@ import com.warehouse.security.dto.LoginRequest;
 import com.warehouse.security.service.JwtTokenProvider;
 import com.warehouse.repository.UserRepository;
 import com.warehouse.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,40 +45,6 @@ public class AuthController {
         return ResponseEntity.ok("Регистрация завершена. Проверьте email для активации учётной записи.");
     }
 
-
-//    @PostMapping("/login")
-//    public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
-//        return userRepository.findByUsername(request.getUsername())
-//                .filter(user -> user.isEnabled() &&
-//                        passwordEncoder.matches(request.getPassword(), user.getPassword()))
-//                .map(user -> {
-//                    String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername());
-//                    String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUsername());
-//                    return ResponseEntity.ok(new JwtResponse(accessToken, refreshToken));
-//                })
-//                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
-//    }
-//
-//    @PostMapping("/refresh")
-//    public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
-//        String refreshToken = request.get("refreshToken");
-//
-//        if (jwtTokenProvider.validateToken(refreshToken)) {
-//            String username = jwtTokenProvider.getUsername(refreshToken);
-//
-//            // Генерация новой пары токенов
-//            String newAccessToken = jwtTokenProvider.generateAccessToken(username);
-//            String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
-//
-//            return ResponseEntity.ok(Map.of(
-//                    "accessToken", newAccessToken,
-//                    "refreshToken", newRefreshToken
-//            ));
-//        } else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Недействительный или истёкший refresh token");
-//        }
-//    }
-
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request, HttpServletResponse response) {
         return userRepository.findByUsername(request.getUsername())
@@ -96,32 +64,57 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Object> refreshToken(@RequestBody Map<String, String> request, HttpServletResponse response) {
-        String refreshToken = request.get("refreshToken");
-
-        if (jwtTokenProvider.validateToken(refreshToken)) {
-            String username = jwtTokenProvider.getUsername(refreshToken);
-
-            // Генерация новой пары токенов
-            String newAccessToken = jwtTokenProvider.generateAccessToken(username);
-            String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
-
-            // Устанавливаем токены в cookies
-            addCookie(response, "AccessToken", newAccessToken, 30 * 60);
-            addCookie(response, "RefreshToken", newRefreshToken, 7 * 24 * 60 * 60);
-
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+    public ResponseEntity<Object> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String refreshToken = getCookieValue(request, "RefreshToken");
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        String username = jwtTokenProvider.getUsername(refreshToken);
+
+        String newAccessToken = jwtTokenProvider.generateAccessToken(username);
+        String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
+
+        addCookie(response, "AccessToken", newAccessToken, 30 * 60);
+        addCookie(response, "RefreshToken", newRefreshToken, 7 * 24 * 60 * 60);
+
+        // если фронту что-то нужно в ответе — можно вернуть минимальный JSON
+        return ResponseEntity.ok(Map.of("ok", true));
     }
+
+    private String getCookieValue(HttpServletRequest request, String cookieName) {
+        if (request.getCookies() != null) {
+            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
+                if (cookieName.equals(cookie.getName())) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
+    }
+
+    @GetMapping("/users/me")
+    public ResponseEntity<Map<String, Object>> me(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        return ResponseEntity.ok(Map.of(
+                "username", auth.getName()
+                // при желании добавь email, company и т.п.
+        ));
+    }
+
 
     private void addCookie(HttpServletResponse response, String name, String token, int maxAgeInSeconds) {
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, token);
-        cookie.setHttpOnly(true); // Доступ только через HTTP
-        cookie.setSecure(true);   // Только для HTTPS
-        cookie.setPath("/");      // Доступен для всего приложения
-        cookie.setMaxAge(maxAgeInSeconds); // Время жизни в секундах
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(maxAgeInSeconds);
+        // Если фронт и API на разных доменах:
+        cookie.setAttribute("SameSite", "None");
+        // Если на одном домене, лучше:
+        // cookie.setAttribute("SameSite", "Lax");
         response.addCookie(cookie);
     }
 }
