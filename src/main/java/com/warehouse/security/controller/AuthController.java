@@ -93,17 +93,6 @@ public class AuthController {
         return null;
     }
 
-    @GetMapping("/users/me")
-    public ResponseEntity<Map<String, Object>> me(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        return ResponseEntity.ok(Map.of(
-                "username", auth.getName()
-                // при желании добавь email, company и т.п.
-        ));
-    }
-
 
     private void addCookie(HttpServletResponse response, String name, String token, int maxAgeInSeconds) {
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, token);
