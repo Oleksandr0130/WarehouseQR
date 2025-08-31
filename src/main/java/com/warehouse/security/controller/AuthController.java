@@ -38,8 +38,6 @@ public class AuthController {
         return ResponseEntity.ok("Регистрация завершена. Проверьте email для активации учётной записи.");
     }
 
-// AuthController.java (полные методы)
-
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
         return userRepository.findByUsername(request.getUsername())
@@ -48,13 +46,16 @@ public class AuthController {
                     String access = jwtTokenProvider.generateAccessToken(u.getUsername());
                     String refresh = jwtTokenProvider.generateRefreshToken(u.getUsername());
 
-                    ResponseCookie accessC = buildCookie("AccessToken", access, 30 * 60);
+                    ResponseCookie accessC  = buildCookie("AccessToken",  access,  30 * 60);
                     ResponseCookie refreshC = buildCookie("RefreshToken", refresh, 7 * 24 * 60 * 60);
 
                     return ResponseEntity.ok()
-                            .header(HttpHeaders.SET_COOKIE, accessC.toString())
-                            .header(HttpHeaders.SET_COOKIE, refreshC.toString())
-                            .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                            .headers(h -> {
+                                h.add(HttpHeaders.SET_COOKIE, accessC.toString());
+                                h.add(HttpHeaders.SET_COOKIE, refreshC.toString());
+                                h.add(HttpHeaders.CACHE_CONTROL, "no-store");
+                                h.add("Pragma", "no-cache");
+                            })
                             .<Object>build();
                 })
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).<Object>build());
@@ -68,34 +69,42 @@ public class AuthController {
         }
         String username = jwtTokenProvider.getUsername(refresh);
 
-        ResponseCookie accessC = buildCookie("AccessToken", jwtTokenProvider.generateAccessToken(username), 30 * 60);
+        ResponseCookie accessC  = buildCookie("AccessToken",  jwtTokenProvider.generateAccessToken(username), 30 * 60);
         ResponseCookie refreshC = buildCookie("RefreshToken", jwtTokenProvider.generateRefreshToken(username), 7 * 24 * 60 * 60);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessC.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshC.toString())
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .headers(h -> {
+                    h.add(HttpHeaders.SET_COOKIE, accessC.toString());
+                    h.add(HttpHeaders.SET_COOKIE, refreshC.toString());
+                    h.add(HttpHeaders.CACHE_CONTROL, "no-store");
+                    h.add("Pragma", "no-cache");
+                })
                 .<Object>build();
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Object> logout() {
-        ResponseCookie accessC = deleteCookie("AccessToken");
+        ResponseCookie accessC  = deleteCookie("AccessToken");
         ResponseCookie refreshC = deleteCookie("RefreshToken");
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, accessC.toString())
-                .header(HttpHeaders.SET_COOKIE, refreshC.toString())
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .headers(h -> {
+                    h.add(HttpHeaders.SET_COOKIE, accessC.toString());
+                    h.add(HttpHeaders.SET_COOKIE, refreshC.toString());
+                    h.add(HttpHeaders.CACHE_CONTROL, "no-store");
+                    h.add("Pragma", "no-cache");
+                })
                 .<Object>build();
     }
+
+    // -------- helpers --------
 
     private ResponseCookie buildCookie(String name, String value, int maxAgeSeconds) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
-                .secure(true)                           // прод — только HTTPS
-                .path("/")                              // покрывает /api/*
-                .sameSite("Lax")                        // фронт и API на одном origin
-                .domain("warehouse-qr-app-8adwv.ondigitalocean.app") // ЯВНО укажем host
+                .secure(true)     // на проде у вас HTTPS, ок
+                .path("/")        // покрывает /api/*
+                .sameSite("None") // т.к. раньше могли быть cross-site сценарии/прокси — ставим None
+                // ВАЖНО: НЕ указывать .domain(...) — делаем host-only cookie
                 .maxAge(maxAgeSeconds)
                 .build();
     }
@@ -105,8 +114,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("Lax")
-                .domain("warehouse-qr-app-8adwv.ondigitalocean.app")
+                .sameSite("None")
                 .maxAge(0)
                 .build();
     }
@@ -118,5 +126,4 @@ public class AuthController {
         }
         return null;
     }
-
 }
