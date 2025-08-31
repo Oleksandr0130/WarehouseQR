@@ -5,7 +5,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -43,33 +42,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         userDetails, null, userDetails.getAuthorities());
                 auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(auth);
-                logger.info("Пользователь успешно авторизован: {}", username);
-            } else if (token != null) {
-                logger.warn("Токен не прошел проверку валидности");
+                logger.debug("Пользователь авторизован по куке: {}", username);
             }
         } catch (Exception e) {
             logger.error("Ошибка при обработке JWT: {}", e.getMessage());
-            // Можно сбросить текущий контекст, чтобы явно показать, что авторизация не прошла
             SecurityContextHolder.clearContext();
-            // Можно также отправить ошибку в ответ, например, 401 Unauthorized
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Пожалуйста, авторизуйтесь");
-            return; // важен, чтобы не продолжать цепочку фильтров
+            return;
         }
 
-        // продолжение обработки
         filterChain.doFilter(request, response);
     }
 
-//    private String resolveToken(HttpServletRequest request) {
-//        String bearer = request.getHeader("Authorization");
-//        if (StringUtils.hasText(bearer) && bearer.startsWith("Bearer ")) {
-//            return bearer.substring(7);
-//        }
-//        return null;
-//    }
-
+    /** Берём токен только из HttpOnly-куки AccessToken */
     private String resolveToken(HttpServletRequest request) {
-        return getCookieValue(request, "AccessToken"); // Определяем токен только из cookies
+        return getCookieValue(request, "AccessToken");
     }
 
     private String getCookieValue(HttpServletRequest request, String cookieName) {
@@ -82,6 +69,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
         return null;
     }
-
-
 }
