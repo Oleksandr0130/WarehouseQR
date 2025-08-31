@@ -1,18 +1,18 @@
 package com.warehouse.exeption_handling;
 
+
 import com.warehouse.exeption_handling.exeptions.ThirdTestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@RestControllerAdvice
+@ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ThirdTestException.class)
@@ -23,25 +23,41 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ValidationResponse> handleValidationException(MethodArgumentNotValidException e) {
+        // создаем список ошибок для накопления сообщений
         List<String> errors = new ArrayList<>();
+
+        // перебираем все ошибки
         for (FieldError error : e.getBindingResult().getFieldErrors()) {
-            errors.add(error.getField() + " | " + error.getDefaultMessage());
+            // добовляем сообщение об ошибки для текущего поля
+           errors.add(error.getField() + " | " + error.getDefaultMessage());
         }
+
+        // Сщздаем обьект Response с накопленным сообщением
         ValidationResponse response = new ValidationResponse(errors);
+
+        // возвращаем ResponseEntity с обьектом Response и статусом 400
+
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
-    // <<< НОВОЕ: неавторизован — 401, чтобы фронт сделал /auth/refresh >>>
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Response> handleAccessDenied(AccessDeniedException e) {
-        // Тело можно не возвращать — фронту достаточно кода 401.
-        // Но пусть будет компактный ответ:
-        return new ResponseEntity<>(new Response(e.getMessage()), HttpStatus.UNAUTHORIZED);
-    }
+//    @ExceptionHandler(MethodArgumentNotValidException.class)
+//    public ResponseEntity<Response> handleValidationException(MethodArgumentNotValidException e) {
+//        // создам обьект StringBuilder для накопления сообщений
+//        StringBuilder errorMessage = new StringBuilder();
+//
+//        // перебираем все ошибки
+//        for (FieldError error : e.getBindingResult().getFieldErrors()) {
+//            // добовляем сообщение об ошибки для текущего поля
+//            errorMessage.append(error.getDefaultMessage()).append("; ");
+//        }
+//
+//        // Сщздаем обьект Response с накопленным сообщением
+//        Response response = new Response(errorMessage.toString());
+//
+//        // возвращаем ResponseEntity с обьектом Response и статусом 400
+//
+//        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+//    }
 
-    // (Опционально) Любые необработанные — 500 с кратким сообщением
-    // @ExceptionHandler(Exception.class)
-    // public ResponseEntity<Response> handleAny(Exception e) {
-    //     return new ResponseEntity<>(new Response("Внутренняя ошибка сервера"), HttpStatus.INTERNAL_SERVER_ERROR);
-    // }
+
 }

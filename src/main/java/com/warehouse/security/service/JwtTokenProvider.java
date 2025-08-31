@@ -12,12 +12,14 @@ public class JwtTokenProvider {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private final long accessTokenValidity = 30 * 60 * 1000; // 30 минут
-    private final long refreshTokenValidity = 7L * 24 * 60 * 60 * 1000; // 7 дней
+    private final long accessTokenValidity = 3600000; // 1 час
+    private final long refreshTokenValidity = 30L * 24 * 60 * 60 * 1000; // 30 дней
 
+    // Генерация Access Token
     public String generateAccessToken(String username) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + accessTokenValidity);
+
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(now)
@@ -26,9 +28,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // Генерация Refresh Token
     public String generateRefreshToken(String username) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + refreshTokenValidity);
+
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(now)
@@ -37,6 +41,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // Получение имени пользователя из токена
     public String getUsername(String token) {
         return Jwts.parser()
                 .setSigningKey(secretKey)
@@ -45,14 +50,16 @@ public class JwtTokenProvider {
                 .getSubject();
     }
 
+    // Валидация токена
     public boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            return false;
+            System.out.println("Токен истёк.");
         } catch (JwtException | IllegalArgumentException e) {
-            return false;
+            System.out.println("Токен недействителен.");
         }
+        return false;
     }
 }
