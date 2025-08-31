@@ -38,19 +38,22 @@ public class AuthController {
         return ResponseEntity.ok("Регистрация завершена. Проверьте email для активации учётной записи.");
     }
 
+// AuthController.java (полные методы)
+
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
         return userRepository.findByUsername(request.getUsername())
-                .filter(user -> user.isEnabled() && passwordEncoder.matches(request.getPassword(), user.getPassword()))
-                .map(user -> {
-                    String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername());
-                    String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUsername());
+                .filter(u -> u.isEnabled() && passwordEncoder.matches(request.getPassword(), u.getPassword()))
+                .map(u -> {
+                    String access = jwtTokenProvider.generateAccessToken(u.getUsername());
+                    String refresh = jwtTokenProvider.generateRefreshToken(u.getUsername());
 
-                    ResponseCookie access = buildCookie("AccessToken", accessToken, 30 * 60);           // 30 мин
-                    ResponseCookie refresh = buildCookie("RefreshToken", refreshToken, 7 * 24 * 60 * 60); // 7 дней
+                    ResponseCookie accessC = buildCookie("AccessToken", access, 30 * 60);
+                    ResponseCookie refreshC = buildCookie("RefreshToken", refresh, 7 * 24 * 60 * 60);
 
                     return ResponseEntity.ok()
-                            .header(HttpHeaders.SET_COOKIE, access.toString(), refresh.toString())
+                            .header(HttpHeaders.SET_COOKIE, accessC.toString())
+                            .header(HttpHeaders.SET_COOKIE, refreshC.toString())
                             .header(HttpHeaders.CACHE_CONTROL, "no-store")
                             .<Object>build();
                 })
@@ -59,43 +62,40 @@ public class AuthController {
 
     @PostMapping("/refresh")
     public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
-        String refreshToken = getCookie(request, "RefreshToken");
-        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+        String refresh = getCookie(request, "RefreshToken");
+        if (refresh == null || !jwtTokenProvider.validateToken(refresh)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).<Object>build();
         }
-        String username = jwtTokenProvider.getUsername(refreshToken);
+        String username = jwtTokenProvider.getUsername(refresh);
 
-        String newAccess = jwtTokenProvider.generateAccessToken(username);
-        String newRefresh = jwtTokenProvider.generateRefreshToken(username);
-
-        ResponseCookie access = buildCookie("AccessToken", newAccess, 30 * 60);
-        ResponseCookie refresh = buildCookie("RefreshToken", newRefresh, 7 * 24 * 60 * 60);
+        ResponseCookie accessC = buildCookie("AccessToken", jwtTokenProvider.generateAccessToken(username), 30 * 60);
+        ResponseCookie refreshC = buildCookie("RefreshToken", jwtTokenProvider.generateRefreshToken(username), 7 * 24 * 60 * 60);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, access.toString(), refresh.toString())
+                .header(HttpHeaders.SET_COOKIE, accessC.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshC.toString())
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .<Object>build();
     }
 
     @PostMapping("/logout")
     public ResponseEntity<Object> logout() {
-        ResponseCookie access = deleteCookie("AccessToken");
-        ResponseCookie refresh = deleteCookie("RefreshToken");
+        ResponseCookie accessC = deleteCookie("AccessToken");
+        ResponseCookie refreshC = deleteCookie("RefreshToken");
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, access.toString(), refresh.toString())
+                .header(HttpHeaders.SET_COOKIE, accessC.toString())
+                .header(HttpHeaders.SET_COOKIE, refreshC.toString())
                 .header(HttpHeaders.CACHE_CONTROL, "no-store")
                 .<Object>build();
     }
 
-    /* ================= helpers ================= */
-
     private ResponseCookie buildCookie(String name, String value, int maxAgeSeconds) {
         return ResponseCookie.from(name, value)
                 .httpOnly(true)
-                .secure(true)                 // на проде обязательно HTTPS
-                .path("/")                    // покрывает /api тоже
-                .sameSite("None")             // фронт и API могут быть разными origin
-                // .domain("warehouse-qr-app-8adwv.ondigitalocean.app") // можно явно указать при необходимости
+                .secure(true)                           // прод — только HTTPS
+                .path("/")                              // покрывает /api/*
+                .sameSite("Lax")                        // фронт и API на одном origin
+                .domain("warehouse-qr-app-8adwv.ondigitalocean.app") // ЯВНО укажем host
                 .maxAge(maxAgeSeconds)
                 .build();
     }
@@ -105,7 +105,8 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .sameSite("None")
+                .sameSite("Lax")
+                .domain("warehouse-qr-app-8adwv.ondigitalocean.app")
                 .maxAge(0)
                 .build();
     }
@@ -117,4 +118,5 @@ public class AuthController {
         }
         return null;
     }
+
 }
