@@ -1,17 +1,19 @@
 package com.warehouse.security.controller;
 
 import com.warehouse.model.dto.UserRegistrationDTO;
+import com.warehouse.repository.UserRepository;
 import com.warehouse.security.dto.LoginRequest;
 import com.warehouse.security.service.JwtTokenProvider;
-import com.warehouse.repository.UserRepository;
 import com.warehouse.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/auth")
@@ -37,80 +39,82 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Object> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<Object> login(@RequestBody LoginRequest request) {
         return userRepository.findByUsername(request.getUsername())
                 .filter(user -> user.isEnabled() && passwordEncoder.matches(request.getPassword(), user.getPassword()))
                 .map(user -> {
                     String accessToken = jwtTokenProvider.generateAccessToken(user.getUsername());
                     String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUsername());
 
-                    addCookie(response, "AccessToken", accessToken, 30 * 60);            // 30 минут
-                    addCookie(response, "RefreshToken", refreshToken, 7 * 24 * 60 * 60); // 7 дней
+                    ResponseCookie access = buildCookie("AccessToken", accessToken, 30 * 60);           // 30 мин
+                    ResponseCookie refresh = buildCookie("RefreshToken", refreshToken, 7 * 24 * 60 * 60); // 7 дней
 
-                    // Тело не нужно — куки выставлены. Важно подсказать типу <Object>.
-                    return ResponseEntity.ok().<Object>build();
+                    return ResponseEntity.ok()
+                            .header(HttpHeaders.SET_COOKIE, access.toString(), refresh.toString())
+                            .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                            .<Object>build();
                 })
-                // Важно подсказать типу: <Object>build()
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).<Object>build());
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<Object> refreshToken(HttpServletRequest request, HttpServletResponse response) {
-        String refreshToken = getCookieValue(request, "RefreshToken");
+    public ResponseEntity<Object> refreshToken(HttpServletRequest request) {
+        String refreshToken = getCookie(request, "RefreshToken");
         if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).<Object>build();
         }
-
         String username = jwtTokenProvider.getUsername(refreshToken);
 
-        String newAccessToken = jwtTokenProvider.generateAccessToken(username);
-        String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
+        String newAccess = jwtTokenProvider.generateAccessToken(username);
+        String newRefresh = jwtTokenProvider.generateRefreshToken(username);
 
-        addCookie(response, "AccessToken", newAccessToken, 30 * 60);
-        addCookie(response, "RefreshToken", newRefreshToken, 7 * 24 * 60 * 60);
+        ResponseCookie access = buildCookie("AccessToken", newAccess, 30 * 60);
+        ResponseCookie refresh = buildCookie("RefreshToken", newRefresh, 7 * 24 * 60 * 60);
 
-        // Без тела, но тип — Object
-        return ResponseEntity.ok().<Object>build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, access.toString(), refresh.toString())
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .<Object>build();
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Object> logout(HttpServletResponse response) {
-        clearCookie(response, "AccessToken");
-        clearCookie(response, "RefreshToken");
-        return ResponseEntity.ok().<Object>build();
+    public ResponseEntity<Object> logout() {
+        ResponseCookie access = deleteCookie("AccessToken");
+        ResponseCookie refresh = deleteCookie("RefreshToken");
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, access.toString(), refresh.toString())
+                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .<Object>build();
     }
 
     /* ================= helpers ================= */
 
-    private String getCookieValue(HttpServletRequest request, String cookieName) {
-        if (request.getCookies() != null) {
-            for (jakarta.servlet.http.Cookie cookie : request.getCookies()) {
-                if (cookieName.equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
+    private ResponseCookie buildCookie(String name, String value, int maxAgeSeconds) {
+        return ResponseCookie.from(name, value)
+                .httpOnly(true)
+                .secure(true)                 // на проде обязательно HTTPS
+                .path("/")                    // покрывает /api тоже
+                .sameSite("None")             // фронт и API могут быть разными origin
+                // .domain("warehouse-qr-app-8adwv.ondigitalocean.app") // можно явно указать при необходимости
+                .maxAge(maxAgeSeconds)
+                .build();
+    }
+
+    private ResponseCookie deleteCookie(String name) {
+        return ResponseCookie.from(name, "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .sameSite("None")
+                .maxAge(0)
+                .build();
+    }
+
+    private String getCookie(HttpServletRequest request, String name) {
+        if (request.getCookies() == null) return null;
+        for (jakarta.servlet.http.Cookie c : request.getCookies()) {
+            if (name.equals(c.getName())) return c.getValue();
         }
         return null;
-    }
-
-    private void addCookie(HttpServletResponse response, String name, String token, int maxAgeInSeconds) {
-        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); // на проде через HTTPS
-        cookie.setPath("/");
-        cookie.setMaxAge(maxAgeInSeconds);
-        cookie.setAttribute("SameSite", "None"); // если фронт и API на разных доменах
-        // если один домен — можно: cookie.setAttribute("SameSite", "Lax");
-        response.addCookie(cookie);
-    }
-
-    private void clearCookie(HttpServletResponse response, String name) {
-        jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, "");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        cookie.setAttribute("SameSite", "None");
-        response.addCookie(cookie);
     }
 }
