@@ -55,7 +55,7 @@ public class AuthController {
                     String refreshToken = jwtTokenProvider.generateRefreshToken(user.getUsername());
 
                     // Устанавливаем токены в cookies
-                    addCookie(response, "AccessToken", accessToken, 30 * 60); // 30 минут
+                    addCookie(response, "AccessToken", accessToken, 60 * 60); // 30 минут
                     addCookie(response, "RefreshToken", refreshToken, 7 * 24 * 60 * 60); // 7 дней
 
                     return ResponseEntity.ok().build();
@@ -75,7 +75,7 @@ public class AuthController {
         String newAccessToken = jwtTokenProvider.generateAccessToken(username);
         String newRefreshToken = jwtTokenProvider.generateRefreshToken(username);
 
-        addCookie(response, "AccessToken", newAccessToken, 30 * 60);
+        addCookie(response, "AccessToken", newAccessToken, 60 * 60);
         addCookie(response, "RefreshToken", newRefreshToken, 7 * 24 * 60 * 60);
 
         // если фронту что-то нужно в ответе — можно вернуть минимальный JSON

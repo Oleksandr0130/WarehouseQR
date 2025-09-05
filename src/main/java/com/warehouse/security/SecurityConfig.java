@@ -7,6 +7,7 @@ import com.warehouse.security.filter.JwtAuthenticationFilter;
 import com.warehouse.security.filter.SubscriptionGuardFilter;
 import com.warehouse.security.service.JwtTokenProvider;
 import com.warehouse.service.CompanyService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +31,11 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtTokenProvider jwtTokenProvider) throws Exception {
         http.csrf(csrf -> csrf.disable())
+                .sessionManagement(sm -> sm.sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
+                .exceptionHandling(eh -> eh
+                        .authenticationEntryPoint((req, resp, ex) -> resp.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                        .accessDeniedHandler((req, resp, ex) -> resp.sendError(HttpServletResponse.SC_FORBIDDEN))
+                )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/register", "/auth/confirm","/confirmation").permitAll()
                         .requestMatchers(
@@ -43,10 +49,13 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().permitAll()
                 )
-                // 1) JWT — ДО username/password фильтра
+// 0) авто-refresh до JWT
+                .addFilterBefore(new com.warehouse.security.filter.RefreshTokenFilter(jwtTokenProvider, userDetailsService()),
+                        UsernamePasswordAuthenticationFilter.class)
+                // 1) обычная JWT-аутентификация
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService()),
                         UsernamePasswordAuthenticationFilter.class)
-                // 2) Guard — ПОСЛЕ JWT, чтобы видеть Authentication
+                // 2) Guard — после того, как контекст уже установлен
                 .addFilterAfter(subscriptionGuardFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
