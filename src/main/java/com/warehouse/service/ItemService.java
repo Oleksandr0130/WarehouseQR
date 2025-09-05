@@ -218,11 +218,13 @@ public Item addItem(Item item) {
     }
 
 
+    // ItemService.java
     public List<Item> getAllItemsSorted(Comparator<Item> comparator) {
-        List<Item> items = getAllItems(); // Получаем все товары
-        items.sort(comparator); // Сортируем с использованием переданного компаратора
+        List<Item> items = getAllItems();
+        items.sort(Comparator.nullsLast(comparator)); // не упадём даже если в списке затесался null
         return items;
     }
+
 
 
 //    private void generateQRCode(String id) {
