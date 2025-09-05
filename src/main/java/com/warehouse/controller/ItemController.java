@@ -113,9 +113,13 @@ public class ItemController {
                     throw new IllegalArgumentException("Параметр sortBy недействителен. Используйте 'name', 'quantity' или 'sold'.");
             }
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Ошибка при сортировке товаров. Причина: " + e.getMessage(), e);
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, e.getMessage(), e
+            );
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка сервера при сортировке товаров.", e);
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR, "Внутренняя ошибка сортировки", e
+            );
         }
     }
 
