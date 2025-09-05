@@ -3,7 +3,6 @@ package com.warehouse.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.Objects;
 
 @Entity
 @Data
@@ -13,8 +12,8 @@ public class Item {
     private String name;
     private int quantity;
     private int sold;
-    @Lob // Для хранения больших данных, добавляем аннотацию
-    @Column(name = "qr_code")
+    @Basic(fetch = FetchType.LAZY)
+    @Column(name = "qr_code", columnDefinition = "bytea")
     private byte[] qrCode; // QR-код теперь хранится как массив байт
 
     @ManyToOne(fetch = FetchType.LAZY)

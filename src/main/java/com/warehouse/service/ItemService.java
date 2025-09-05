@@ -11,7 +11,7 @@ import com.warehouse.model.dto.ItemDTO;
 import com.warehouse.repository.ItemRepository;
 import com.warehouse.repository.ReservationRepository;
 import com.warehouse.service.mapper.interfaces.ItemMapper;
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
