@@ -9,6 +9,7 @@ import com.warehouse.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -41,4 +42,12 @@ public class UserController {
         );
         return ResponseEntity.ok(dto);
     }
+
+    @DeleteMapping("users/me")
+    public ResponseEntity<Void> deleteMyAccount(Authentication authentication) {
+        String username = authentication.getName();
+        userService.deleteUserAndRelatedData(username);
+        return ResponseEntity.noContent().build();
+    }
+
 }

@@ -7,6 +7,7 @@ import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +22,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserService {
 
+    @Autowired
     private final UserRepository userRepository;
+    @Autowired
+    private final CompanyRepository companyRepository;
     private final CompanyService companyService; // Используем сервис вместо репозитория
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
@@ -133,4 +137,19 @@ public class UserService {
 
         return userRepository.save(u);
     }
+
+    @Transactional
+    public void deleteUserAndRelatedData(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Если админ — удалить компанию и всех связанных пользователей
+        if ("ROLE_ADMIN".equals(user.getRole()) && user.getCompany() != null) {
+            companyRepository.delete(user.getCompany());
+        }
+
+        // Удаляем самого юзера
+        userRepository.delete(user);
+    }
 }
+
