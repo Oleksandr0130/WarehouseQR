@@ -13,12 +13,16 @@
     <properties>
         <java.version>17</java.version>
         <spring-boot.version>3.3.4</spring-boot.version>
-        <!-- версии гугловских либ -->
+
+        <!-- Google libs -->
         <google.api.client.version>2.6.0</google.api.client.version>
         <google.http.jackson.version>1.43.3</google.http.jackson.version>
         <google.auth.version>1.23.0</google.auth.version>
-        <!-- ревизия Android Publisher v3 -->
-        <androidpublisher.version>v3-rev202408-2.0.0</androidpublisher.version>
+        <androidpublisher.version>v3-rev20240912-2.0.0</androidpublisher.version>
+
+        <!-- MapStruct / Lombok -->
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <lombok.version>1.18.32</lombok.version>
     </properties>
 
     <dependencies>
@@ -54,7 +58,7 @@
             <version>2.20.76</version>
         </dependency>
 
-        <!-- Stripe для веб-версии (оставляем как есть) -->
+        <!-- Stripe -->
         <dependency>
             <groupId>com.stripe</groupId>
             <artifactId>stripe-java</artifactId>
@@ -66,11 +70,6 @@
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <optional>true</optional>
         </dependency>
 
         <!-- ZXing -->
@@ -138,9 +137,8 @@
         <dependency>
             <groupId>com.google.apis</groupId>
             <artifactId>google-api-services-androidpublisher</artifactId>
-            <version>v3-rev20240912-2.0.0</version>
+            <version>${androidpublisher.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.google.auth</groupId>
             <artifactId>google-auth-library-oauth2-http</artifactId>
@@ -157,6 +155,20 @@
             <version>${google.http.jackson.version}</version>
         </dependency>
         <!-- ======================================================== -->
+
+        <!-- MapStruct (аннотации) -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <!-- Lombok (для @Getter/@Builder и т.п.) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Tests -->
         <dependency>
@@ -180,23 +192,46 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>${spring-boot.version}</version>
-                <executions>
-                    <execution>
-                        <goals><goal>repackage</goal></goals>
-                    </execution>
-                </executions>
-            </plugin>
+            <!-- ВАЖНО: компилятор с annotation processors для MapStruct/Lombok -->
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.11.0</version>
                 <configuration>
                     <release>17</release>
                     <parameters>true</parameters>
+
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>${mapstruct.version}</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+
+                    <!-- опционально: по умолчанию генерировать Spring-бины -->
+                    <compilerArgs>
+                        <arg>-Amapstruct.defaultComponentModel=spring</arg>
+                    </compilerArgs>
                 </configuration>
+            </plugin>
+
+            <!-- Spring Boot -->
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
