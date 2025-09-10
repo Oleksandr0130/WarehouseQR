@@ -8,15 +8,31 @@ import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 public class PlayBillingService {
 
     private AndroidPublisher androidPublisher() throws Exception {
-        var creds = GoogleCredentials.getApplicationDefault()
-                .createScoped(List.of("https://www.googleapis.com/auth/androidpublisher"));
+        GoogleCredentials creds;
+
+        String json = System.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON");
+        if (json != null && !json.isBlank()) {
+            try (InputStream in = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
+                creds = GoogleCredentials.fromStream(in)
+                        .createScoped(Collections.singletonList("https://www.googleapis.com/auth/androidpublisher"));
+            }
+        } else {
+            // fallback: ADC по переменной GOOGLE_APPLICATION_CREDENTIALS или метадате
+            creds = GoogleCredentials.getApplicationDefault()
+                    .createScoped(Collections.singletonList("https://www.googleapis.com/auth/androidpublisher"));
+        }
+
         var reqInit = new HttpCredentialsAdapter(creds);
         return new AndroidPublisher.Builder(
                 GoogleNetHttpTransport.newTrustedTransport(),
