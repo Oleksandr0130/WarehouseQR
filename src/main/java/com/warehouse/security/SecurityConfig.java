@@ -60,7 +60,7 @@ public class SecurityConfig {
                         .requestMatchers("/billing/play/verify", "/api/billing/play/verify").authenticated()
 
                         // Остальное — по умолчанию требуем аутентификацию
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
 
                 // 0) авто-refresh до JWT
