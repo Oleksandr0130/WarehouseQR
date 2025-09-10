@@ -1,8 +1,8 @@
 package com.warehouse.service;
 
-
 import com.warehouse.model.Company;
 import com.warehouse.repository.CompanyRepository;
+import com.warehouse.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,37 +14,24 @@ import java.time.temporal.ChronoUnit;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
-
+    private final UserRepository userRepository; // добавили, чтобы по пользователю найти компанию
 
     /**
      * Регистрация или поиск компании по названию.
-     *
-     * @param name название компании.
-     * @return инстанс зарегистрированной или найденной компании.
      */
     public Company registerOrFindCompany(String name) {
-        // Удаляем пробелы и приводим ввёденное название в нижний регистр
         String normalizedName = name.trim().toLowerCase();
-
-        // Проверяем наличие компании в базе по имени
         return companyRepository.findByNameIgnoreCase(normalizedName)
                 .orElseGet(() -> {
                     Company company = new Company();
                     company.setName(normalizedName);
                     company.setIdentifier(generateIdentifier(normalizedName)); // Генерация уникального идентификатора
-                    company.setEnabled(true); // Сразу активируем компанию
+                    company.setEnabled(true);
                     return companyRepository.save(company);
                 });
     }
 
-    /**
-     * Генератор уникального идентификатора компании.
-     *
-     * @param name название компании.
-     * @return уникальный идентификатор компании.
-     */
     private String generateIdentifier(String name) {
-        // Упрощённая генерация идентификатора (например, берётся часть названия + случайное число)
         return name.replace(" ", "_") + "_" + System.currentTimeMillis();
     }
 
@@ -58,7 +45,7 @@ public class CompanyService {
 
     public boolean isCompanyAccessAllowed(Company c) {
         Instant now = Instant.now();
-        if (c.isEnabled() == false) return false;
+        if (!c.isEnabled()) return false;
 
         // ACTIVE
         if (c.isSubscriptionActive() && c.getCurrentPeriodEnd() != null && now.isBefore(c.getCurrentPeriodEnd()))
@@ -68,7 +55,7 @@ public class CompanyService {
         if (c.getTrialStart() != null && c.getTrialEnd() != null && now.isBefore(c.getTrialEnd()))
             return true;
 
-        return false; // иначе EXPIRED
+        return false;
     }
 
     /** Вспомогательно возвращать «дней осталось» по триалу или оплате */
@@ -85,5 +72,33 @@ public class CompanyService {
         return Math.max(0, secs / 86400);
     }
 
-}
+    // ========= NEW: активация подписки из Google Play Billing =========
 
+    /**
+     * Активирует подписку для компании пользователя после успешной проверки purchaseToken у Google.
+     * @param username логин пользователя (Principal.getName())
+     * @param productId ID подписки в Play Console (например "flowqr_standard")
+     * @param expiryMillis время окончания периода в миллисекундах с эпохи
+     */
+    public void activateFromGoogle(String username, String productId, long expiryMillis) {
+        // Находим пользователя и его компанию (ожидается, что у User есть getCompany())
+        var user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + username));
+        Company c = user.getCompany();
+        if (c == null) {
+            throw new IllegalStateException("Company not linked to user: " + username);
+        }
+
+        // Включаем подписку и сбрасываем триал
+        c.setSubscriptionActive(true);
+        c.setCurrentPeriodEnd(Instant.ofEpochMilli(expiryMillis));
+        c.setTrialStart(null);
+        c.setTrialEnd(null);
+
+        // (опционально) можно сохранить productId/source в полях Company, если они есть
+        // c.setSubscriptionProduct(productId);
+        // c.setSubscriptionSource("GOOGLE");
+
+        companyRepository.save(c);
+    }
+}
