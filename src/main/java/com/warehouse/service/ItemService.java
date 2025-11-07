@@ -113,7 +113,11 @@ public Item addItem(Item item) {
 
     @Transactional
     public void deleteItem(String id) {
-        // Если надо ограничить удаление по компании — проверь здесь company текущего пользователя.
+        Item item = itemRepository.findById(id)
+                        .orElseThrow(() -> new IllegalArgumentException("Item not found for ID: " + id));
+        if (item.getImages() != null && !item.getImages().isEmpty()) {
+            item.getImages().clear();
+        }
         itemRepository.deleteById(id);
     }
 
