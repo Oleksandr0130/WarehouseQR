@@ -111,6 +111,11 @@ public Item addItem(Item item) {
     }
 }
 
+    @Transactional
+    public void deleteItem(String id) {
+        // Если надо ограничить удаление по компании — проверь здесь company текущего пользователя.
+        itemRepository.deleteById(id);
+    }
 
 
     public Optional<Item> updateQuantity(String id, int quantity) {

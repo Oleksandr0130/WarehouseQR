@@ -162,4 +162,18 @@ public class ItemController {
             throw new RuntimeException("Ошибка при генерации Excel-файла с товарами.", e);
         }
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        try {
+            itemService.deleteItem(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            // Если хочешь — можно вернуть 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
