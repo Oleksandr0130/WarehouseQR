@@ -176,7 +176,7 @@ public class ItemController {
         }
     }
 
-    @PutMapping("/items/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ItemDTO> update(@PathVariable String id, @RequestBody ItemDTO patch) {
         ItemDTO updated = itemService.updateItem(id, patch);
         return ResponseEntity.ok(updated);
