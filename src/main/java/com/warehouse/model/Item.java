@@ -31,7 +31,6 @@ public class Item {
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "item_image", joinColumns = @JoinColumn(name = "item_id"))
     @Column(name = "data", columnDefinition = "TEXT")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private List<String> images = new ArrayList<>();
 
 
