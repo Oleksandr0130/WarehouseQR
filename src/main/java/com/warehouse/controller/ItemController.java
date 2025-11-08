@@ -176,10 +176,4 @@ public class ItemController {
         }
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<ItemDTO> update(@PathVariable String id, @RequestBody ItemDTO patch) {
-        ItemDTO updated = itemService.update(id, patch);
-        return ResponseEntity.ok(updated);
-    }
-
 }

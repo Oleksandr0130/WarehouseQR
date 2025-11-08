@@ -311,37 +311,4 @@ private byte[] generateQRCodeAsBytes(String id) {
         }
     }
 
-    @Transactional
-    public ItemDTO update(String id, ItemDTO patch) {
-        Item entity = itemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
-
-        // частично обновляем только присланные поля
-        itemMapper.updateEntityFromDto(patch, entity);
-
-        // бизнес-правило: если цена не прислана/очищена — валюту обнуляем
-        if (patch.getPrice() == null) {
-            entity.setCurrency(null);
-        }
-        // лимит до 5 картинок (если фронт ошибся)
-        if (entity.getImages() != null && entity.getImages().size() > 5) {
-            entity.setImages(entity.getImages().subList(0, 5));
-        }
-
-        Item saved = itemRepository.save(entity);
-        return itemMapper.toDTO(saved);
-    }
-
-    @Transactional
-    public void delete(String id) {
-        Item entity = itemRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
-
-        // подстраховка: очистить ElementCollection, чтобы не ловить FK (плюс держи ON DELETE CASCADE в БД)
-        if (entity.getImages() != null) {
-            entity.getImages().clear();
-        }
-        itemRepository.delete(entity);
-    }
-
 }
