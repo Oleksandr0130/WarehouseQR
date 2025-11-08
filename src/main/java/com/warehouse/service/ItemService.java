@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
@@ -40,11 +39,13 @@ public class ItemService {
     private final UserService userService;
     private final ItemMapper itemMapper;
 
-//    @Value("${app.qrcode-base-url}")
-@Value("${app.qrcode-base-url}")
-private String qrCodeBaseUrl; // Значение из application.yml
+    @Value("${app.qrcode-base-url}")
+    private String qrCodeBaseUrl; // Значение из application.yml
 
-    public ItemService(ItemRepository itemRepository, ReservationRepository reservationRepository, ItemMapper itemMapper, UserService userService) {
+    public ItemService(ItemRepository itemRepository,
+                       ReservationRepository reservationRepository,
+                       ItemMapper itemMapper,
+                       UserService userService) {
         this.itemRepository = itemRepository;
         this.reservationRepository = reservationRepository;
         this.userService = userService;
@@ -56,71 +57,82 @@ private String qrCodeBaseUrl; // Значение из application.yml
         }
     }
 
-
     public String getQrCodeUrl(String id) {
-//        return qrCodeBaseUrl + id + ".png"; // Формирование полного URL
+        // return qrCodeBaseUrl + id + ".png";
         throw new UnsupportedOperationException("QR-коды хранятся в базе данных в формате Base64. Используйте Base64 строку.");
-
     }
 
+    @Transactional
+    public Item addItem(Item item) {
+        try {
+            var currentUser = userService.getCurrentUser();
+            if (currentUser == null) {
+                throw new IllegalStateException("Текущий пользователь не найден.");
+            }
 
-//    public Item addItem(Item item) {
-//        if (item.getId() == null || item.getId().isEmpty()) {
-//            item.setId(UUID.randomUUID().toString());
-//        }
-//        Item savedItem = itemRepository.save(item);
-//        // Генерация QR-кода
-//        generateQRCode(savedItem.getId());
-//
-//        // Установка QR-кода в объект и повторное сохранение
-//        savedItem.setQrCode(getQrCodeUrl(savedItem.getId()));
-//        return itemRepository.save(savedItem); // Сохраняем с обновленным полем qrCode
-//
-//    }
-@Transactional
-public Item addItem(Item item) {
-    try {
-        var currentUser = userService.getCurrentUser();
-        if (currentUser == null) {
-            throw new IllegalStateException("Текущий пользователь не найден.");
+            Company currentCompany = currentUser.getCompany();
+            if (currentCompany == null) {
+                throw new IllegalStateException("Компания текущего пользователя не определена.");
+            }
+
+            // Устанавливаем текущую компанию
+            item.setCompany(currentCompany);
+
+            if (item.getId() == null || item.getId().isEmpty()) {
+                item.setId(UUID.randomUUID().toString());
+            }
+
+            Item savedItem = itemRepository.save(item);
+
+            // Генерация QR-кода (в bytes)
+            byte[] qrCodeBytes = generateQRCodeAsBytes(savedItem.getId());
+            savedItem.setQrCode(qrCodeBytes);
+
+            return itemRepository.save(savedItem);
+        } catch (Exception e) {
+            System.err.println("Ошибка при добавлении товара: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Не удалось добавить товар. Обратитесь к администратору.", e);
         }
-
-        Company currentCompany = currentUser.getCompany();
-        if (currentCompany == null) {
-            throw new IllegalStateException("Компания текущего пользователя не определена.");
-        }
-
-        // Устанавливаем текущую компанию
-        item.setCompany(currentCompany);
-
-        if (item.getId() == null || item.getId().isEmpty()) {
-            item.setId(UUID.randomUUID().toString());
-        }
-
-        Item savedItem = itemRepository.save(item);
-
-        // Генерация QR-кода
-        byte[] qrCodeBytes = generateQRCodeAsBytes(savedItem.getId());
-        savedItem.setQrCode(qrCodeBytes);
-
-        return itemRepository.save(savedItem);
-    } catch (Exception e) {
-        System.err.println("Ошибка при добавлении товара: " + e.getMessage());
-        e.printStackTrace();
-        throw new RuntimeException("Не удалось добавить товар. Обратитесь к администратору.", e);
     }
-}
 
     @Transactional
     public void deleteItem(String id) {
         Item item = itemRepository.findById(id)
-                        .orElseThrow(() -> new IllegalArgumentException("Item not found for ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Item not found for ID: " + id));
         if (item.getImages() != null && !item.getImages().isEmpty()) {
             item.getImages().clear();
         }
         itemRepository.deleteById(id);
     }
 
+    /* ========================= NEW: Частичное обновление товара =========================
+       Метод вызывается контроллером из PUT /items/{id}.
+       - копируем ТОЛЬКО не-null поля из DTO в entity (это делает ItemMapper#updateEntityFromDto)
+       - если пришёл images != null, заменяем коллекцию (позволяет очистить, если []),
+       - сохраняем и отдаём обновлённый DTO.
+     */
+    @Transactional
+    public ItemDTO updateItem(String id, ItemDTO patch) {
+        Item entity = itemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found for ID: " + id));
+
+        // Копируем только присланные поля (description/price/currency и пр.)
+        itemMapper.updateEntityFromDto(patch, entity);
+
+        // ВАЖНО: именно так позволяем "стереть" картинки — если пришёл пустой список,
+        // он заменит существующую коллекцию; если пришёл null — оставим как было.
+        if (patch.getImages() != null) {
+            entity.setImages(patch.getImages());
+        }
+
+        // Если на фронте убрали цену (price=null), можно дополнительно обнулить валюту:
+        // if (patch.getPrice() == null) entity.setCurrency(null);
+
+        Item saved = itemRepository.save(entity);
+        return itemMapper.toDTO(saved);
+    }
+    /* ================================================================================== */
 
     public Optional<Item> updateQuantity(String id, int quantity) {
         Optional<Item> itemOpt = itemRepository.findById(id);
@@ -152,7 +164,7 @@ public Item addItem(Item item) {
 
         // Суммируем из Reservation по имени товара
         return reservationRepository.getTotalSoldQuantityForItem(item.getName())
-                .orElse(0); // Если в таблице Reservation нет данных - возвращаем 0
+                .orElse(0);
     }
 
     // Новый метод: Вернуть список всех товаров с подсчётом проданных штук
@@ -171,54 +183,42 @@ public Item addItem(Item item) {
     @Transactional
     public List<Item> getAllItems() {
         try {
-            // Логируем старт метода
             System.out.println("Вызов ItemService.getAllItems() начат.");
 
-            // Проверка текущего пользователя
             var currentUser = userService.getCurrentUser();
             if (currentUser == null) {
                 throw new IllegalStateException("Текущий пользователь не определен. Авторизация отсутствует.");
             }
 
-            // Проверка компании текущего пользователя
             Company currentCompany = currentUser.getCompany();
             if (currentCompany == null) {
                 throw new IllegalStateException("Компания текущего пользователя не определена. Свяжите пользователя с компанией.");
             }
 
-            // Логируем ID и имя компании
             System.out.println("Компания пользователя: ID = " + currentCompany.getId() + ", Name = " + currentCompany.getName());
 
-            // Получаем товары из репозитория
             List<Item> items = itemRepository.findAllByCompany(currentCompany);
 
-            // Логируем, что было возвращено из репозитория
             if (items == null) {
                 System.err.println("findAllByCompany вернул null для компании ID: " + currentCompany.getId());
-                return List.of(); // Возвращаем пустой список для предотвращения NPE
+                return List.of();
             }
             System.out.println("Найдено товаров: " + items.size());
 
-            // Если список пустой, предупреждаем, но это не ошибка.
             if (items.isEmpty()) {
                 System.out.println("Для компании ID: " + currentCompany.getId() + " товары отсутствуют.");
             }
 
             return items;
         } catch (IllegalStateException e) {
-            // Логируем ошибки состояния
             System.err.println("Ошибка состояния: " + e.getMessage());
-            throw e; // Пробрасываем исключения для обработки в глобальном обработчике
+            throw e;
         } catch (Exception e) {
-            // Логируем любые другие непредвиденные ошибки
             System.err.println("Внутренняя ошибка при загрузке товаров: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Ошибка при загрузке товаров. Подробности в логах сервера.", e);
         }
     }
-
-
-
 
     @Transactional
     public Optional<Item> getItemByName(String name) {
@@ -226,52 +226,27 @@ public Item addItem(Item item) {
         return itemRepository.findByNameAndCompany(name, currentCompany);
     }
 
-
     // ItemService.java
     public List<Item> getAllItemsSorted(Comparator<Item> comparator) {
         List<Item> items = getAllItems();
-        items.sort(Comparator.nullsLast(comparator)); // не упадём даже если в списке затесался null
+        items.sort(Comparator.nullsLast(comparator));
         return items;
     }
 
+    // Генерация QR-кода в виде массива байт
+    private byte[] generateQRCodeAsBytes(String id) {
+        try {
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
 
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
 
-//    private void generateQRCode(String id) {
-//        try {
-//            // Создаем полный путь до папки, включая вложенные директории
-//            Path qrFolderPath = Paths.get(QR_PATH + id).getParent();
-//            if (qrFolderPath != null) {
-//                Files.createDirectories(qrFolderPath);
-//            }
-//
-//            // Формируем полный путь к файлу
-//            String filePath = QR_PATH + id + ".png";
-//
-//            // Генерация и сохранение QR-кода
-//            QRCodeWriter qrCodeWriter = new QRCodeWriter();
-//            BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
-//            Path path = Paths.get(filePath);
-//            MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-//
-//        } catch (WriterException | IOException e) {
-//            throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
-//        }
-//    }
-// Генерация QR-кода в виде массива байт
-private byte[] generateQRCodeAsBytes(String id) {
-    try {
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode(id, BarcodeFormat.QR_CODE, 200, 200);
-
-        // Пишем данные QR-кода в ByteArrayOutputStream
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        MatrixToImageWriter.writeToStream(bitMatrix, "PNG", outputStream);
-
-        return outputStream.toByteArray(); // Возвращаем массив байт
-    } catch (WriterException | IOException e) {
-        throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
+            return outputStream.toByteArray();
+        } catch (WriterException | IOException e) {
+            throw new RuntimeException("Failed to generate QR code: " + e.getMessage());
+        }
     }
-}
 
     // Возвращаем QR-код из базы в виде массива байт
     public byte[] getQRCode(String itemId) {
@@ -280,12 +255,10 @@ private byte[] generateQRCodeAsBytes(String id) {
         return item.getQrCode();
     }
 
-
     public InputStream generateExcelFile(List<Item> items) {
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Items");
 
-            // Создаем заголовок таблицы
             Row headerRow = sheet.createRow(0);
             String[] columns = {"ID", "Name", "Quantity"};
             for (int i = 0; i < columns.length; i++) {
@@ -293,7 +266,6 @@ private byte[] generateQRCodeAsBytes(String id) {
                 cell.setCellValue(columns[i]);
             }
 
-            // Заполняем данные товаров
             int rowNum = 1;
             for (Item item : items) {
                 Row row = sheet.createRow(rowNum++);
@@ -302,7 +274,6 @@ private byte[] generateQRCodeAsBytes(String id) {
                 row.createCell(2).setCellValue(item.getQuantity());
             }
 
-            // Сохраняем файл в поток
             ByteArrayOutputStream out = new ByteArrayOutputStream();
             workbook.write(out);
             return new ByteArrayInputStream(out.toByteArray());
@@ -310,5 +281,4 @@ private byte[] generateQRCodeAsBytes(String id) {
             throw new RuntimeException("Failed to generate Excel file", e);
         }
     }
-
 }

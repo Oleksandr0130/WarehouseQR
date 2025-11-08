@@ -2,10 +2,7 @@ package com.warehouse.service.mapper.interfaces;
 
 import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 import java.util.Base64;
 import java.util.List;
@@ -14,46 +11,45 @@ import java.util.Objects;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.WARN)
 public interface ItemMapper {
 
+    /* ======== Entity -> DTO ======== */
     @Mapping(source = "qrCode", target = "qrCode", qualifiedByName = "mapQrCodeToString")
     ItemDTO toDTO(Item item);
 
+    /* ======== DTO -> Entity (create) ======== */
     @Mapping(source = "qrCode", target = "qrCode", qualifiedByName = "mapStringToQrCode")
     Item toEntity(ItemDTO itemDTO);
 
+    /* ======== Частичное обновление Entity из DTO (PUT /items/{id}) ========
+       IGNORE = не перезаписывать поля null-значениями.
+       Пустой список images из DTO заменит текущие картинки (т.е. можно очистить).
+    */
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(source = "qrCode", target = "qrCode", qualifiedByName = "mapStringToQrCode")
+    void updateEntityFromDto(ItemDTO patch, @MappingTarget Item entity);
+
+    /* ======== Списки ======== */
     default List<ItemDTO> toDTOList(List<Item> items) {
         if (items == null) {
             System.err.println("Ошибка: пытаемся преобразовать null в список DTO.");
-            return List.of(); // Возвращаем пустой список, если данные отсутствуют
+            return List.of();
         }
-
-        // Логируем количество элементов перед началом преобразования
         System.out.println("Преобразование списка товаров в список DTO. Количество элементов: " + items.size());
-
-        // Маппинг с фильтрацией null-элементов, чтобы защититься от ошибок
         return items.stream()
-                .filter(Objects::nonNull) // Убираем возможные null-значения из списка
-                .map(this::toDTO)         // Преобразуем в ItemDTO
+                .filter(Objects::nonNull)
+                .map(this::toDTO)
                 .toList();
     }
 
-
-    // Метод для преобразования byte[] в Base64 String (помечаем @Named!)
+    /* ======== QR helpers ======== */
     @Named("mapQrCodeToString")
     default String mapQrCodeToString(byte[] qrCode) {
-        if (qrCode == null) {
-            return null;
-        }
+        if (qrCode == null) return null;
         return Base64.getEncoder().encodeToString(qrCode);
     }
 
-    // Метод для преобразования Base64 String в byte[] (помечаем @Named!)
     @Named("mapStringToQrCode")
     default byte[] mapStringToQrCode(String qrCode) {
-        if (qrCode == null) {
-            return null;
-        }
+        if (qrCode == null || qrCode.isBlank()) return null;
         return Base64.getDecoder().decode(qrCode);
     }
 }
-
-

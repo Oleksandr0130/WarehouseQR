@@ -1,5 +1,6 @@
 package com.warehouse.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.ElementCollection;
 import lombok.Data;
 
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL) // не отправлять null-поля в JSON
 public class ItemDTO {
     private String id;
     private String name;
@@ -17,7 +19,7 @@ public class ItemDTO {
     private String description;
     private BigDecimal price;
     private String currency;
-    @ElementCollection
+
     private List<String> images;
 
 }
