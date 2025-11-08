@@ -17,7 +17,6 @@ public class ItemDTO {
     private String description;
     private BigDecimal price;
     private String currency;
-    @ElementCollection
     private List<String> images;
 
 }

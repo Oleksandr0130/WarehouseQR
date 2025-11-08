@@ -316,14 +316,14 @@ private byte[] generateQRCodeAsBytes(String id) {
         Item entity = itemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
 
-        // частичный апдейт только пришедших полей
+        // частично обновляем только присланные поля
         itemMapper.updateEntityFromDto(patch, entity);
 
-        // если цена не прислана/очищена — обнуляем валюту
+        // бизнес-правило: если цена не прислана/очищена — валюту обнуляем
         if (patch.getPrice() == null) {
             entity.setCurrency(null);
         }
-        // ограничим до 5 картинок
+        // лимит до 5 картинок (если фронт ошибся)
         if (entity.getImages() != null && entity.getImages().size() > 5) {
             entity.setImages(entity.getImages().subList(0, 5));
         }
@@ -337,7 +337,7 @@ private byte[] generateQRCodeAsBytes(String id) {
         Item entity = itemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
 
-        // подстраховка на уровне JPA, чтобы не ловить FK на item_image
+        // подстраховка: очистить ElementCollection, чтобы не ловить FK (плюс держи ON DELETE CASCADE в БД)
         if (entity.getImages() != null) {
             entity.getImages().clear();
         }
