@@ -13,8 +13,8 @@ import java.util.Objects;
 public class ItemDTO {
     private String id;
     private String name;
-    private int quantity;
-    private int sold;
+    private Integer quantity;
+    private Integer sold;
     private String qrCode; // Новое поле для URL QR-кода
     private String description;
     private BigDecimal price;
