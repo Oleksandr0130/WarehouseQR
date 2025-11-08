@@ -2,10 +2,7 @@ package com.warehouse.service.mapper.interfaces;
 
 import com.warehouse.model.Item;
 import com.warehouse.model.dto.ItemDTO;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 import java.util.Base64;
 import java.util.List;
@@ -54,6 +51,9 @@ public interface ItemMapper {
         }
         return Base64.getDecoder().decode(qrCode);
     }
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(ItemDTO patch, @MappingTarget Item entity);
 }
 
 

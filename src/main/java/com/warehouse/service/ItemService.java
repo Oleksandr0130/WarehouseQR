@@ -311,4 +311,37 @@ private byte[] generateQRCodeAsBytes(String id) {
         }
     }
 
+    @Transactional
+    public ItemDTO update(String id, ItemDTO patch) {
+        Item entity = itemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
+
+        // частичный апдейт только пришедших полей
+        itemMapper.updateEntityFromDto(patch, entity);
+
+        // если цена не прислана/очищена — обнуляем валюту
+        if (patch.getPrice() == null) {
+            entity.setCurrency(null);
+        }
+        // ограничим до 5 картинок
+        if (entity.getImages() != null && entity.getImages().size() > 5) {
+            entity.setImages(entity.getImages().subList(0, 5));
+        }
+
+        Item saved = itemRepository.save(entity);
+        return itemMapper.toDTO(saved);
+    }
+
+    @Transactional
+    public void delete(String id) {
+        Item entity = itemRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + id));
+
+        // подстраховка на уровне JPA, чтобы не ловить FK на item_image
+        if (entity.getImages() != null) {
+            entity.getImages().clear();
+        }
+        itemRepository.delete(entity);
+    }
+
 }
