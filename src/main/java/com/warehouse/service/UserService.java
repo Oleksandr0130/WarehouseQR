@@ -2,6 +2,7 @@ package com.warehouse.service;
 
 import com.warehouse.model.Company;
 import com.warehouse.model.User;
+import com.warehouse.model.dto.UserDTO;
 import com.warehouse.model.dto.UserRegistrationDTO;
 import com.warehouse.repository.CompanyRepository;
 import com.warehouse.repository.UserRepository;
@@ -15,8 +16,10 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
- * Сервис регистрации и подтверждения пользователя.
+ * Сервис регистрации и подтверждения пользователя + операции команды для фронта.
  */
 @Service
 @RequiredArgsConstructor
@@ -30,6 +33,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final ConfirmationCodeService codeService;
+
+    /* ===================== Регистрация / подтверждение (твоя логика — без изменений) ===================== */
 
     public User registerUser(UserRegistrationDTO registrationDTO) {
         // Проверяем, есть ли пользователь с указанным email
@@ -151,5 +156,86 @@ public class UserService {
         // Удаляем самого юзера
         userRepository.delete(user);
     }
-}
 
+    /* ===================== Методы для фронта (список, роль, удаление, профиль) ===================== */
+
+    /** Профиль текущего пользователя в виде DTO (для /users/me). */
+    @Transactional
+    public UserDTO getMeDto() {
+        User me = getCurrentUser();
+        return toDto(me);
+    }
+
+    /** Список пользователей своей компании (для /admin/users). */
+    @Transactional
+    public List<UserDTO> listMyCompanyUsers() {
+        User me = getCurrentUser();
+        if (!"ROLE_ADMIN".equalsIgnoreCase(me.getRole())) {
+            throw new IllegalStateException("Недостаточно прав. Требуется ROLE_ADMIN.");
+        }
+        return userRepository.findAllByCompanyId(me.getCompany().getId())
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    /** Обновить роль участника своей компании (для PUT /admin/users/{id}/role). */
+    @Transactional
+    public void updateMemberRole(Long memberId, boolean admin) {
+        User me = getCurrentUser();
+        if (!"ROLE_ADMIN".equalsIgnoreCase(me.getRole())) {
+            throw new IllegalStateException("Недостаточно прав. Требуется ROLE_ADMIN.");
+        }
+
+        // Нельзя менять свою роль
+        if (me.getId().equals(memberId)) {
+            throw new IllegalArgumentException("Нельзя менять собственную роль.");
+        }
+
+        // Пользователь должен принадлежать той же компании
+        User target = userRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
+        if (!target.getCompany().getId().equals(me.getCompany().getId())) {
+            throw new IllegalStateException("Недостаточно прав для изменения пользователя из другой компании.");
+        }
+
+        target.setRole(admin ? "ROLE_ADMIN" : "ROLE_USER");
+        userRepository.save(target);
+    }
+
+    /** Удалить участника своей компании (для DELETE /admin/users/{id}). */
+    @Transactional
+    public void deleteMember(Long memberId) {
+        User me = getCurrentUser();
+        if (!"ROLE_ADMIN".equalsIgnoreCase(me.getRole())) {
+            throw new IllegalStateException("Недостаточно прав. Требуется ROLE_ADMIN.");
+        }
+
+        // Нельзя удалить себя
+        if (me.getId().equals(memberId)) {
+            throw new IllegalArgumentException("Нельзя удалить самого себя.");
+        }
+
+        // Проверка принадлежности компании
+        boolean allowed = userRepository.existsByIdAndCompanyId(memberId, me.getCompany().getId());
+        if (!allowed) {
+            throw new IllegalStateException("Недостаточно прав для удаления пользователя из другой компании.");
+        }
+
+        userRepository.deleteById(memberId);
+    }
+
+    /* ===================== Маппер ===================== */
+
+    private UserDTO toDto(User u) {
+        String companyName = u.getCompany() != null ? u.getCompany().getName() : null;
+        boolean admin = "ROLE_ADMIN".equalsIgnoreCase(u.getRole()) || "ADMIN".equalsIgnoreCase(u.getRole());
+        UserDTO dto = new UserDTO();
+        dto.setId(u.getId());
+        dto.setUsername(u.getUsername());
+        dto.setEmail(u.getEmail());
+        dto.setCompanyName(companyName);
+        dto.setAdmin(admin);
+        return dto;
+    }
+}

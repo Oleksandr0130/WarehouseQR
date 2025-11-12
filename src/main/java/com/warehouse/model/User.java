@@ -2,11 +2,8 @@ package com.warehouse.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.Instant;
-
 
 @Entity
 @Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email") })
@@ -34,6 +31,18 @@ public class User {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company; // Указание на компанию, к которой привязан пользователь
+
+    /**
+     * 👇 Эти методы не создают новых колонок в БД.
+     * Они просто помогают фронту работать с булевым полем "admin".
+     */
+    @Transient
+    public boolean isAdmin() {
+        return "ROLE_ADMIN".equalsIgnoreCase(role) || "ADMIN".equalsIgnoreCase(role);
+    }
+
+    @Transient
+    public void setAdmin(boolean admin) {
+        this.role = admin ? "ROLE_ADMIN" : "ROLE_USER";
+    }
 }
-
-

@@ -14,9 +14,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByConfirmationCode(String confirmationCode);
 
     boolean existsByUsername(String username); // Проверяет наличие пользователя по имени
-    boolean existsByEmail(String email);      // Проверяет наличие пользователя по email
+    boolean existsByEmail(String email);       // Проверяет наличие пользователя по email
 
     List<User> findByCompany(Company company); // Список пользователей определенной компании
-
     boolean existsByEmailAndCompany(String email, Company company); // Проверка email в рамках компании
+
+    /* ==== Добавлено для админ-операций в рамках своей компании ==== */
+
+    // Список пользователей по ID компании (удобно для /admin/users)
+    List<User> findAllByCompanyId(Long companyId);
+
+    // Проверка принадлежности пользователя компании (для delete/update role)
+    boolean existsByIdAndCompanyId(Long id, Long companyId);
+
+    // (Опционально может пригодиться в сервисе)
+    Optional<User> findByIdAndCompanyId(Long id, Long companyId);
 }
