@@ -13,32 +13,43 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Collections;
-import java.util.List;
 
 @Service
 public class PlayBillingService {
 
-    private AndroidPublisher androidPublisher() throws Exception {
-        GoogleCredentials creds;
+    private volatile AndroidPublisher cachedPublisher; // ➕ ADDED
 
-        String json = System.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON");
-        if (json != null && !json.isBlank()) {
-            try (InputStream in = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
-                creds = GoogleCredentials.fromStream(in)
+    private AndroidPublisher androidPublisher() throws Exception {
+        // ➕ ADDED: кешируем клиент
+        if (cachedPublisher != null) return cachedPublisher;
+
+        synchronized (this) {
+            if (cachedPublisher != null) return cachedPublisher;
+
+            GoogleCredentials creds;
+
+            String json = System.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON");
+            if (json != null && !json.isBlank()) {
+                try (InputStream in = new ByteArrayInputStream(json.getBytes(StandardCharsets.UTF_8))) {
+                    creds = GoogleCredentials.fromStream(in)
+                            .createScoped(Collections.singletonList("https://www.googleapis.com/auth/androidpublisher"));
+                }
+            } else {
+                // fallback: ADC
+                creds = GoogleCredentials.getApplicationDefault()
                         .createScoped(Collections.singletonList("https://www.googleapis.com/auth/androidpublisher"));
             }
-        } else {
-            // fallback: ADC по переменной GOOGLE_APPLICATION_CREDENTIALS или метадате
-            creds = GoogleCredentials.getApplicationDefault()
-                    .createScoped(Collections.singletonList("https://www.googleapis.com/auth/androidpublisher"));
-        }
 
-        var reqInit = new HttpCredentialsAdapter(creds);
-        return new AndroidPublisher.Builder(
-                GoogleNetHttpTransport.newTrustedTransport(),
-                JacksonFactory.getDefaultInstance(),
-                reqInit
-        ).setApplicationName("FlowQR").build();
+            var reqInit = new HttpCredentialsAdapter(creds);
+
+            cachedPublisher = new AndroidPublisher.Builder(
+                    GoogleNetHttpTransport.newTrustedTransport(),
+                    JacksonFactory.getDefaultInstance(),
+                    reqInit
+            ).setApplicationName("FlowQR").build();
+
+            return cachedPublisher;
+        }
     }
 
     public SubscriptionPurchase verify(String packageName, String productId, String purchaseToken) throws Exception {
