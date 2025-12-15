@@ -44,8 +44,6 @@ app:
     price-id-pln: ${STRIPE_PRICE_ID_PLN}
     price-id-eur: ${STRIPE_PRICE_ID_EUR}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET}
-  play:
-    packageName: ${PLAY_PACKAGE_NAME}
 server:
   servlet:
     context-path: /api
