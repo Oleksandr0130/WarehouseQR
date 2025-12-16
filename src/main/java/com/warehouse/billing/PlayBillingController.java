@@ -16,7 +16,7 @@ import java.util.Map;
  * Требует аутентификацию (настроим в SecurityConfig: authenticated()).
  */
 @RestController
-@RequestMapping("/api/billing/play")
+@RequestMapping("/billing/play")
 @RequiredArgsConstructor
 public class PlayBillingController {
 
