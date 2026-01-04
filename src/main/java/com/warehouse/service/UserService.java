@@ -175,6 +175,11 @@ public class UserService {
         return userRepository.save(u);
     }
 
+    /**
+     * ✅ FIX: правильный порядок удаления
+     * - если админ: удалить всех пользователей компании -> удалить компанию
+     * - иначе: удалить только пользователя
+     */
     @Transactional
     public void deleteUserAndRelatedData(String username) {
         User user = userRepository.findByUsername(username)
@@ -182,13 +187,20 @@ public class UserService {
 
         // Если админ — удалить компанию и всех связанных пользователей
         if ("ROLE_ADMIN".equals(user.getRole()) && user.getCompany() != null) {
-            companyRepository.delete(user.getCompany());
+            Long companyId = user.getCompany().getId();
+
+            // 1) удалить всех пользователей компании (включая админа)
+            List<User> companyUsers = userRepository.findAllByCompanyId(companyId);
+            userRepository.deleteAll(companyUsers);
+
+            // 2) удалить компанию
+            companyRepository.deleteById(companyId);
+            return;
         }
 
-        // Удаляем самого юзера
+        // Обычный пользователь — удаляем только его
         userRepository.delete(user);
     }
-
     /* ===================== Методы для фронта (список, роль, удаление, профиль) ===================== */
 
     /** Профиль текущего пользователя в виде DTO (для /users/me). */
