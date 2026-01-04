@@ -28,7 +28,10 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody UserRegistrationDTO registrationDTO) {
+    public ResponseEntity<String> register(
+            @RequestBody UserRegistrationDTO registrationDTO,
+            @RequestHeader(value = "Accept-Language", required = false) String acceptLanguage
+    ) {
         // Проверка уникальности пользователя по username
         if (userRepository.existsByUsername(registrationDTO.getUsername())) {
             return ResponseEntity.badRequest().body("Пользователь с таким именем уже существует.");
@@ -39,8 +42,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Пользователь с таким email уже существует.");
         }
 
-        // Передаём логику регистрации (включая привязку компании) в UserService
-        userService.registerUser(registrationDTO);
+        // Передаём логику регистрации (включая привязку компании) в UserService + язык
+        userService.registerUser(registrationDTO, acceptLanguage);
 
         return ResponseEntity.ok("Регистрация завершена. Проверьте email для активации учётной записи.");
     }
@@ -92,7 +95,6 @@ public class AuthController {
         }
         return null;
     }
-
 
     private void addCookie(HttpServletResponse response, String name, String token, int maxAgeInSeconds) {
         jakarta.servlet.http.Cookie cookie = new jakarta.servlet.http.Cookie(name, token);

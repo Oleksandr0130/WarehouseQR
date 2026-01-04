@@ -37,6 +37,14 @@ public class UserService {
     /* ===================== Регистрация / подтверждение (твоя логика — без изменений) ===================== */
 
     public User registerUser(UserRegistrationDTO registrationDTO) {
+        // ✅ Оставляем как было (чтобы ничего не ломать)
+        // По умолчанию будет ru (в EmailService старый метод остаётся)
+        // Но если AuthController передал язык — будет использоваться перегруженный метод ниже
+        return registerUser(registrationDTO, null);
+    }
+
+    // ✅ Новый метод: принимает Accept-Language и выбирает язык письма
+    public User registerUser(UserRegistrationDTO registrationDTO, String acceptLanguage) {
         // Проверяем, есть ли пользователь с указанным email
         if (userRepository.findByEmail(registrationDTO.getEmail()).isPresent()) {
             throw new IllegalArgumentException("Пользователь с таким email уже зарегистрирован");
@@ -62,13 +70,37 @@ public class UserService {
         // Генерируем код подтверждения
         String code = codeService.generateConfirmationCode(savedUser);
 
-        // Формируем ссылку подтверждения
-        String confirmationLink = "https://warehouse-qr-app-8adwv.ondigitalocean.app/api/confirmation?code=" + code;
+        // ✅ Определяем язык из Accept-Language
+        String lang = normalizeLang(acceptLanguage);
 
-        // Отправляем email с ссылкой подтверждения
-        emailService.sendConfirmationEmail(savedUser.getEmail(), savedUser.getUsername(), confirmationLink);
+        // ✅ Формируем ссылку подтверждения (+lang)
+        String confirmationLink =
+                "https://warehouse-qr-app-8adwv.ondigitalocean.app/api/confirmation?code=" + code
+                        + "&lang=" + lang;
+
+        // ✅ Отправляем email с ссылкой подтверждения (новый метод в EmailService)
+        emailService.sendConfirmationEmail(savedUser.getEmail(), savedUser.getUsername(), confirmationLink, lang);
 
         return savedUser;
+    }
+
+    // ✅ Минимальный парсер Accept-Language (не влияет на остальную логику)
+    private String normalizeLang(String acceptLanguage) {
+        // чтобы поведение по умолчанию осталось как раньше (RU)
+        if (acceptLanguage == null || acceptLanguage.isBlank()) return "ru";
+
+        String l = acceptLanguage.toLowerCase();
+
+        // Примеры:
+        // "de-DE,de;q=0.9,en;q=0.8"
+        // "pl"
+        // "ru-RU"
+        if (l.startsWith("de")) return "de";
+        if (l.startsWith("pl")) return "pl";
+        if (l.startsWith("en")) return "en";
+        if (l.startsWith("ru")) return "ru";
+
+        return "en";
     }
 
     public void confirmEmail(String confirmationCode) {

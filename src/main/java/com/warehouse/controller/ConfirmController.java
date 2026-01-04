@@ -26,7 +26,8 @@ public class ConfirmController {
     }
 
     @GetMapping
-    public ResponseEntity<Void> confirmEmail(@RequestParam("code") String code) {
+    public ResponseEntity<Void> confirmEmail(@RequestParam("code") String code,
+                                             @RequestParam(value = "lang", required = false) String lang) {
         boolean confirmed;
         try {
             confirmed = confirmationCodeService.confirmCode(code);
@@ -34,7 +35,13 @@ public class ConfirmController {
             confirmed = false;
         }
 
-        String redirectUrl = frontendBaseUrl + "/confirmed?status=" + (confirmed ? "success" : "error");
+        String safeLang = (lang == null || lang.isBlank())
+                ? ""
+                : UriUtils.encode(lang, StandardCharsets.UTF_8);
+
+        String redirectUrl = frontendBaseUrl + "/confirmed?status=" + (confirmed ? "success" : "error")
+                + (safeLang.isEmpty() ? "" : "&lang=" + safeLang);
+
         return ResponseEntity.status(HttpStatus.FOUND).location(URI.create(redirectUrl)).build();
     }
 }
