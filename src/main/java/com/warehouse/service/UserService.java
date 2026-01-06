@@ -60,7 +60,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(registrationDTO.getPassword()));
         user.setRole("ROLE_ADMIN");
         user.setEnabled(false);
-        companyService.startTrial(company, 5); // внутри save
+        companyService.startTrial(company, 30); // внутри save
         company.setEnabled(true);
         user.setCompany(company); // Привязываем компанию к пользователю
 
